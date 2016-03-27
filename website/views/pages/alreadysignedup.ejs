@@ -1,0 +1,28 @@
+<!-- views/pages/error.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+    <title>Error</title>
+</head>
+<body class="container">
+
+    <header>
+        <% include ../partials/header %>
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <h1>Error</h1>
+            <p>Sorry, Looks like you're already signed up for <%= type %></p>
+            <p>If you haven't gotten a playlist yet, you should soon!</p>
+        </div>
+    </main>
+
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+    
+</body>
+</html>

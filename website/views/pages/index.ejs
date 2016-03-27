@@ -1,0 +1,34 @@
+<!-- views/pages/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+    <title>Autoplaylists for Spotify</title>
+</head>
+<body class="container">
+
+    <header>
+        <% include ../partials/header %>
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <h1>Welcome!</h1>
+            <p>What kind of autoupdating playlist would you like to create?</p>
+            <p>
+                <a href="/create/mostplayed">Most Played in 30 Days*</a>
+            </p>
+            <p>
+                <a href="/create/recentlyadded">Recently Added</a>
+            </p>
+            <h6>*Requires a <a href="http://last.fm/">Last.fm</a> account connected to Spotify</h6>
+        </div>
+    </main>
+
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+    
+</body>
+</html>

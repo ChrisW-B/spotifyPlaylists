@@ -1,0 +1,34 @@
+<!-- views/pages/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+    <title>Stop Updating</title>
+</head>
+<body class="container">
+    <header>
+        <% include ../partials/header %>
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <h1>Sorry to see you go!</h1>
+            <p>Which playlist would you like to stop updating?</p>
+            <p>
+                <a href="/stop/mostplayed">Most Played in 30 Days</a>
+            </p>
+            <p>
+                <a href="/stop/recentlyadded">Recently Added</a>
+            </p>
+            <p>
+                <h5>We'll have to log you in one last time to unsubscribe</h5>
+            </p>
+        </div>
+    </main>
+
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+</body>
+</html>

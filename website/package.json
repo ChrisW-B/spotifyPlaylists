@@ -1,0 +1,27 @@
+{
+  "name": "spotify-recently-added-list",
+  "version": "0.0.1",
+  "description": "Create a playlist of the most recently added songs periodically",
+  "main": "recentlyAdded.js",
+  "author": "Chris Barry <cwb@outlook.com>",
+  "license": "None",
+  "repository": {
+    "type": "git",
+    "url": "null"
+  },
+  "keywords": [
+    "spotify",
+    "playlist"
+  ],
+  "dependencies": {
+    "spotify-web-api-node": "*",
+    "jsonfile": "*",
+    "express": "*",
+    "ejs": "*",
+    "body-parser": "*"
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.3.x"
+  }
+}
