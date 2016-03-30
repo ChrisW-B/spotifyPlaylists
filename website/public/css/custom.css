@@ -1,0 +1,12 @@
+body {
+    padding-top: 50px;
+}
+.align-left {
+    float: right;
+}
+.navbar-default .cancel>li>a {
+    color: #A30001;
+}
+.navbar-default .cancel>li>a:hover {
+    color: #D23E00;
+}
