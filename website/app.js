@@ -62,9 +62,9 @@ app.get('/stop', function(req, res) {
 	res.render('pages/stop');
 });
 
-app.get('/mostplayed/callback', function(req, res) {
+app.get('/setup/mostplayed', function(req, res) {
 	authorize(req.query.code, config.mostPlayed, false, function(data) {
-		res.render('pages/lastfmlogin', {
+		res.render('pages/mostplayed', {
 			access: data.body.access_token,
 			refresh: data.body.refresh_token
 		});
@@ -72,53 +72,68 @@ app.get('/mostplayed/callback', function(req, res) {
 	});
 });
 
-app.get('/recentlyadded/callback', function(req, res) {
+app.get('/setup/recentlyadded', function(req, res) {
 	authorize(req.query.code, config.recentlyAdded, false, function(data) {
-		var userAccessToken = data.body.access_token,
-			userRefreshToken = data.body.refresh_token;
+		res.render('pages/recentlyadded', {
+			access: data.body.access_token,
+			refresh: data.body.refresh_token
+		});
 
-		config.recentlyAdded.spotifyApi.setAccessToken(userAccessToken);
-		config.recentlyAdded.spotifyApi.setRefreshToken(userRefreshToken);
-
-		config.recentlyAdded.spotifyApi.getMe().then(function(data) {
-				jsonfile.readFile(config.recentlyAdded.fileLoc, function(err, obj) {
-					if (notRegistered(obj, data.body.id)) {
-						if (!err) {
-							obj.push({
-								userName: data.body.id,
-								token: userAccessToken,
-								refresh: userRefreshToken,
-								oldPlaylist: "null"
-							});
-						} else {
-							obj = [{
-								userName: data.body.id,
-								token: userAccessToken,
-								refresh: userRefreshToken,
-								oldPlaylist: "null"
-							}];
-						}
-						jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
-							if (err) {
-								console.log(err);
-								res.redirect('/error');
-							} else {
-								res.redirect('/recentlyadded/thanks');
-							}
-						});
-					} else {
-						res.redirect('/recentlyadded/error');
-					}
-				});
-			},
-			function(err) {
-				console.log('Something went wrong in getMe!', err);
-			});
 	});
 });
 
-app.post('/lastfmlogin', function(req, res) {
+app.post('/setup/recentlyadded', function(req, res) {
 	var lastFmId = req.body.lastFmId,
+		numTracks = req.body.numTracks,
+		userAccessToken = req.body.token,
+		userRefreshToken = req.body.refresh;
+
+	config.recentlyAdded.spotifyApi.setAccessToken(userAccessToken);
+	config.recentlyAdded.spotifyApi.setRefreshToken(userRefreshToken);
+
+	config.recentlyAdded.spotifyApi.getMe().then(function(data) {
+			jsonfile.readFile(config.recentlyAdded.fileLoc, function(err, obj) {
+				if (notRegistered(obj, data.body.id)) {
+					if (!err) {
+						obj.push({
+							userName: data.body.id,
+							numTracks: numTracks,
+							token: userAccessToken,
+							refresh: userRefreshToken,
+							oldPlaylist: "null"
+						});
+					} else {
+						obj = [{
+							userName: data.body.id,
+							numTracks: numTracks,
+							token: userAccessToken,
+							refresh: userRefreshToken,
+							oldPlaylist: "null"
+						}];
+					}
+					jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
+						if (err) {
+							console.log(err)
+							res.redirect('/error');
+						} else {
+							res.redirect('/recentlyadded/thanks');
+						}
+					});
+				} else {
+					res.redirect('/recentlyadded/error');
+				}
+			});
+		},
+		function(err) {
+			console.log('Something went wrong in getMe!', err);
+		});
+});
+
+
+app.post('/setup/mostplayed', function(req, res) {
+	var lastFmId = req.body.lastFmId,
+		timeSpan = req.body.timeSpan,
+		numTracks = req.body.numTracks,
 		userAccessToken = req.body.token,
 		userRefreshToken = req.body.refresh;
 
@@ -132,6 +147,8 @@ app.post('/lastfmlogin', function(req, res) {
 						obj.push({
 							userName: data.body.id,
 							lastFmId: escape(lastFmId),
+							numTracks: numTracks,
+							timeSpan: timeSpan,
 							token: userAccessToken,
 							refresh: userRefreshToken,
 							oldPlaylist: "null"
@@ -140,6 +157,8 @@ app.post('/lastfmlogin', function(req, res) {
 						obj = [{
 							userName: data.body.id,
 							lastFmId: escape(lastFmId),
+							numTracks: numTracks,
+							timeSpan: timeSpan,
 							token: userAccessToken,
 							refresh: userRefreshToken,
 							oldPlaylist: "null"
@@ -162,6 +181,7 @@ app.post('/lastfmlogin', function(req, res) {
 			console.log('Something went wrong in getMe!', err);
 		});
 });
+
 app.get('/error', function(req, res) {
 	res.render('pages/error');
 });
@@ -218,7 +238,7 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 	});
 });
 
-app.get('/stop/mostPlayed/callback', function(req, res) {
+app.get('/stop/mostplayed/callback', function(req, res) {
 	authorize(req.query.code, config.mostPlayed, true, function(data) {
 		var userAccessToken = data.body.access_token,
 			userRefreshToken = data.body.refresh_token,

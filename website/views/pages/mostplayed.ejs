@@ -1,0 +1,60 @@
+<!-- views/pages/lastfmlogin.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+     <title>Setup your playlist</title>
+</head>
+<body class="container">
+
+    <header>
+        <% include ../partials/header %>
+
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <h1>
+                One more step
+            </h1>
+            <p>
+                We need your <a href="http://last.fm/">Last.fm</a> username to keep track what you've listened to
+            </p>
+            <form name="mostplayedsetup" id="mostplayedsetup" action="/setup/mostplayed" method="POST">
+                    <input type="text" name="lastFmId" size="25" placeholder="Enter Last.FM username" required="true">
+
+                    <h5>How long should your playlist be*?</h5>
+
+                    <select form="mostplayedsetup" name="numTracks">
+                        <option value="50" selected>50 Songs</option> 
+                        <option value="25">25 Songs</option>
+                        <option value="10">10 Songs</option>
+                    </select>
+
+                    <h5>What timespan should most played be from?</h5>
+
+                    <select form="mostplayedsetup" name="timeSpan">
+                        <option value="overall" selected>All Time</option> 
+                        <option value="12month">1 Year</option>
+                        <option value="6month">6 Months</option>
+                        <option value="3month">3 Months</option>
+                        <option value="1month">1 Month</option>
+                        <option value="7day">1 Week</option>
+                    </select>
+                    <br><br>
+                    <input type="hidden" name="token" value="<%= access %>">
+                    <input type="hidden" name="refresh" value="<%= refresh %>">
+                    <input type="submit" value="Submit">
+            </form>
+            <h6>*Playlists can not include local files, only those on spotify</h6>
+        </div>
+    </main>
+
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+    
+</body>
+</html>
+<% include ../partials/css %> 
