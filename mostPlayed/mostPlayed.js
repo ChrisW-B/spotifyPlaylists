@@ -19,39 +19,69 @@ var spotifyApi = new SpotifyWebApi({
 });
 
 
-function getLastFmData(lastfmId, oldPlaylist, callback) {
+function getLastfmData(lastfmId, oldPlaylist, callback) {
 	lastfm.getSessionKey(
 		function(result) {
 			if (!result.success) {
 				console.log(result.error);
 			} else {
-				lastfm.getTopTracks({
-					user: lastfmId,
-					limit: config.numTracks,
-					period: '1month',
-					callback: function(result) {
-						if (result.success) {
-							createSpotifyList(result.topTracks, function(data) {
-								data.sort(function(a, b) {
-									return a.rank - b.rank;
-								});
-								createPlaylist(data, oldPlaylist, 10, function(data) {
-									callback(data);
-								});
-							});
-						} else {
-							console.log(result.error);
-						}
-					}
-				})
+				var emptyTracks = [];
+				callback(getTracks(emptyTracks, lastfmId, 50, 1, oldPlaylist));
 			}
-		}
-	);
+		});
 };
 
-function createSpotifyList(topTracks, callback) {
+function getTracks(tracks, lastfmId, numTracks, pageNum, playlistId) {
+	if (tracks.length >= numTracks) {
+		console.log(tracks);
+
+		createPlaylist(tracks, playlistId, 10, function(data) {
+			console.log(data);
+
+		});
+	} else {
+		getLastfmTracks(lastfmId, pageNum, numTracks, function(err, data) {
+			if (!err) {
+				console.log("waiting");
+				setTimeout(function() {
+					convertToSpotify(data.topTracks, numTracks, function(currentTracks) {
+						//TODO: fix so that it acutally picks the top ones. Maybe sort before?
+						currentTracks.sort(function(a, b) {
+							return a.rank - b.rank;
+						});
+						var max = (currentTracks.length + tracks.length) > numTracks ? numTracks - tracks.length : currentTracks.length;
+						for (var i = 0; i < max; i++) {
+							tracks.push(currentTracks[i]);
+						}
+						return getTracks(tracks, lastfmId, numTracks, pageNum + 1, playlistId);
+					});
+				}, 5000);
+			} else {
+				console.log(err, data);
+			}
+		});
+	}
+}
+
+function getLastfmTracks(lastfmId, page, numTracks, callback) {
+	lastfm.getTopTracks({
+		user: lastfmId,
+		limit: numTracks,
+		period: '1month',
+		page: page,
+		callback: function(result) {
+			if (result.success) {
+				callback(false, result);
+			} else {
+				console.log("error getting lastfm", result);
+				callback(true, null);
+			}
+		}
+	});
+};
+
+function convertToSpotify(topTracks, numNeeded, callback) {
 	var tracks = [];
-	var numNeeded = topTracks.length;
 	topTracks.forEach(function(ele, id) {
 		searchForSong(ele.name, ele.artist.name,
 			function(err, spotifyId) {
@@ -63,13 +93,14 @@ function createSpotifyList(topTracks, callback) {
 				} else {
 					numNeeded--;
 				}
-				if (numNeeded == tracks.length) {
+				if (tracks.length == numNeeded) {
 					callback(tracks);
 				}
 			});
-
 	});
 }
+
+
 
 function searchForSong(title, artist, callback) {
 	title = title.replace('/', " ");
@@ -193,7 +224,7 @@ function main() {
 							console.log('refresh error', err);
 						} else {
 							var newTokens = data;
-							getLastFmData(ele.lastFmId, ele.oldPlaylist, function(data) {
+							getLastfmData(ele.lastFmId, ele.oldPlaylist, function(data) {
 								var newData = {
 									userName: ele.userName,
 									lastFmId: ele.lastFmId,
