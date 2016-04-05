@@ -96,9 +96,9 @@ function createPlaylist(recentSongData, numPlaylists, playlistId, callback) {
 		})
 }
 
-function getTracks(playlistId, callback) {
+function getTracks(playlistId, numTracks, callback) {
 	spotifyApi.getMySavedTracks({
-		limit: config.numTracks,
+		limit: numTracks,
 		offset: 0
 	}).then(function(data) {
 		createPlaylist(data.body.items, 10, playlistId, function(data) {
@@ -140,11 +140,12 @@ function main() {
 							console.log('refresh error', err);
 						} else {
 							var newTokens = data;
-							getTracks(ele.oldPlaylist, function(data) {
+							getTracks(ele.oldPlaylist, ele.numTracks, function(data) {
 								var newData = {
 									userName: ele.userName,
 									token: newTokens.token,
 									refresh: newTokens.refresh,
+									numTracks: ele.numTracks,
 									oldPlaylist: data
 								}
 								obj[id] = newData;

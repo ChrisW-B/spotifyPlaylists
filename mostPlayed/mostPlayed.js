@@ -19,21 +19,21 @@ var spotifyApi = new SpotifyWebApi({
 });
 
 
-function getLastfmData(lastfmId, oldPlaylist, callback) {
+function getLastfmData(lastfmId, oldPlaylist, numTracks, timeSpan, callback) {
 	lastfm.getSessionKey(
 		function(result) {
 			if (!result.success) {
 				console.log(result.error);
 			} else {
 				var emptyTracks = [];
-				getTracks(emptyTracks, lastfmId, 50, 1, oldPlaylist, function(newPlaylistId) {
+				getTracks(emptyTracks, lastfmId, numTracks, timeSpan, 1, oldPlaylist, function(newPlaylistId) {
 					callback(newPlaylistId);
 				});
 			}
 		});
 };
 
-function getTracks(tracks, lastfmId, numTracks, pageNum, oldPlaylist, callback) {
+function getTracks(tracks, lastfmId, numTracks, timeSpan, pageNum, oldPlaylist, callback) {
 	if (tracks.length >= numTracks) {
 		setTimeout(function() {
 			createPlaylist(tracks, oldPlaylist, 10, function(data) {
@@ -41,7 +41,7 @@ function getTracks(tracks, lastfmId, numTracks, pageNum, oldPlaylist, callback) 
 			}, 5000);
 		});
 	} else {
-		getLastfmTracks(lastfmId, pageNum, numTracks, function(err, data) {
+		getLastfmTracks(lastfmId, pageNum, numTracks, timeSpan, function(err, data) {
 			if (!err) {
 				setTimeout(function() {
 					convertToSpotify(data.topTracks, numTracks, function(currentTracks) {
@@ -52,7 +52,7 @@ function getTracks(tracks, lastfmId, numTracks, pageNum, oldPlaylist, callback) 
 						for (var i = 0; i < max; i++) {
 							tracks.push(currentTracks[i]);
 						}
-						getTracks(tracks, lastfmId, numTracks, pageNum + 1, oldPlaylist, function(newPlaylistId) {
+						getTracks(tracks, lastfmId, numTracks, timeSpan, pageNum + 1, oldPlaylist, function(newPlaylistId) {
 							callback(newPlaylistId);
 						});
 					});
@@ -72,11 +72,11 @@ function getTracks(tracks, lastfmId, numTracks, pageNum, oldPlaylist, callback) 
 	}
 }
 
-function getLastfmTracks(lastfmId, page, numTracks, callback) {
+function getLastfmTracks(lastfmId, page, numTracks, timeSpan, callback) {
 	lastfm.getTopTracks({
 		user: lastfmId,
 		limit: numTracks,
-		period: '1month',
+		period: timeSpan,
 		page: page,
 		callback: function(result) {
 			if (result.success) {
@@ -233,21 +233,24 @@ function main() {
 							console.log('refresh error', err);
 						} else {
 							var newTokens = data;
-							getLastfmData(ele.lastFmId, ele.oldPlaylist, function(data) {
-								var newData = {
-									userName: ele.userName,
-									lastFmId: ele.lastFmId,
-									token: newTokens.token,
-									refresh: newTokens.refresh,
-									oldPlaylist: data
-								}
-								obj[id] = newData;
-								jsonfile.writeFile(config.fileLoc, obj, function(err) {
-									if (err) {
-										console.log('error writing file');
+							getLastfmData(ele.lastFmId, ele.oldPlaylist, ele.numTracks,
+								ele.timeSpan, function(data) {
+									var newData = {
+										userName: ele.userName,
+										lastFmId: ele.lastFmId,
+										numTracks: ele.numTracks,
+										timeSpan: ele.timeSpan,
+										token: newTokens.token,
+										refresh: newTokens.refresh,
+										oldPlaylist: data
 									}
+									obj[id] = newData;
+									jsonfile.writeFile(config.fileLoc, obj, function(err) {
+										if (err) {
+											console.log('error writing file');
+										}
+									});
 								});
-							});
 						}
 					});
 				}

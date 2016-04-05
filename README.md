@@ -65,7 +65,6 @@ config.lastfm = {
     password: 'lastfmpass'
 }
 
-config.numTracks = 50;
 config.fileLoc = '../data/mostPlayed.json';
 
 module.exports = config;
@@ -78,7 +77,6 @@ module.exports = config;
 var config = {
     clientId: 'YYY',
     clientSecret: 'YYY',
-    numTracks: 50,
     fileLoc: '../data/recentlyAdded.json'
 };
 
