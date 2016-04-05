@@ -26,26 +26,25 @@ function getLastfmData(lastfmId, oldPlaylist, callback) {
 				console.log(result.error);
 			} else {
 				var emptyTracks = [];
-				callback(getTracks(emptyTracks, lastfmId, 50, 1, oldPlaylist));
+				getTracks(emptyTracks, lastfmId, 50, 1, oldPlaylist, function(newPlaylistId) {
+					callback(newPlaylistId);
+				});
 			}
 		});
 };
 
-function getTracks(tracks, lastfmId, numTracks, pageNum, playlistId) {
+function getTracks(tracks, lastfmId, numTracks, pageNum, oldPlaylist, callback) {
 	if (tracks.length >= numTracks) {
 		setTimeout(function() {
-			createPlaylist(tracks, playlistId, 10, function(data) {
-				console.log(data);
+			createPlaylist(tracks, oldPlaylist, 10, function(data) {
+				callback(data);
 			}, 5000);
-
 		});
 	} else {
 		getLastfmTracks(lastfmId, pageNum, numTracks, function(err, data) {
 			if (!err) {
-				console.log("waiting");
 				setTimeout(function() {
 					convertToSpotify(data.topTracks, numTracks, function(currentTracks) {
-						//TODO: fix so that it acutally picks the top ones. Maybe sort before?
 						currentTracks.sort(function(a, b) {
 							return a.rank - b.rank;
 						});
@@ -53,11 +52,21 @@ function getTracks(tracks, lastfmId, numTracks, pageNum, playlistId) {
 						for (var i = 0; i < max; i++) {
 							tracks.push(currentTracks[i]);
 						}
-						return getTracks(tracks, lastfmId, numTracks, pageNum + 1, playlistId);
+						getTracks(tracks, lastfmId, numTracks, pageNum + 1, oldPlaylist, function(newPlaylistId) {
+							callback(newPlaylistId);
+						});
 					});
 				}, 5000);
 			} else {
 				console.log(err, data);
+				//attempt to make a playlist with what we have
+				if (tracks.length > 0) {
+					setTimeout(function() {
+						createPlaylist(tracks, oldPlaylist, 10, function(data) {
+							callback(data);
+						}, 5000);
+					});
+				}
 			}
 		});
 	}
@@ -170,7 +179,7 @@ function createBlankPlaylist(userId, prevPlaylist, trackList, playlists, callbac
 	}
 }
 
-function createPlaylist(trackList, oldPlaylist, numPlaylists, playlistId, callback) {
+function createPlaylist(trackList, oldPlaylist, numPlaylists, callback) {
 	spotifyApi.getMe().then(function(data) {
 			var userId = data.body.id;
 			spotifyApi.getUserPlaylists(userId, {
@@ -178,11 +187,11 @@ function createPlaylist(trackList, oldPlaylist, numPlaylists, playlistId, callba
 			})
 				.then(function(data) {
 					if (data.body.next != null) {
-						createPlaylist(trackList, oldPlaylist, numPlaylists + 10, playlistId, function(data) {
+						createPlaylist(trackList, oldPlaylist, numPlaylists + 10, function(data) {
 							callback(data);
 						});
 					} else {
-						createBlankPlaylist(userId, oldPlaylist, trackList, data.body, playlistId, function(data) {
+						createBlankPlaylist(userId, oldPlaylist, trackList, data.body, function(data) {
 							callback(data);
 						});
 					}
