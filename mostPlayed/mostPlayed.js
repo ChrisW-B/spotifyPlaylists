@@ -33,10 +33,10 @@ function getLastfmData(lastfmId, oldPlaylist, callback) {
 
 function getTracks(tracks, lastfmId, numTracks, pageNum, playlistId) {
 	if (tracks.length >= numTracks) {
-		console.log(tracks);
-
-		createPlaylist(tracks, playlistId, 10, function(data) {
-			console.log(data);
+		setTimeout(function() {
+			createPlaylist(tracks, playlistId, 10, function(data) {
+				console.log(data);
+			}, 5000);
 
 		});
 	} else {
