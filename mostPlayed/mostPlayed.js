@@ -118,20 +118,19 @@ function convertToSpotify(topTracks, numNeeded, callback) {
 }
 
 function searchForSong(title, artist, callback) {
-	logger.info('searching for ' + title + ' by ' + artist)
-	title = title.replace('/', " ");
-	artist = artist.replace('/', " ");
-	spotifyApi.searchTracks(title + " " + artist, {
+	logger.info('searching for ' + title + ' by ' + artist);
+	query = "track:" + title + " artist:" + artist;
+	spotifyApi.searchTracks(query, {
 		limit: 1,
 	}).then(function(data) {
 		if (data.body.tracks.total < 1) {
-			logger.time().file().info('No result for', title, "by", artist);
+			logger.time().file().info('No result for', title, "by ", artist);
 			callback(true, null);
 		} else {
 			callback(false, data.body.tracks.items[0].uri);
 		}
 	}, function(err) {
-		logger.time().file().error('Problem finding song', title, "by", artist, err);
+		logger.time().file().error('Problem finding song', title, "by ", artist, err);
 		callback(true, null);
 	});
 }
