@@ -15,7 +15,8 @@
   ],
   "dependencies": {
     "spotify-web-api-node": "*",
-    "jsonfile": "*"
+    "jsonfile": "*",
+    "scribe-js": "*"
   },
   "engines": {
     "node": "0.10.x",

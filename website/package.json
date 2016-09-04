@@ -18,7 +18,8 @@
     "jsonfile": "*",
     "express": "*",
     "ejs": "*",
-    "body-parser": "*"
+    "body-parser": "*",
+    "scribe-js": "*"
   },
   "engines": {
     "node": "0.10.x",

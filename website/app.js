@@ -4,8 +4,18 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 	bodyParser = require('body-parser'),
 	jsonfile = require('jsonfile'),
 	util = require('util'),
-	config = require('./config');
-
+	config = require('./config'),
+	scribe = require('scribe-js')({
+		createDefaultConsole: false
+	});
+var console = scribe.console({
+	console: {
+		colors: 'white'
+	},
+	logWriter: {
+		rootPath: '../logs'
+	}
+});
 var app = express();
 
 config.recentlyAdded.spotifyApi = new SpotifyWebApi({
@@ -39,6 +49,9 @@ app.use(bodyParser.urlencoded({
 	extended: false
 }));
 app.use(bodyParser.json());
+app.use(scribe.express.logger()); //Log each request
+app.use('/logs', scribe.webPanel());
+
 
 app.get('/', function(req, res) {
 	res.render('pages/index');

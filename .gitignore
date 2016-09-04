@@ -1,4 +1,6 @@
 *.sh
+*.DS_Store
 config.js
 data
 node_modules
+logs/*

@@ -1,7 +1,18 @@
 var SpotifyWebApi = require('spotify-web-api-node'),
 	jsonfile = require('jsonfile'),
 	util = require('util'),
-	config = require('./config');
+	config = require('./config'),
+	scribe = require('scribe-js')({
+		createDefaultConsole: false
+	});
+var console = scribe.console({
+	console: {
+		colors: 'white'
+	},
+	logWriter: {
+		rootPath: '../logs'
+	}
+});
 
 // Create the api object with the credentials
 var spotifyApi = new SpotifyWebApi({
@@ -24,7 +35,7 @@ function addSongsToPlaylist(userId, recentSongData, playlistId, callback) {
 		.then(function(data) {
 			callback(playlistId);
 		}, function(err) {
-			console.log('Something went wrong in adding songs!', err);
+			console.time().file().tag('addSongsToPlaylist').error(err);
 		});
 }
 
@@ -39,13 +50,13 @@ function createBlankPlaylist(userId, recentSongData, playlists, prevPlaylist, ca
 				}
 				spotifyApi.removeTracksFromPlaylistByPosition(userId, playlists.items[i].id, numsToDelete, playlists.items[i].snapshot_id)
 					.then(function(data) {
-						console.log('Tracks removed from playlist!');
+						console.time().file().info('Tracks removed from playlist!');
 						addSongsToPlaylist(userId, recentSongData, playlists.items[i].id,
 							function(data) {
 								callback(data);
 							});
 					}, function(err) {
-						console.log('Something went wrong!', err);
+						console.time().file().info('Something went wrong!', err);
 					});
 			} else {
 				addSongsToPlaylist(userId, recentSongData, playlists.items[i].id,
@@ -61,13 +72,13 @@ function createBlankPlaylist(userId, recentSongData, playlists, prevPlaylist, ca
 		spotifyApi.createPlaylist(userId, 'Recently Added', {
 			'public': false
 		}).then(function(data) {
-			console.log('Created new playlist!, id is ', data.body.id);
+			console.time().file().info('Created new playlist!, id is ', data.body.id);
 			addSongsToPlaylist(userId, recentSongData, data.body.id, function(data) {
 				callback(data);
 			});
 
 		}, function(err) {
-			console.log('Something went wrong!', err);
+			console.time().file().tag('createBlankPlaylist').error(err);
 		});
 	}
 }
@@ -88,11 +99,11 @@ function createPlaylist(recentSongData, numPlaylists, playlistId, callback) {
 					});
 				}
 			}, function(err) {
-				console.log('Something went wrong!', err);
+				console.time().file().tag('createPlaylist').error(err);
 			});
 		},
 		function(err) {
-			console.log('Could not get user!', err)
+			console.time().file().tag('getUser').error(err);
 		})
 }
 
@@ -105,7 +116,7 @@ function getTracks(playlistId, numTracks, callback) {
 			callback(data);
 		});
 	}, function(err) {
-		console.log('Something went wrong in songs!', err);
+		console.time().file().tag('getTracks').error(err);
 	});
 };
 
@@ -125,7 +136,7 @@ function refreshToken(access, refresh, callback) {
 				refresh: refresh
 			});
 		}, function(err) {
-			console.log('Could not refresh the token!', err.message);
+			console.time().file().tag('refreshToken').error(err);
 			callback(true, null);
 		});
 };
@@ -137,7 +148,7 @@ function main() {
 				if (ele.hasOwnProperty("token")) {
 					refreshToken(ele.token, ele.refresh, function(err, data) {
 						if (err) {
-							console.log('refresh error', err);
+							console.time().file().tag('readFile').error(err);
 						} else {
 							var newTokens = data;
 							getTracks(ele.oldPlaylist, ele.numTracks, function(data) {
@@ -151,7 +162,7 @@ function main() {
 								obj[id] = newData;
 								jsonfile.writeFile(config.fileLoc, obj, function(err) {
 									if (err) {
-										console.log('error writing file');
+										console.time().file().tag('writeFile').error('error writing file');
 									}
 								});
 							});
@@ -160,7 +171,7 @@ function main() {
 				}
 			});
 		} else {
-			console.log('error', err);
+			console.time().file().tag('main').error(err);
 		}
 	});
 }

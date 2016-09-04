@@ -16,7 +16,8 @@
   "dependencies": {
     "simple-lastfm": "git://github.com/ChrisW-B/simple-lastfm#master",
     "spotify-web-api-node": "*",
-    "jsonfile": "*"
+    "jsonfile": "*",
+    "scribe-js": "*"
   },
   "engines": {
     "node": "0.10.x",
