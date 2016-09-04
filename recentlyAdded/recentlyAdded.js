@@ -6,13 +6,11 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 		createDefaultlog: false
 	}),
 	console = process.console;
-
 var logger = scribe.console({
 	logWriter: {
 		rootPath: '../logs'
 	}
 });
-
 // Create the api object with the credentials
 var spotifyApi = new SpotifyWebApi({
 	clientId: config.clientId,
@@ -21,6 +19,7 @@ var spotifyApi = new SpotifyWebApi({
 });
 
 function createTrackListArray(recentSongData) {
+	logger.info('creating track list array');
 	tracks = [];
 	recentSongData.forEach(function(ele, id) {
 		tracks.push('spotify:track:' + ele.track.id);
@@ -28,82 +27,93 @@ function createTrackListArray(recentSongData) {
 	return tracks;
 }
 
-function addSongsToPlaylist(userId, recentSongData, playlistId, callback) {
+function addSongsToPlaylist(userId, recentSongData, playlistId) {
+	logger.info('adding tracks to playlist')
+	logger.log(recentSongData)
 	var trackArray = createTrackListArray(recentSongData);
-	spotifyApi.addTracksToPlaylist(userId, playlistId, trackArray)
-		.then(function(data) {
-			callback(playlistId);
-		}, function(err) {
-			logger.time().file().tag('addSongsToPlaylist').error(err);
-		});
+	spotifyApi.addTracksToPlaylist(userId, playlistId, trackArray).then(function(data) {
+		logger.time().file().info('Added tracks!');
+	}, function(err) {
+		logger.time().file().tag('addSongsToPlaylist').error(err);
+	});
 }
 
-function createBlankPlaylist(userId, recentSongData, playlists, prevPlaylist, callback) {
-	var foundPlaylist = false;
-	for (var i = 0; i < playlists.total; i++) {
-		if (playlists.items[i].id === prevPlaylist) {
-			if (playlists.items[i].tracks.total > 0) {
-				var numsToDelete = [];
-				for (var j = 0; j < playlists.items[i].tracks.total; j++) {
-					numsToDelete.push(j);
-				}
-				spotifyApi.removeTracksFromPlaylistByPosition(userId, playlists.items[i].id, numsToDelete, playlists.items[i].snapshot_id)
-					.then(function(data) {
-						logger.time().file().info('Tracks removed from playlist!');
-						addSongsToPlaylist(userId, recentSongData, playlists.items[i].id,
-							function(data) {
-								callback(data);
-							});
-					}, function(err) {
-						logger.time().file().info('Something went wrong!', err);
-					});
-			} else {
-				addSongsToPlaylist(userId, recentSongData, playlists.items[i].id,
-					function(data) {
-						callback(data);
-					});
-			}
-			foundPlaylist = true;
-			break;
+function createBlankPlaylist(userId, playlist, trackList) {
+	logger.info('creating blank playlist');
+	if (playlist.tracks.total > 0) {
+		var numsToDelete = [];
+		for (var j = 0; j < playlist.tracks.total; j++) {
+			numsToDelete.push(j);
+		}
+		logger.tag('createBlankPlaylist').info(playlist)
+		spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id).then(function(data) {
+			addSongsToPlaylist(userId, trackList, playlist.id);
+		}, function(err) {
+			logger.time().file().tag('createBlankPlaylistFound').error(err);
+		});
+	} else {
+		logger.info('empty playlist, adding songs');
+		addSongsToPlaylist(userId, trackList, playlist.id);
+	}
+}
+
+function foundOldPlaylist(playlists, oldPlaylist) {
+	for (var i = 0; i < playlists.length; i++) {
+		if (playlists[i].id === oldPlaylist) {
+			logger.info('Found old playlist')
+			return i;
 		}
 	}
-	if (!foundPlaylist) {
-		spotifyApi.createPlaylist(userId, 'Recently Added', {
-			'public': false
-		}).then(function(data) {
-			logger.time().file().info('Created new playlist!, id is ', data.body.id);
-			addSongsToPlaylist(userId, recentSongData, data.body.id, function(data) {
-				callback(data);
-			});
-
-		}, function(err) {
-			logger.time().file().tag('createBlankPlaylist').error(err);
-		});
-	}
+	return -1;
 }
 
-function createPlaylist(recentSongData, numPlaylists, playlistId, callback) {
+function createNewPlaylist(userId, callback) {
+	logger.info('creating new playlist');
+	spotifyApi.createPlaylist(userId, 'Recently Added', {
+		'public': false
+	}).then(function(data) {
+		callback(data.body);
+	}, function(err) {
+		logger.time().file().tag('createBlankPlaylistNotFound').error(err);
+	});
+}
+
+function getPlaylist(recentSongData, oldPlaylist, offset, callback) {
+	logger.info('creating playlist')
 	spotifyApi.getMe().then(function(data) {
-			var userId = data.body.id;
-			spotifyApi.getUserPlaylists(userId, {
-				limit: numPlaylists
-			}).then(function(data) {
-				if (data.body.next != null) {
-					createPlaylist(recentSongData, numPlaylists + 10, playlistId, function(data) {
-						callback(data);
-					});
+		var userId = data.body.id;
+		spotifyApi.getUserPlaylists(userId, {
+			limit: 20,
+			offset: offset
+		}).then(function(data) {
+			if (data.body.next != null) {
+				var playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
+				if (playlistLoc > -1) {
+					createBlankPlaylist(userId, data.body.items[playlistLoc], recentSongData);
+					callback(oldPlaylist)
 				} else {
-					createBlankPlaylist(userId, recentSongData, data.body, playlistId, function(data) {
-						callback(data);
+					getPlaylist(recentSongData, oldPlaylist, offset + 20, function(data) {
+						callback(data)
 					});
 				}
-			}, function(err) {
-				logger.time().file().tag('createPlaylist').error(err);
-			});
-		},
-		function(err) {
-			logger.time().file().tag('getUser').error(err);
-		})
+			} else {
+				var playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
+				if (playlistLoc > -1) {
+					createBlankPlaylist(userId, data.body.items[playlistLoc], recentSongData);
+					callback(oldPlaylist)
+				} else {
+					createNewPlaylist(userId, function(playlist) {
+						createBlankPlaylist(userId, playlist, recentSongData);
+						callback(playlist.id)
+					})
+				}
+			}
+		}, function(err) {
+			logger.time().file().tag('getPlaylist').error(err);
+		});
+	}, function(err) {
+		logger.time().file().tag('getUser in getPlaylist').error(err)
+	});
 }
 
 function getTracks(playlistId, numTracks, callback) {
@@ -111,7 +121,7 @@ function getTracks(playlistId, numTracks, callback) {
 		limit: numTracks,
 		offset: 0
 	}).then(function(data) {
-		createPlaylist(data.body.items, 10, playlistId, function(data) {
+		getPlaylist(data.body.items, playlistId, 0, function(data) {
 			callback(data);
 		});
 	}, function(err) {
@@ -119,25 +129,22 @@ function getTracks(playlistId, numTracks, callback) {
 	});
 };
 
-
-
 function refreshToken(access, refresh, callback) {
 	spotifyApi.setAccessToken(access);
 	spotifyApi.setRefreshToken(refresh);
-	spotifyApi.refreshAccessToken()
-		.then(function(data) {
-			access = data.body.access_token;
-			refresh = data.body.refresh_token ? data.body.refresh_token : refresh;
-			spotifyApi.setAccessToken(access);
-			spotifyApi.setRefreshToken(refresh);
-			callback(false, {
-				token: access,
-				refresh: refresh
-			});
-		}, function(err) {
-			logger.time().file().tag('refreshToken').error(err);
-			callback(true, null);
+	spotifyApi.refreshAccessToken().then(function(data) {
+		access = data.body.access_token;
+		refresh = data.body.refresh_token ? data.body.refresh_token : refresh;
+		spotifyApi.setAccessToken(access);
+		spotifyApi.setRefreshToken(refresh);
+		callback(false, {
+			token: access,
+			refresh: refresh
 		});
+	}, function(err) {
+		logger.time().file().tag('refreshToken').error(err);
+		callback(true, null);
+	});
 };
 
 function main() {
@@ -174,5 +181,4 @@ function main() {
 		}
 	});
 }
-
 main();

@@ -7,20 +7,17 @@ var Lastfm = require('simple-lastfm'),
 		createDefaultlog: false
 	}),
 	console = process.console;
-
 var logger = scribe.console({
 	logWriter: {
 		rootPath: '../logs'
 	}
 });
-
 var lastfm = new Lastfm({
 	api_key: config.lastfm.token,
 	api_secret: config.lastfm.secret,
 	username: config.lastfm.username,
 	password: config.lastfm.password
 });
-
 // Create the api object with the credentials
 var spotifyApi = new SpotifyWebApi({
 	clientId: config.spotify.token,
@@ -28,20 +25,18 @@ var spotifyApi = new SpotifyWebApi({
 	redirectUri: config.spotify.redirectUri
 });
 
-
 function getLastfmData(lastfmId, oldPlaylist, numTracks, timeSpan, callback) {
 	logger.info('getting last.fm data')
-	lastfm.getSessionKey(
-		function(result) {
-			if (!result.success) {
-				logger.time().file().tag('getSessionKey').error(result.error);
-			} else {
-				var emptyTracks = [];
-				getTracks(emptyTracks, lastfmId, numTracks, timeSpan, 1, oldPlaylist, function(newPlaylistId) {
-					callback(newPlaylistId);
-				});
-			}
-		});
+	lastfm.getSessionKey(function(result) {
+		if (!result.success) {
+			logger.time().file().tag('getSessionKey').error(result.error);
+		} else {
+			var emptyTracks = [];
+			getTracks(emptyTracks, lastfmId, numTracks, timeSpan, 1, oldPlaylist, function(newPlaylistId) {
+				callback(newPlaylistId);
+			});
+		}
+	});
 };
 
 function getTracks(tracks, lastfmId, numTracks, timeSpan, pageNum, oldPlaylist, callback) {
@@ -106,44 +101,39 @@ function convertToSpotify(topTracks, numNeeded, callback) {
 	logger.info('converting to spotify')
 	var tracks = [];
 	topTracks.forEach(function(ele, id) {
-		searchForSong(ele.name, ele.artist.name,
-			function(err, spotifyId) {
-				if (!err) {
-					tracks.push({
-						id: spotifyId,
-						rank: ele['@'].rank
-					});
-				} else {
-					numNeeded--;
-				}
-				if (tracks.length == numNeeded) {
-					callback(tracks);
-				}
-			});
+		searchForSong(ele.name, ele.artist.name, function(err, spotifyId) {
+			if (!err) {
+				tracks.push({
+					id: spotifyId,
+					rank: ele['@'].rank
+				});
+			} else {
+				numNeeded--;
+			}
+			if (tracks.length == numNeeded) {
+				callback(tracks);
+			}
+		});
 	});
 }
 
-
-
 function searchForSong(title, artist, callback) {
-	logger.info('searching for ' + title + ' by ' +
-		artist)
+	logger.info('searching for ' + title + ' by ' + artist)
 	title = title.replace('/', " ");
 	artist = artist.replace('/', " ");
 	spotifyApi.searchTracks(title + " " + artist, {
 		limit: 1,
-	})
-		.then(function(data) {
-			if (data.body.tracks.total < 1) {
-				logger.time().file().info('No result for', title, "by", artist);
-				callback(true, null);
-			} else {
-				callback(false, data.body.tracks.items[0].uri);
-			}
-		}, function(err) {
-			logger.time().file().error('Problem finding song', title, "by", artist, err);
+	}).then(function(data) {
+		if (data.body.tracks.total < 1) {
+			logger.time().file().info('No result for', title, "by", artist);
 			callback(true, null);
-		});
+		} else {
+			callback(false, data.body.tracks.items[0].uri);
+		}
+	}, function(err) {
+		logger.time().file().error('Problem finding song', title, "by", artist, err);
+		callback(true, null);
+	});
 }
 
 function addSongsToPlaylist(userId, trackList, playlistId) {
@@ -152,40 +142,36 @@ function addSongsToPlaylist(userId, trackList, playlistId) {
 	for (var i = 0; i < trackList.length; i++) {
 		trackArray.push(trackList[i].id);
 	}
-	spotifyApi.addTracksToPlaylist(userId, playlistId, trackArray)
-		.then(function(data) {
-			logger.time().file().info('Added tracks!');
-		}, function(err) {
-			logger.time().file().tag('addSongsToPlaylist').error(err);
-		});
+	spotifyApi.addTracksToPlaylist(userId, playlistId, trackArray).then(function(data) {
+		logger.time().file().info('Added tracks!');
+	}, function(err) {
+		logger.time().file().tag('addSongsToPlaylist').error(err);
+	});
 }
 
 function createBlankPlaylist(userId, playlist, trackList) {
-	logger.info('creating blank playlist')
+	logger.info('creating blank playlist');
 	if (playlist.tracks.total > 0) {
 		var numsToDelete = [];
-		for (var j = 0; j < playlists.items[i].tracks.total; j++) {
+		for (var j = 0; j < playlist.tracks.total; j++) {
 			numsToDelete.push(j);
 		}
-		spotifyApi.removeTracksFromPlaylistByPosition(userId,
-			playlists.items[i].id,
-			numsToDelete,
-			playlists.items[i].snapshot_id)
-			.then(function(data) {
-				addSongsToPlaylist(userId, trackList, prevPlaylist);
-			}, function(err) {
-				logger.time().file().tag('createBlankPlaylistFound').error(err);
-			});
+		logger.tag('createBlankPlaylist').info(playlist)
+		spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id).then(function(data) {
+			addSongsToPlaylist(userId, trackList, playlist.id);
+		}, function(err) {
+			logger.time().file().tag('createBlankPlaylistFound').error(err);
+		});
 	} else {
-		addSongsToPlaylist(userId, trackList, prevPlaylist);
+		logger.info('empty playlist, adding songs');
+		addSongsToPlaylist(userId, trackList, playlist.id);
 	}
-
 }
 
 function foundOldPlaylist(playlists, oldPlaylist) {
 	for (var i = 0; i < playlists.length; i++) {
-		if (playlists[i].id === prevPlaylist) {
-			logger.log('Found old playlist')
+		if (playlists[i].id === oldPlaylist) {
+			logger.info('Found old playlist')
 			return i;
 		}
 	}
@@ -197,7 +183,7 @@ function createNewPlaylist(userId, callback) {
 	spotifyApi.createPlaylist(userId, 'Most Played', {
 		'public': false
 	}).then(function(data) {
-		callback(data.body.id);
+		callback(data.body);
 	}, function(err) {
 		logger.time().file().tag('createBlankPlaylistNotFound').error(err);
 	});
@@ -206,73 +192,58 @@ function createNewPlaylist(userId, callback) {
 function getPlaylist(trackList, oldPlaylist, offset, callback) {
 	logger.info('creating playlist')
 	spotifyApi.getMe().then(function(data) {
-			var userId = data.body.id;
-			logger.tag('userName').info(userId)
-			spotifyApi.getUserPlaylists(userId, {
-				limit: 20,
-				offset: offset
-			}).then(function(data) {
-				if (data.body.next != null) {
-					var playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
-					logger.tag('PlaylistData notNull').log({
-						"oldplaylist": oldplaylist,
-						"offset": offset,
-						"location": playlistLoc,
-						"next": data.body.next
-					});
-					if (playlistLoc > -1) {
-						createBlankPlaylist(userId, data.body.items[i], trackList);
-						callback(oldPlaylist)
-					} else {
-						getPlaylist(trackList, oldPlaylist, offset + 20, function(data) {
-							callback(data)
-						});
-					}
+		var userId = data.body.id;
+		spotifyApi.getUserPlaylists(userId, {
+			limit: 20,
+			offset: offset
+		}).then(function(data) {
+			if (data.body.next != null) {
+				var playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
+				if (playlistLoc > -1) {
+					createBlankPlaylist(userId, data.body.items[playlistLoc], trackList);
+					callback(oldPlaylist)
 				} else {
-					var playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
-					logger.tag('PlaylistData null').log({
-						"oldplaylist": oldplaylist,
-						"offset": offset,
-						"location": playlistLoc,
-						"next": data.body.next
+					getPlaylist(trackList, oldPlaylist, offset + 20, function(data) {
+						callback(data)
 					});
-					if (playlistLoc > -1) {
-						createBlankPlaylist(userId, data.body.items[i], trackList);
-						callback(oldPlaylist)
-					} else {
-						createNewPlaylist(userId, function(playlistId) {
-							createBlankPlaylist(userId, playlistId, trackList);
-							callback(playlistId)
-						})
-					}
 				}
-			}, function(err) {
-				logger.time().file().tag('getPlaylist').error(err);
-			});
-		},
-		function(err) {
-			logger.time().file().tag('getUser in getPlaylist').error(err)
+			} else {
+				var playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
+				if (playlistLoc > -1) {
+					createBlankPlaylist(userId, data.body.items[playlistLoc], trackList);
+					callback(oldPlaylist)
+				} else {
+					createNewPlaylist(userId, function(playlist) {
+						createBlankPlaylist(userId, playlist, trackList);
+						callback(playlist.id)
+					})
+				}
+			}
+		}, function(err) {
+			logger.time().file().tag('getPlaylist').error(err);
 		});
+	}, function(err) {
+		logger.time().file().tag('getUser in getPlaylist').error(err)
+	});
 }
 
 function refreshToken(access, refresh, callback) {
 	logger.info('refreshing token')
 	spotifyApi.setAccessToken(access);
 	spotifyApi.setRefreshToken(refresh);
-	spotifyApi.refreshAccessToken()
-		.then(function(data) {
-			access = data.body.access_token;
-			refresh = data.body.refresh_token ? data.body.refresh_token : refresh;
-			spotifyApi.setAccessToken(access);
-			spotifyApi.setRefreshToken(refresh);
-			callback(false, {
-				token: access,
-				refresh: refresh
-			});
-		}, function(err) {
-			logger.time().file().tag('refreshToken').error(err);
-			callback(true, null);
+	spotifyApi.refreshAccessToken().then(function(data) {
+		access = data.body.access_token;
+		refresh = data.body.refresh_token ? data.body.refresh_token : refresh;
+		spotifyApi.setAccessToken(access);
+		spotifyApi.setRefreshToken(refresh);
+		callback(false, {
+			token: access,
+			refresh: refresh
 		});
+	}, function(err) {
+		logger.time().file().tag('refreshToken').error(err);
+		callback(true, null);
+	});
 };
 
 function main() {
@@ -286,24 +257,24 @@ function main() {
 							logger.time().file().tag('refreshToken').error(err);
 						} else {
 							var newTokens = data;
-							getLastfmData(ele.lastFmId, ele.oldPlaylist, ele.numTracks,
-								ele.timeSpan, function(data) {
-									var newData = {
-										userName: ele.userName,
-										lastFmId: ele.lastFmId,
-										numTracks: ele.numTracks,
-										timeSpan: ele.timeSpan,
-										token: newTokens.token,
-										refresh: newTokens.refresh,
-										oldPlaylist: data
+							getLastfmData(ele.lastFmId, ele.oldPlaylist, ele.numTracks, ele.timeSpan, function(data) {
+								var newData = {
+									userName: ele.userName,
+									lastFmId: ele.lastFmId,
+									numTracks: ele.numTracks,
+									timeSpan: ele.timeSpan,
+									token: newTokens.token,
+									refresh: newTokens.refresh,
+									oldPlaylist: data
+								}
+								logger.info("writing ", newData)
+								obj[id] = newData;
+								jsonfile.writeFile(config.fileLoc, obj, function(err) {
+									if (err) {
+										logger.time().file().warning('error writing file');
 									}
-									obj[id] = newData;
-									jsonfile.writeFile(config.fileLoc, obj, function(err) {
-										if (err) {
-											logger.time().file().warning('error writing file');
-										}
-									});
 								});
+							});
 						}
 					});
 				}
