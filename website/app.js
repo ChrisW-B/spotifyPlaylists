@@ -6,12 +6,11 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 	util = require('util'),
 	config = require('./config'),
 	scribe = require('scribe-js')({
-		createDefaultConsole: false
-	});
-var console = scribe.console({
-	console: {
-		colors: 'white'
-	},
+		createDefaultlog: false
+	}),
+	console = process.log;
+
+var logger = scribe.console({
 	logWriter: {
 		rootPath: '../logs'
 	}
@@ -42,14 +41,13 @@ config.mostPlayed.spotifyApiUnsubscribe = new SpotifyWebApi({
 	redirectUri: config.mostPlayed.cancelUri
 });
 
-
 app.set('view engine', 'ejs');
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({
 	extended: false
 }));
 app.use(bodyParser.json());
-app.use(scribe.express.logger()); //Log each request
+app.use(scribe.express.logger(log)); //Log each request
 app.use('/logs', scribe.webPanel());
 
 
@@ -126,7 +124,7 @@ app.post('/setup/recentlyadded', function(req, res) {
 					}
 					jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
 						if (err) {
-							console.log(err)
+							logger.log(err)
 							res.redirect('/error');
 						} else {
 							res.redirect('/recentlyadded/thanks');
@@ -138,7 +136,7 @@ app.post('/setup/recentlyadded', function(req, res) {
 			});
 		},
 		function(err) {
-			console.log('Something went wrong in getMe!', err);
+			logger.log('Something went wrong in getMe!', err);
 		});
 });
 
@@ -179,7 +177,7 @@ app.post('/setup/mostplayed', function(req, res) {
 					}
 					jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
 						if (err) {
-							console.log(err)
+							logger.log(err)
 							res.redirect('/error');
 						} else {
 							res.redirect('/mostplayed/thanks');
@@ -191,7 +189,7 @@ app.post('/setup/mostplayed', function(req, res) {
 			});
 		},
 		function(err) {
-			console.log('Something went wrong in getMe!', err);
+			logger.log('Something went wrong in getMe!', err);
 		});
 });
 
@@ -237,7 +235,7 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 					obj = removeFromList(obj, data.body.id);
 					jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
 						if (err) {
-							console.log(err)
+							logger.log(err)
 							res.redirect('/error');
 						} else {
 							res.redirect('/recentlyadded/goodbye');
@@ -246,7 +244,7 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 				});
 			},
 			function(err) {
-				console.log('Something went wrong in getMe!', err);
+				logger.log('Something went wrong in getMe!', err);
 			});
 	});
 });
@@ -265,7 +263,7 @@ app.get('/stop/mostplayed/callback', function(req, res) {
 					obj = removeFromList(obj, data.body.id);
 					jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
 						if (err) {
-							console.log(err);
+							logger.log(err);
 							res.redirect('/error');
 						} else {
 							res.redirect('/mostplayed/goodbye');
@@ -274,7 +272,7 @@ app.get('/stop/mostplayed/callback', function(req, res) {
 				});
 			},
 			function(err) {
-				console.log('Something went wrong in getMe!', err);
+				logger.log('Something went wrong in getMe!', err);
 			});
 	});
 });
@@ -302,7 +300,7 @@ app.get('/recentlyadded/thanks', function(req, res) {
 });
 
 app.listen(3000, function() {
-	console.log('Example app listening on port 3000!');
+	logger.log('Example app listening on port 3000!');
 });
 
 function getCreds(type, unsub) {
@@ -316,14 +314,14 @@ function authorize(code, type, unsub, callback) {
 			.then(function(data) {
 				callback(data);
 			}, function(err) {
-				console.log('Something went wrong! in auth', err);
+				logger.log('Something went wrong! in auth', err);
 			});
 	} else {
 		type.spotifyApiUnsubscribe.authorizationCodeGrant(code)
 			.then(function(data) {
 				callback(data);
 			}, function(err) {
-				console.log('Something went wrong! in auth', err);
+				logger.log('Something went wrong! in auth', err);
 			});
 	}
 };
@@ -343,11 +341,11 @@ function notRegistered(authInfo, userName) {
 function removeFromList(array, userName) {
 	for (var i = 0; i < array.length; i++) {
 		if (array[i].userName == userName) {
-			console.log('removing');
+			logger.log('removing');
 			array.splice(i, 1);
 			break;
 		}
 	}
-	console.log(array);
+	logger.log(array);
 	return array;
 };

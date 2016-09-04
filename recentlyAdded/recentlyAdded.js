@@ -3,12 +3,11 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 	util = require('util'),
 	config = require('./config'),
 	scribe = require('scribe-js')({
-		createDefaultConsole: false
-	});
-var console = scribe.console({
-	console: {
-		colors: 'white'
-	},
+		createDefaultlog: false
+	}),
+	console = process.console;
+
+var logger = scribe.console({
 	logWriter: {
 		rootPath: '../logs'
 	}
@@ -35,7 +34,7 @@ function addSongsToPlaylist(userId, recentSongData, playlistId, callback) {
 		.then(function(data) {
 			callback(playlistId);
 		}, function(err) {
-			console.time().file().tag('addSongsToPlaylist').error(err);
+			logger.time().file().tag('addSongsToPlaylist').error(err);
 		});
 }
 
@@ -50,13 +49,13 @@ function createBlankPlaylist(userId, recentSongData, playlists, prevPlaylist, ca
 				}
 				spotifyApi.removeTracksFromPlaylistByPosition(userId, playlists.items[i].id, numsToDelete, playlists.items[i].snapshot_id)
 					.then(function(data) {
-						console.time().file().info('Tracks removed from playlist!');
+						logger.time().file().info('Tracks removed from playlist!');
 						addSongsToPlaylist(userId, recentSongData, playlists.items[i].id,
 							function(data) {
 								callback(data);
 							});
 					}, function(err) {
-						console.time().file().info('Something went wrong!', err);
+						logger.time().file().info('Something went wrong!', err);
 					});
 			} else {
 				addSongsToPlaylist(userId, recentSongData, playlists.items[i].id,
@@ -72,13 +71,13 @@ function createBlankPlaylist(userId, recentSongData, playlists, prevPlaylist, ca
 		spotifyApi.createPlaylist(userId, 'Recently Added', {
 			'public': false
 		}).then(function(data) {
-			console.time().file().info('Created new playlist!, id is ', data.body.id);
+			logger.time().file().info('Created new playlist!, id is ', data.body.id);
 			addSongsToPlaylist(userId, recentSongData, data.body.id, function(data) {
 				callback(data);
 			});
 
 		}, function(err) {
-			console.time().file().tag('createBlankPlaylist').error(err);
+			logger.time().file().tag('createBlankPlaylist').error(err);
 		});
 	}
 }
@@ -99,11 +98,11 @@ function createPlaylist(recentSongData, numPlaylists, playlistId, callback) {
 					});
 				}
 			}, function(err) {
-				console.time().file().tag('createPlaylist').error(err);
+				logger.time().file().tag('createPlaylist').error(err);
 			});
 		},
 		function(err) {
-			console.time().file().tag('getUser').error(err);
+			logger.time().file().tag('getUser').error(err);
 		})
 }
 
@@ -116,7 +115,7 @@ function getTracks(playlistId, numTracks, callback) {
 			callback(data);
 		});
 	}, function(err) {
-		console.time().file().tag('getTracks').error(err);
+		logger.time().file().tag('getTracks').error(err);
 	});
 };
 
@@ -136,7 +135,7 @@ function refreshToken(access, refresh, callback) {
 				refresh: refresh
 			});
 		}, function(err) {
-			console.time().file().tag('refreshToken').error(err);
+			logger.time().file().tag('refreshToken').error(err);
 			callback(true, null);
 		});
 };
@@ -148,7 +147,7 @@ function main() {
 				if (ele.hasOwnProperty("token")) {
 					refreshToken(ele.token, ele.refresh, function(err, data) {
 						if (err) {
-							console.time().file().tag('readFile').error(err);
+							logger.time().file().tag('readFile').error(err);
 						} else {
 							var newTokens = data;
 							getTracks(ele.oldPlaylist, ele.numTracks, function(data) {
@@ -162,7 +161,7 @@ function main() {
 								obj[id] = newData;
 								jsonfile.writeFile(config.fileLoc, obj, function(err) {
 									if (err) {
-										console.time().file().tag('writeFile').error('error writing file');
+										logger.time().file().tag('writeFile').error('error writing file');
 									}
 								});
 							});
@@ -171,7 +170,7 @@ function main() {
 				}
 			});
 		} else {
-			console.time().file().tag('main').error(err);
+			logger.time().file().tag('main').error(err);
 		}
 	});
 }

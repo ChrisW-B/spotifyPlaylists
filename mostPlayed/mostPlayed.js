@@ -4,14 +4,13 @@ var Lastfm = require('simple-lastfm'),
 	util = require('util'),
 	config = require('./config'),
 	scribe = require('scribe-js')({
-		createDefaultConsole: false
-	});
-var console = scribe.console({
-	console: {
-		colors: 'white'
-	},
+		createDefaultlog: false
+	}),
+	console = process.console;
+
+var logger = scribe.console({
 	logWriter: {
-		rootPath: '../logs'
+		rootPath: 'logs'
 	}
 });
 
@@ -34,7 +33,7 @@ function getLastfmData(lastfmId, oldPlaylist, numTracks, timeSpan, callback) {
 	lastfm.getSessionKey(
 		function(result) {
 			if (!result.success) {
-				console.time().file().tag('getSessionKey').error(result.error);
+				logger.time().file().tag('getSessionKey').error(result.error);
 			} else {
 				var emptyTracks = [];
 				getTracks(emptyTracks, lastfmId, numTracks, timeSpan, 1, oldPlaylist, function(newPlaylistId) {
@@ -69,7 +68,7 @@ function getTracks(tracks, lastfmId, numTracks, timeSpan, pageNum, oldPlaylist, 
 					});
 				}, 5000);
 			} else {
-				console.time().file().tag('getTracks').warning(err, data);
+				logger.time().file().tag('getTracks').warning(err, data);
 				//attempt to make a playlist with what we have
 				if (tracks.length > 0) {
 					setTimeout(function() {
@@ -93,7 +92,7 @@ function getLastfmTracks(lastfmId, page, numTracks, timeSpan, callback) {
 			if (result.success) {
 				callback(false, result);
 			} else {
-				console.time().file().tag('getLastFmTracks').error(result);
+				logger.time().file().tag('getLastFmTracks').error(result);
 				callback(true, null);
 			}
 		}
@@ -130,13 +129,13 @@ function searchForSong(title, artist, callback) {
 	})
 		.then(function(data) {
 			if (data.body.tracks.total < 1) {
-				console.time().file().info('No result for', title, "by", artist);
+				logger.time().file().info('No result for', title, "by", artist);
 				callback(true, null);
 			} else {
 				callback(false, data.body.tracks.items[0].uri);
 			}
 		}, function(err) {
-			console.time().file().error('Problem finding song', title, "by", artist, err);
+			logger.time().file().error('Problem finding song', title, "by", artist, err);
 			callback(true, null);
 		});
 }
@@ -148,9 +147,9 @@ function addSongsToPlaylist(userId, trackList, playlistId) {
 	}
 	spotifyApi.addTracksToPlaylist(userId, playlistId, trackArray)
 		.then(function(data) {
-			console.time().file().info('Added tracks!');
+			logger.time().file().info('Added tracks!');
 		}, function(err) {
-			console.time().file().tag('addSongsToPlaylist').error(err);
+			logger.time().file().tag('addSongsToPlaylist').error(err);
 		});
 }
 
@@ -171,7 +170,7 @@ function createBlankPlaylist(userId, prevPlaylist, trackList, playlists, callbac
 						addSongsToPlaylist(userId, trackList, prevPlaylist);
 						callback(prevPlaylist)
 					}, function(err) {
-						console.time().file().tag('createBlankPlaylistFound').error(err);
+						logger.time().file().tag('createBlankPlaylistFound').error(err);
 					});
 			} else {
 				addSongsToPlaylist(userId, trackList, prevPlaylist);
@@ -188,7 +187,7 @@ function createBlankPlaylist(userId, prevPlaylist, trackList, playlists, callbac
 			addSongsToPlaylist(userId, trackList, data.body.id);
 			callback(data.body.id);
 		}, function(err) {
-			console.time().file().tag('createBlankPlaylistNotFound').error(err);
+			logger.time().file().tag('createBlankPlaylistNotFound').error(err);
 		});
 	}
 }
@@ -211,11 +210,11 @@ function createPlaylist(trackList, oldPlaylist, offset, callback) {
 						});
 					}
 				}, function(err) {
-					console.time().file().tag('createPlaylist').error(err);
+					logger.time().file().tag('createPlaylist').error(err);
 				});
 		},
 		function(err) {
-			console.time().file().tag('getUser in createPlaylist').error(err)
+			logger.time().file().tag('getUser in createPlaylist').error(err)
 		});
 }
 
@@ -233,7 +232,7 @@ function refreshToken(access, refresh, callback) {
 				refresh: refresh
 			});
 		}, function(err) {
-			console.time().file().tag('refreshToken').error(err);
+			logger.time().file().tag('refreshToken').error(err);
 			callback(true, null);
 		});
 };
@@ -245,7 +244,7 @@ function main() {
 				if (ele.hasOwnProperty("token")) {
 					refreshToken(ele.token, ele.refresh, function(err, data) {
 						if (err) {
-							console.time().file().tag('refreshToken').error(err);
+							logger.time().file().tag('refreshToken').error(err);
 						} else {
 							var newTokens = data;
 							getLastfmData(ele.lastFmId, ele.oldPlaylist, ele.numTracks,
@@ -262,7 +261,7 @@ function main() {
 									obj[id] = newData;
 									jsonfile.writeFile(config.fileLoc, obj, function(err) {
 										if (err) {
-											console.time().file().warning('error writing file');
+											logger.time().file().warning('error writing file');
 										}
 									});
 								});
@@ -271,7 +270,7 @@ function main() {
 				}
 			});
 		} else {
-			console.time().file().error('error', err);
+			logger.time().file().error('error', err);
 		}
 	});
 }
