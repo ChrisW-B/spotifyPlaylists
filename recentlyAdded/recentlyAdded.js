@@ -29,7 +29,6 @@ function createTrackListArray(recentSongData) {
 
 function addSongsToPlaylist(userId, recentSongData, playlistId) {
 	logger.info('adding tracks to playlist')
-	logger.log(recentSongData)
 	var trackArray = createTrackListArray(recentSongData);
 	spotifyApi.addTracksToPlaylist(userId, playlistId, trackArray).then(function(data) {
 		logger.time().file().info('Added tracks!');
@@ -79,7 +78,7 @@ function createNewPlaylist(userId, callback) {
 }
 
 function getPlaylist(recentSongData, oldPlaylist, offset, callback) {
-	logger.info('creating playlist')
+	logger.info('looking for playlist')
 	spotifyApi.getMe().then(function(data) {
 		var userId = data.body.id;
 		spotifyApi.getUserPlaylists(userId, {

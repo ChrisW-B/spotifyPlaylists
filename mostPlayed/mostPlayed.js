@@ -190,7 +190,7 @@ function createNewPlaylist(userId, callback) {
 }
 
 function getPlaylist(trackList, oldPlaylist, offset, callback) {
-	logger.info('creating playlist')
+	logger.info('looking for playlist')
 	spotifyApi.getMe().then(function(data) {
 		var userId = data.body.id;
 		spotifyApi.getUserPlaylists(userId, {
