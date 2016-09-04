@@ -47,7 +47,7 @@ app.use(bodyParser.urlencoded({
 	extended: false
 }));
 app.use(bodyParser.json());
-app.use(scribe.express.logger(log)); //Log each request
+app.use(scribe.express.logger(logger)); //Log each request
 app.use('/logs', scribe.webPanel());
 
 
