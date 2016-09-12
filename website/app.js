@@ -9,38 +9,32 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 		createDefaultlog: false
 	}),
 	console = process.log;
-
 var logger = scribe.console({
 	logWriter: {
 		rootPath: '../logs'
 	}
 });
 var app = express();
-
 config.recentlyAdded.spotifyApi = new SpotifyWebApi({
 	clientId: config.recentlyAdded.clientId,
 	clientSecret: config.recentlyAdded.clientSecret,
 	redirectUri: config.recentlyAdded.redirectUri
 });
-
 config.mostPlayed.spotifyApi = new SpotifyWebApi({
 	clientId: config.mostPlayed.clientId,
 	clientSecret: config.mostPlayed.clientSecret,
 	redirectUri: config.mostPlayed.redirectUri
 });
-
 config.recentlyAdded.spotifyApiUnsubscribe = new SpotifyWebApi({
 	clientId: config.recentlyAdded.clientId,
 	clientSecret: config.recentlyAdded.clientSecret,
 	redirectUri: config.recentlyAdded.cancelUri
 });
-
 config.mostPlayed.spotifyApiUnsubscribe = new SpotifyWebApi({
 	clientId: config.mostPlayed.clientId,
 	clientSecret: config.mostPlayed.clientSecret,
 	redirectUri: config.mostPlayed.cancelUri
 });
-
 app.set('view engine', 'ejs');
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({
@@ -49,154 +43,134 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 app.use(scribe.express.logger(logger)); //Log each request
 app.use('/logs', scribe.webPanel());
-
-
 app.get('/', function(req, res) {
 	res.render('pages/index');
 });
-
 app.get('/create/mostplayed', function(req, res) {
 	res.render('pages/signin', {
 		loginUrl: getCreds(config.mostPlayed, false),
 		visitType: "This will let us create and update a playlist on your spotify account."
 	});
 });
-
 app.get('/create/recentlyadded', function(req, res) {
 	res.render('pages/signin', {
 		loginUrl: getCreds(config.recentlyAdded, false),
 		visitType: "This will let us create and update a playlist on your spotify account."
 	});
 });
-
 app.get('/stop', function(req, res) {
 	res.render('pages/stop');
 });
-
 app.get('/setup/mostplayed', function(req, res) {
 	authorize(req.query.code, config.mostPlayed, false, function(data) {
 		res.render('pages/mostplayed', {
 			access: data.body.access_token,
 			refresh: data.body.refresh_token
 		});
-
 	});
 });
-
 app.get('/setup/recentlyadded', function(req, res) {
 	authorize(req.query.code, config.recentlyAdded, false, function(data) {
 		res.render('pages/recentlyadded', {
 			access: data.body.access_token,
 			refresh: data.body.refresh_token
 		});
-
 	});
 });
-
 app.post('/setup/recentlyadded', function(req, res) {
 	var lastFmId = req.body.lastFmId,
 		numTracks = req.body.numTracks,
 		userAccessToken = req.body.token,
 		userRefreshToken = req.body.refresh;
-
 	config.recentlyAdded.spotifyApi.setAccessToken(userAccessToken);
 	config.recentlyAdded.spotifyApi.setRefreshToken(userRefreshToken);
-
 	config.recentlyAdded.spotifyApi.getMe().then(function(data) {
-			jsonfile.readFile(config.recentlyAdded.fileLoc, function(err, obj) {
-				if (notRegistered(obj, data.body.id)) {
-					if (!err) {
-						obj.push({
-							userName: data.body.id,
-							numTracks: numTracks,
-							token: userAccessToken,
-							refresh: userRefreshToken,
-							oldPlaylist: "null"
-						});
-					} else {
-						obj = [{
-							userName: data.body.id,
-							numTracks: numTracks,
-							token: userAccessToken,
-							refresh: userRefreshToken,
-							oldPlaylist: "null"
-						}];
-					}
-					jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
-						if (err) {
-							logger.log(err)
-							res.redirect('/error');
-						} else {
-							res.redirect('/recentlyadded/thanks');
-						}
+		jsonfile.readFile(config.recentlyAdded.fileLoc, function(err, obj) {
+			if (notRegistered(obj, data.body.id)) {
+				if (!err) {
+					obj.push({
+						userName: data.body.id,
+						numTracks: numTracks,
+						token: userAccessToken,
+						refresh: userRefreshToken,
+						oldPlaylist: "null"
 					});
 				} else {
-					res.redirect('/recentlyadded/error');
+					obj = [{
+						userName: data.body.id,
+						numTracks: numTracks,
+						token: userAccessToken,
+						refresh: userRefreshToken,
+						oldPlaylist: "null"
+					}];
 				}
-			});
-		},
-		function(err) {
-			logger.log('Something went wrong in getMe!', err);
+				jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
+					if (err) {
+						logger.log(err)
+						res.redirect('/error');
+					} else {
+						res.redirect('/recentlyadded/thanks');
+					}
+				});
+			} else {
+				res.redirect('/recentlyadded/error');
+			}
 		});
+	}, function(err) {
+		logger.log('Something went wrong in getMe!', err);
+	});
 });
-
-
 app.post('/setup/mostplayed', function(req, res) {
 	var lastFmId = req.body.lastFmId,
 		timeSpan = req.body.timeSpan,
 		numTracks = req.body.numTracks,
 		userAccessToken = req.body.token,
 		userRefreshToken = req.body.refresh;
-
 	config.mostPlayed.spotifyApi.setAccessToken(userAccessToken);
 	config.mostPlayed.spotifyApi.setRefreshToken(userRefreshToken);
-
 	config.mostPlayed.spotifyApi.getMe().then(function(data) {
-			jsonfile.readFile(config.mostPlayed.fileLoc, function(err, obj) {
-				if (notRegistered(obj, data.body.id)) {
-					if (!err) {
-						obj.push({
-							userName: data.body.id,
-							lastFmId: escape(lastFmId),
-							numTracks: numTracks,
-							timeSpan: timeSpan,
-							token: userAccessToken,
-							refresh: userRefreshToken,
-							oldPlaylist: "null"
-						});
-					} else {
-						obj = [{
-							userName: data.body.id,
-							lastFmId: escape(lastFmId),
-							numTracks: numTracks,
-							timeSpan: timeSpan,
-							token: userAccessToken,
-							refresh: userRefreshToken,
-							oldPlaylist: "null"
-						}];
-					}
-					jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
-						if (err) {
-							logger.log(err)
-							res.redirect('/error');
-						} else {
-							res.redirect('/mostplayed/thanks');
-						}
+		jsonfile.readFile(config.mostPlayed.fileLoc, function(err, obj) {
+			if (notRegistered(obj, data.body.id)) {
+				if (!err) {
+					obj.push({
+						userName: data.body.id,
+						lastFmId: escape(lastFmId),
+						numTracks: numTracks,
+						timeSpan: timeSpan,
+						token: userAccessToken,
+						refresh: userRefreshToken,
+						oldPlaylist: "null"
 					});
 				} else {
-					res.redirect('/mostplayed/error');
+					obj = [{
+						userName: data.body.id,
+						lastFmId: escape(lastFmId),
+						numTracks: numTracks,
+						timeSpan: timeSpan,
+						token: userAccessToken,
+						refresh: userRefreshToken,
+						oldPlaylist: "null"
+					}];
 				}
-			});
-		},
-		function(err) {
-			logger.log('Something went wrong in getMe!', err);
+				jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
+					if (err) {
+						logger.log(err)
+						res.redirect('/error');
+					} else {
+						res.redirect('/mostplayed/thanks');
+					}
+				});
+			} else {
+				res.redirect('/mostplayed/error');
+			}
 		});
+	}, function(err) {
+		logger.log('Something went wrong in getMe!', err);
+	});
 });
-
 app.get('/error', function(req, res) {
 	res.render('pages/error');
 });
-
 app.get('/mostplayed/error', function(req, res) {
 	res.render('pages/alreadysignedup', {
 		type: "most played"
@@ -207,73 +181,63 @@ app.get('/recentlyadded/error', function(req, res) {
 		type: "recently added"
 	});
 });
-
 app.get('/stop/mostplayed', function(req, res) {
 	res.render('pages/signin', {
 		loginUrl: getCreds(config.mostPlayed, true),
 		visitType: "One last sign in so we know which account to remove."
 	});
 });
-
 app.get('/stop/recentlyadded', function(req, res) {
 	res.render('pages/signin', {
 		loginUrl: getCreds(config.recentlyAdded, true),
 		visitType: "One last sign in so we know which account to remove."
 	});
 });
-
 app.get('/stop/recentlyadded/callback', function(req, res) {
 	authorize(req.query.code, config.recentlyAdded, true, function(data) {
 		var userAccessToken = data.body.access_token,
 			userRefreshToken = data.body.refresh_token;
-
 		config.recentlyAdded.spotifyApiUnsubscribe.setAccessToken(userAccessToken);
 		config.recentlyAdded.spotifyApiUnsubscribe.setRefreshToken(userRefreshToken);
-
 		config.recentlyAdded.spotifyApiUnsubscribe.getMe().then(function(data) {
-				jsonfile.readFile(config.recentlyAdded.fileLoc, function(err, obj) {
-					obj = removeFromList(obj, data.body.id);
-					jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
-						if (err) {
-							logger.log(err)
-							res.redirect('/error');
-						} else {
-							res.redirect('/recentlyadded/goodbye');
-						}
-					});
+			jsonfile.readFile(config.recentlyAdded.fileLoc, function(err, obj) {
+				obj = removeFromList(obj, data.body.id);
+				jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
+					if (err) {
+						logger.log(err)
+						res.redirect('/error');
+					} else {
+						res.redirect('/recentlyadded/goodbye');
+					}
 				});
-			},
-			function(err) {
-				logger.log('Something went wrong in getMe!', err);
 			});
+		}, function(err) {
+			logger.log('Something went wrong in getMe!', err);
+		});
 	});
 });
-
 app.get('/stop/mostplayed/callback', function(req, res) {
 	authorize(req.query.code, config.mostPlayed, true, function(data) {
 		var userAccessToken = data.body.access_token,
 			userRefreshToken = data.body.refresh_token,
 			file = '../data/mostPlayed.json';
-
 		config.mostPlayed.spotifyApiUnsubscribe.setAccessToken(userAccessToken);
 		config.mostPlayed.spotifyApiUnsubscribe.setRefreshToken(userRefreshToken);
-
 		config.mostPlayed.spotifyApiUnsubscribe.getMe().then(function(data) {
-				jsonfile.readFile(config.mostPlayed.fileLoc, function(err, obj) {
-					obj = removeFromList(obj, data.body.id);
-					jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
-						if (err) {
-							logger.log(err);
-							res.redirect('/error');
-						} else {
-							res.redirect('/mostplayed/goodbye');
-						}
-					});
+			jsonfile.readFile(config.mostPlayed.fileLoc, function(err, obj) {
+				obj = removeFromList(obj, data.body.id);
+				jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
+					if (err) {
+						logger.log(err);
+						res.redirect('/error');
+					} else {
+						res.redirect('/mostplayed/goodbye');
+					}
 				});
-			},
-			function(err) {
-				logger.log('Something went wrong in getMe!', err);
 			});
+		}, function(err) {
+			logger.log('Something went wrong in getMe!', err);
+		});
 	});
 });
 app.get('/recentlyadded/goodbye', function(req, res) {
@@ -286,43 +250,42 @@ app.get('/mostplayed/goodbye', function(req, res) {
 		type: 'most played'
 	});
 });
-
 app.get('/mostplayed/thanks', function(req, res) {
 	res.render('pages/thanks', {
 		type: 'most played'
 	});
 });
-
 app.get('/recentlyadded/thanks', function(req, res) {
 	res.render('pages/thanks', {
 		type: 'recently added'
 	});
 });
-
-app.listen(3000, function() {
-	logger.log('Example app listening on port 3000!');
-});
+require('letsencrypt-express').create({
+	server: 'staging',
+	email: 'me@chriswbarry.com',
+	agreeTos: true,
+	approvedDomains: ['spotifyapps.chriswbarry.com'],
+	app: app,
+	debug: true
+}).listen(80, 443);
 
 function getCreds(type, unsub) {
-	return (unsub) ? type.spotifyApiUnsubscribe.createAuthorizeURL(type.scopes) :
-		type.spotifyApi.createAuthorizeURL(type.scopes);
+	return (unsub) ? type.spotifyApiUnsubscribe.createAuthorizeURL(type.scopes) : type.spotifyApi.createAuthorizeURL(type.scopes);
 };
 
 function authorize(code, type, unsub, callback) {
 	if (!unsub) {
-		type.spotifyApi.authorizationCodeGrant(code)
-			.then(function(data) {
-				callback(data);
-			}, function(err) {
-				logger.log('Something went wrong! in auth', err);
-			});
+		type.spotifyApi.authorizationCodeGrant(code).then(function(data) {
+			callback(data);
+		}, function(err) {
+			logger.log('Something went wrong! in auth', err);
+		});
 	} else {
-		type.spotifyApiUnsubscribe.authorizationCodeGrant(code)
-			.then(function(data) {
-				callback(data);
-			}, function(err) {
-				logger.log('Something went wrong! in auth', err);
-			});
+		type.spotifyApiUnsubscribe.authorizationCodeGrant(code).then(function(data) {
+			callback(data);
+		}, function(err) {
+			logger.log('Something went wrong! in auth', err);
+		});
 	}
 };
 

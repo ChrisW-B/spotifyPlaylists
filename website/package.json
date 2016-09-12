@@ -9,17 +9,15 @@
     "type": "git",
     "url": "null"
   },
-  "keywords": [
-    "spotify",
-    "playlist"
-  ],
+  "keywords": ["spotify", "playlist"],
   "dependencies": {
     "spotify-web-api-node": "*",
     "jsonfile": "*",
     "express": "*",
     "ejs": "*",
     "body-parser": "*",
-    "scribe-js": "*"
+    "scribe-js": "*",
+    "letsencrypt-express": "*"
   },
   "engines": {
     "node": "0.10.x",
