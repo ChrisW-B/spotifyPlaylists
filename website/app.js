@@ -30,7 +30,7 @@ var lex = require('letsencrypt-express').create({
 	email: 'me@chriswbarry.com',
 	agreeTos: true
 });
-require('http').createServer(lex.middleware(require('redirect-https')())).listen(2999, function() {
+require('http').createServer(lex.middleware(require('redirect-https')())).listen(80, function() {
 	logger.log("Listening for ACME http-01 challenges on", this.address());
 });
 config.recentlyAdded.spotifyApi = new SpotifyWebApi({
@@ -278,7 +278,7 @@ app.get('/recentlyadded/thanks', function(req, res) {
 		type: 'recently added'
 	});
 });
-require('https').createServer(lex.httpsOptions, lex.middleware(app)).listen(3000, function() {
+require('https').createServer(lex.httpsOptions, lex.middleware(app)).listen(443, function() {
 	logger.log("Listening for ACME tls-sni-01 challenges and serve app on", this.address());
 });
 
