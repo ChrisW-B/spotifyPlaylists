@@ -30,9 +30,9 @@ var lex = require('letsencrypt-express').create({
 	email: 'me@chriswbarry.com',
 	agreeTos: true
 });
-require('http').createServer(lex.middleware(require('redirect-https')())).listen(80, function() {
-	logger.log("Listening for ACME http-01 challenges on", this.address());
-});
+// require('http').createServer(lex.middleware(require('redirect-https')())).listen(80, function() {
+// 	logger.log("Listening for ACME http-01 challenges on", this.address());
+// });
 config.recentlyAdded.spotifyApi = new SpotifyWebApi({
 	clientId: config.recentlyAdded.clientId,
 	clientSecret: config.recentlyAdded.clientSecret,
