@@ -278,7 +278,7 @@ app.get('/recentlyadded/thanks', function(req, res) {
 		type: 'recently added'
 	});
 });
-require('https').createServer(lex.httpsOptions, lex.middleware(app)).listen(443, function() {
+require('https').createServer(lex.httpsOptions, lex.middleware(app)).listen(3000, function() {
 	logger.log("Listening for ACME tls-sni-01 challenges and serve app on", this.address());
 });
 
