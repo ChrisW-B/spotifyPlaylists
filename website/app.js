@@ -5,16 +5,9 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 	jsonfile = require('jsonfile'),
 	util = require('util'),
 	config = require('./config'),
-	scribe = require('scribe-js')({
-		createDefaultlog: false
-	}),
-	console = process.log;
-var logger = scribe.console({
-	logWriter: {
-		rootPath: '../logs'
-	}
-});
-var app = express();
+	scribe = require('scribe-js')(),
+	console = process.console,
+	app = express();
 var lex = require('letsencrypt-express').create({
 	// set to https://acme-v01.api.letsencrypt.org/directory in production
 	server: 'https://acme-v01.api.letsencrypt.org/directory',
@@ -28,10 +21,11 @@ var lex = require('letsencrypt-express').create({
 	}),
 	approveDomains: ['spotifyapps.chriswbarry.com'],
 	email: 'me@chriswbarry.com',
-	agreeTos: true
+	agreeTos: true,
+	debug: true
 });
-require('http').createServer(lex.middleware(require('redirect-https')())).listen(80, function() {
-	logger.log("Listening for ACME http-01 challenges on", this.address());
+require('http').createServer(lex.middleware(require('redirect-https')())).listen(5620, function() {
+	console.log("Listening for ACME http-01 challenges on", this.address());
 });
 config.recentlyAdded.spotifyApi = new SpotifyWebApi({
 	clientId: config.recentlyAdded.clientId,
@@ -59,7 +53,7 @@ app.use(bodyParser.urlencoded({
 	extended: false
 }));
 app.use(bodyParser.json());
-app.use(scribe.express.logger(logger)); //Log each request
+app.use(scribe.express.logger(console)); //Log each request
 app.use('/logs', scribe.webPanel());
 app.get('/', function(req, res) {
 	res.render('pages/index');
@@ -124,7 +118,7 @@ app.post('/setup/recentlyadded', function(req, res) {
 				}
 				jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
 					if (err) {
-						logger.log(err)
+						console.log(err)
 						res.redirect('/error');
 					} else {
 						res.redirect('/recentlyadded/thanks');
@@ -135,7 +129,7 @@ app.post('/setup/recentlyadded', function(req, res) {
 			}
 		});
 	}, function(err) {
-		logger.log('Something went wrong in getMe!', err);
+		console.log('Something went wrong in getMe!', err);
 	});
 });
 app.post('/setup/mostplayed', function(req, res) {
@@ -172,7 +166,7 @@ app.post('/setup/mostplayed', function(req, res) {
 				}
 				jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
 					if (err) {
-						logger.log(err)
+						console.log(err)
 						res.redirect('/error');
 					} else {
 						res.redirect('/mostplayed/thanks');
@@ -183,7 +177,7 @@ app.post('/setup/mostplayed', function(req, res) {
 			}
 		});
 	}, function(err) {
-		logger.log('Something went wrong in getMe!', err);
+		console.log('Something went wrong in getMe!', err);
 	});
 });
 app.get('/error', function(req, res) {
@@ -222,7 +216,7 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 				obj = removeFromList(obj, data.body.id);
 				jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
 					if (err) {
-						logger.log(err)
+						console.log(err)
 						res.redirect('/error');
 					} else {
 						res.redirect('/recentlyadded/goodbye');
@@ -230,7 +224,7 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 				});
 			});
 		}, function(err) {
-			logger.log('Something went wrong in getMe!', err);
+			console.log('Something went wrong in getMe!', err);
 		});
 	});
 });
@@ -246,7 +240,7 @@ app.get('/stop/mostplayed/callback', function(req, res) {
 				obj = removeFromList(obj, data.body.id);
 				jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
 					if (err) {
-						logger.log(err);
+						console.log(err);
 						res.redirect('/error');
 					} else {
 						res.redirect('/mostplayed/goodbye');
@@ -254,7 +248,7 @@ app.get('/stop/mostplayed/callback', function(req, res) {
 				});
 			});
 		}, function(err) {
-			logger.log('Something went wrong in getMe!', err);
+			console.log('Something went wrong in getMe!', err);
 		});
 	});
 });
@@ -278,8 +272,8 @@ app.get('/recentlyadded/thanks', function(req, res) {
 		type: 'recently added'
 	});
 });
-require('https').createServer(lex.httpsOptions, lex.middleware(app)).listen(443, function() {
-	logger.log("Listening for ACME tls-sni-01 challenges and serve app on", this.address());
+require('https').createServer(lex.httpsOptions, lex.middleware(app)).listen(5621, function() {
+	console.log("Listening for ACME tls-sni-01 challenges and serve app on", this.address());
 });
 
 function getCreds(type, unsub) {
@@ -291,13 +285,13 @@ function authorize(code, type, unsub, callback) {
 		type.spotifyApi.authorizationCodeGrant(code).then(function(data) {
 			callback(data);
 		}, function(err) {
-			logger.log('Something went wrong! in auth', err);
+			console.log('Something went wrong! in auth', err);
 		});
 	} else {
 		type.spotifyApiUnsubscribe.authorizationCodeGrant(code).then(function(data) {
 			callback(data);
 		}, function(err) {
-			logger.log('Something went wrong! in auth', err);
+			console.log('Something went wrong! in auth', err);
 		});
 	}
 };
@@ -317,11 +311,11 @@ function notRegistered(authInfo, userName) {
 function removeFromList(array, userName) {
 	for (var i = 0; i < array.length; i++) {
 		if (array[i].userName == userName) {
-			logger.log('removing');
+			console.log('removing');
 			array.splice(i, 1);
 			break;
 		}
 	}
-	logger.log(array);
+	console.log(array);
 	return array;
 };
