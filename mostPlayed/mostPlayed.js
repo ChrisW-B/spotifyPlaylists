@@ -9,7 +9,7 @@ var Lastfm = require('simple-lastfm'),
 	console = process.console;
 var logger = scribe.console({
 	logWriter: {
-		rootPath: '../logs'
+		rootPath: '../website/logs'
 	}
 });
 var lastfm = new Lastfm({
@@ -26,7 +26,8 @@ var spotifyApi = new SpotifyWebApi({
 });
 
 function getLastfmData(lastfmId, oldPlaylist, numTracks, timeSpan, callback) {
-	logger.info('getting last.fm data')
+	//signs in to last fm to prepare to get data
+	logger.info('getting last.fm data');
 	lastfm.getSessionKey(function(result) {
 		if (!result.success) {
 			logger.time().file().tag('getSessionKey').error(result.error);
@@ -37,10 +38,11 @@ function getLastfmData(lastfmId, oldPlaylist, numTracks, timeSpan, callback) {
 			});
 		}
 	});
-};
+}
 
 function getTracks(tracks, lastfmId, numTracks, timeSpan, pageNum, oldPlaylist, callback) {
-	logger.info('getting tracks data')
+	// manages getting tracks from last.fm, converting them to spotify, and putting them into a playlist
+	logger.info('getting tracks data');
 	if (tracks.length >= numTracks) {
 		setTimeout(function() {
 			getPlaylist(tracks, oldPlaylist, 0, function(data) {
@@ -80,7 +82,8 @@ function getTracks(tracks, lastfmId, numTracks, timeSpan, pageNum, oldPlaylist, 
 }
 
 function getLastfmTracks(lastfmId, page, numTracks, timeSpan, callback) {
-	logger.info('getting last.fm tracks')
+	//gets a list of tracks from last fm
+	logger.info('getting last.fm tracks');
 	lastfm.getTopTracks({
 		user: lastfmId,
 		limit: numTracks,
@@ -95,10 +98,11 @@ function getLastfmTracks(lastfmId, page, numTracks, timeSpan, callback) {
 			}
 		}
 	});
-};
+}
 
 function convertToSpotify(topTracks, numNeeded, callback) {
-	logger.info('converting to spotify')
+	// takes list of last.fm tracks and tries to find them in spotify
+	logger.info('converting to spotify');
 	var tracks = [];
 	topTracks.forEach(function(ele, id) {
 		searchForSong(ele.name, ele.artist.name, function(err, spotifyId) {
@@ -118,6 +122,7 @@ function convertToSpotify(topTracks, numNeeded, callback) {
 }
 
 function searchForSong(title, artist, callback) {
+	//take last.fm data & search spotify
 	logger.info('searching for ' + title + ' by ' + artist);
 	query = "track:" + title + " artist:" + artist;
 	spotifyApi.searchTracks(query, {
@@ -136,7 +141,8 @@ function searchForSong(title, artist, callback) {
 }
 
 function addSongsToPlaylist(userId, trackList, playlistId) {
-	logger.info('adding tracks to playlist')
+	//add list of spotify tracks to a playlist
+	logger.info('adding tracks to playlist');
 	var trackArray = [];
 	for (var i = 0; i < trackList.length; i++) {
 		trackArray.push(trackList[i].id);
@@ -149,13 +155,14 @@ function addSongsToPlaylist(userId, trackList, playlistId) {
 }
 
 function createBlankPlaylist(userId, playlist, trackList) {
+	// create an empty playlist
 	logger.info('creating blank playlist');
 	if (playlist.tracks.total > 0) {
 		var numsToDelete = [];
 		for (var j = 0; j < playlist.tracks.total; j++) {
 			numsToDelete.push(j);
 		}
-		logger.tag('createBlankPlaylist').info(playlist)
+		logger.tag('createBlankPlaylist').info(playlist);
 		spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id).then(function(data) {
 			addSongsToPlaylist(userId, trackList, playlist.id);
 		}, function(err) {
@@ -168,9 +175,10 @@ function createBlankPlaylist(userId, playlist, trackList) {
 }
 
 function foundOldPlaylist(playlists, oldPlaylist) {
+	//try to find old playlist, return true if you do
 	for (var i = 0; i < playlists.length; i++) {
 		if (playlists[i].id === oldPlaylist) {
-			logger.info('Found old playlist')
+			logger.info('Found old playlist');
 			return i;
 		}
 	}
@@ -178,6 +186,7 @@ function foundOldPlaylist(playlists, oldPlaylist) {
 }
 
 function createNewPlaylist(userId, callback) {
+	//create a new playlist??? idk what else to say thats what its called
 	logger.info('creating new playlist');
 	spotifyApi.createPlaylist(userId, 'Most Played', {
 		'public': false
@@ -189,45 +198,48 @@ function createNewPlaylist(userId, callback) {
 }
 
 function getPlaylist(trackList, oldPlaylist, offset, callback) {
-	logger.info('looking for playlist')
+	// manages process of getting tracks from last.fm and putting them in a playlist
+	logger.info('looking for playlist');
 	spotifyApi.getMe().then(function(data) {
 		var userId = data.body.id;
 		spotifyApi.getUserPlaylists(userId, {
 			limit: 20,
 			offset: offset
 		}).then(function(data) {
-			if (data.body.next != null) {
-				var playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
+			var playlistLoc = "";
+			if (data.body.next !== null) {
+				playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
 				if (playlistLoc > -1) {
 					createBlankPlaylist(userId, data.body.items[playlistLoc], trackList);
-					callback(oldPlaylist)
+					callback(oldPlaylist);
 				} else {
 					getPlaylist(trackList, oldPlaylist, offset + 20, function(data) {
-						callback(data)
+						callback(data);
 					});
 				}
 			} else {
-				var playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
+				playlistLoc = foundOldPlaylist(data.body.items, oldPlaylist);
 				if (playlistLoc > -1) {
 					createBlankPlaylist(userId, data.body.items[playlistLoc], trackList);
-					callback(oldPlaylist)
+					callback(oldPlaylist);
 				} else {
 					createNewPlaylist(userId, function(playlist) {
 						createBlankPlaylist(userId, playlist, trackList);
-						callback(playlist.id)
-					})
+						callback(playlist.id);
+					});
 				}
 			}
 		}, function(err) {
 			logger.time().file().tag('getPlaylist').error(err);
 		});
 	}, function(err) {
-		logger.time().file().tag('getUser in getPlaylist').error(err)
+		logger.time().file().tag('getUser in getPlaylist').error(err);
 	});
 }
 
 function refreshToken(access, refresh, callback) {
-	logger.info('refreshing token')
+	//gets refresh token
+	logger.info('refreshing token');
 	spotifyApi.setAccessToken(access);
 	spotifyApi.setRefreshToken(refresh);
 	spotifyApi.refreshAccessToken().then(function(data) {
@@ -246,7 +258,7 @@ function refreshToken(access, refresh, callback) {
 };
 
 function main() {
-	logger.info('Starting')
+	logger.info('Starting');
 	jsonfile.readFile(config.fileLoc, function(err, obj) {
 		if (!err) {
 			obj.forEach(function(ele, id) {
@@ -265,8 +277,8 @@ function main() {
 									token: newTokens.token,
 									refresh: newTokens.refresh,
 									oldPlaylist: data
-								}
-								logger.info("writing ", newData)
+								};
+								logger.info("writing ", newData);
 								obj[id] = newData;
 								jsonfile.writeFile(config.fileLoc, obj, function(err) {
 									if (err) {
