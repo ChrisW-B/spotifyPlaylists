@@ -1,4 +1,4 @@
-var Lastfm = require('simple-lastfm'),
+var Lastfm = require('lastfm-njs'),
 	SpotifyWebApi = require('spotify-web-api-node'),
 	jsonfile = require('jsonfile'),
 	util = require('util'),
@@ -13,8 +13,8 @@ var logger = scribe.console({
 	}
 });
 var lastfm = new Lastfm({
-	api_key: config.lastfm.token,
-	api_secret: config.lastfm.secret,
+	apiKey: config.lastfm.token,
+	apiSecret: config.lastfm.secret,
 	username: config.lastfm.username,
 	password: config.lastfm.password
 });
@@ -28,7 +28,7 @@ var spotifyApi = new SpotifyWebApi({
 function getLastfmData(lastfmId, oldPlaylist, numTracks, timeSpan, callback) {
 	//signs in to last fm to prepare to get data
 	logger.info('getting last.fm data');
-	lastfm.getSessionKey(function(result) {
+	lastfm.auth_getMobileSession(function(result) {
 		if (!result.success) {
 			logger.time().file().tag('getSessionKey').error(result.error);
 		} else {
@@ -53,7 +53,8 @@ function getTracks(tracks, lastfmId, numTracks, timeSpan, pageNum, oldPlaylist, 
 		getLastfmTracks(lastfmId, pageNum, numTracks, timeSpan, function(err, data) {
 			if (!err) {
 				setTimeout(function() {
-					convertToSpotify(data.topTracks, numTracks, function(currentTracks) {
+					// logger.info(data);
+					convertToSpotify(data.track, numTracks, function(currentTracks) {
 						currentTracks.sort(function(a, b) {
 							return a.rank - b.rank;
 						});
@@ -84,7 +85,7 @@ function getTracks(tracks, lastfmId, numTracks, timeSpan, pageNum, oldPlaylist, 
 function getLastfmTracks(lastfmId, page, numTracks, timeSpan, callback) {
 	//gets a list of tracks from last fm
 	logger.info('getting last.fm tracks');
-	lastfm.getTopTracks({
+	lastfm.user_getTopTracks({
 		user: lastfmId,
 		limit: numTracks,
 		period: timeSpan,
@@ -109,7 +110,7 @@ function convertToSpotify(topTracks, numNeeded, callback) {
 			if (!err) {
 				tracks.push({
 					id: spotifyId,
-					rank: ele['@'].rank
+					rank: ele['@attr'].rank
 				});
 			} else {
 				numNeeded--;

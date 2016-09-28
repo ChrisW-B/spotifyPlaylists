@@ -99,7 +99,7 @@ app.post('/setup/recentlyadded', function(req, res) {
 				}
 				jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
 					if (err) {
-						console.log(err)
+						console.log(err);
 						res.redirect('/error');
 					} else {
 						res.redirect('/recentlyadded/thanks');
@@ -147,7 +147,7 @@ app.post('/setup/mostplayed', function(req, res) {
 				}
 				jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
 					if (err) {
-						console.log(err)
+						console.log(err);
 						res.redirect('/error');
 					} else {
 						res.redirect('/mostplayed/thanks');
@@ -197,7 +197,7 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 				obj = removeFromList(obj, data.body.id);
 				jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
 					if (err) {
-						console.log(err)
+						console.log(err);
 						res.redirect('/error');
 					} else {
 						res.redirect('/recentlyadded/goodbye');
@@ -259,7 +259,7 @@ app.listen(5621, function() {
 
 function getCreds(type, unsub) {
 	return (unsub) ? type.spotifyApiUnsubscribe.createAuthorizeURL(type.scopes) : type.spotifyApi.createAuthorizeURL(type.scopes);
-};
+}
 
 function authorize(code, type, unsub, callback) {
 	if (!unsub) {
@@ -275,7 +275,7 @@ function authorize(code, type, unsub, callback) {
 			console.log('Something went wrong! in auth', err);
 		});
 	}
-};
+}
 
 function notRegistered(authInfo, userName) {
 	var foundUsername = true;
@@ -287,7 +287,7 @@ function notRegistered(authInfo, userName) {
 		});
 	}
 	return foundUsername;
-};
+}
 
 function removeFromList(array, userName) {
 	for (var i = 0; i < array.length; i++) {
@@ -299,4 +299,4 @@ function removeFromList(array, userName) {
 	}
 	console.log(array);
 	return array;
-};
+}
