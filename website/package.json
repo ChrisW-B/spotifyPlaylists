@@ -17,5 +17,14 @@
   "bugs": {
     "url": "https://github.com/ChrisW-B/spotifyPlaylists/issues"
   },
-  "homepage": "https://github.com/ChrisW-B/spotifyPlaylists#readme"
+  "homepage": "https://github.com/ChrisW-B/spotifyPlaylists#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "http": "0.0.0",
+    "jsonfile": "^2.4.0",
+    "scribe-js": "^2.0.4",
+    "spotify-web-api-node": "^2.3.5",
+    "util": "^0.10.3"
+  }
 }
