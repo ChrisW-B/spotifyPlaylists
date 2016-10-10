@@ -7,7 +7,7 @@ var Lastfm = require('lastfm-njs'),
 		createDefaultlog: false
 	}),
 	console = process.console,
-	logger.time().file(). = scribe.console({
+	logger = scribe.console({
 		logWriter: {
 			rootPath: './website/logs'
 		}
