@@ -149,15 +149,16 @@ function updatePlaylist(ele, id, obj) {
 			newPlaylistId = "",
 			self = this;
 		logger.time().file().info('Logging in to spotify');
-		refreshToken(ele.token, ele.refresh).then(
-			data => {
-				newTokens.token = data.body.access_token;
-				newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
-				spotifyApi.setAccessToken(newTokens.token);
-				spotifyApi.setRefreshToken(newTokens.refresh);
-				logger.time().file().info('logging in to lastfm');
-				return lastfm.auth_getMobileSession();
-			}).then(() => {
+		refreshToken(
+			ele.token,
+			ele.refresh).then(data => {
+			newTokens.token = data.body.access_token;
+			newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
+			spotifyApi.setAccessToken(newTokens.token);
+			spotifyApi.setRefreshToken(newTokens.refresh);
+			logger.time().file().info('logging in to lastfm');
+			return lastfm.auth_getMobileSession();
+		}).then(() => {
 			logger.time().file().info('getting last.fm');
 			return lastfm.user_getTopTracks({
 				user: ele.lastfmId,
