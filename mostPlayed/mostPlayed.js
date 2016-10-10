@@ -9,7 +9,7 @@ var Lastfm = require('lastfm-njs'),
 	console = process.console,
 	logger = scribe.console({
 		logWriter: {
-			rootPath: './website/logs'
+			rootPath: '../website/logs'
 		}
 	}),
 	lastfm = new Lastfm({
@@ -31,22 +31,24 @@ function convertToSpotify(topTracks, numNeeded) {
 	return new Promise((resolve, reject) => {
 		var tracks = [];
 		topTracks.forEach((ele, id) => {
-			spotifyApi.searchTracks("track:" + ele.name + " artist:" + ele.artist.name)
-				.then(spotifyData => {
-					var results = spotifyData.body.tracks.items;
-					if (results.length > 0 && results[0].uri) {
-						var newTrack = {
-							id: results[0].uri,
-							rank: ele['@attr'].rank
-						};
-						tracks.push(newTrack);
-					}
-					if (tracks.length == numNeeded) {
-						resolve(tracks);
-					}
-				}).catch((err) => {
-					reject(err);
-				});
+			setTimeout({} => {
+				spotifyApi.searchTracks("track:" + ele.name + " artist:" + ele.artist.name)
+					.then(spotifyData => {
+						var results = spotifyData.body.tracks.items;
+						if (results.length > 0 && results[0].uri) {
+							var newTrack = {
+								id: results[0].uri,
+								rank: ele['@attr'].rank
+							};
+							tracks.push(newTrack);
+						}
+						if (tracks.length == numNeeded) {
+							resolve(tracks);
+						}
+					}).catch((err) => {
+						reject(err);
+					});
+			}, id * (ONE_MIN / 20));
 		});
 	});
 }
