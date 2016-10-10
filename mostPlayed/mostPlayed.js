@@ -197,9 +197,13 @@ function updatePlaylist(ele, id, obj) {
 					logger.time().file().warning('error writing file');
 				}
 			});
-		}).catch((err) => {
+		}).catch(err => {
 			logger.time().file().error(err);
 			logger.time().file().error(err.stack);
+			//try again in a few minutes
+			setTimeout(() => {
+				updatePlaylist(ele, id, obj);
+			}, 5 * ONE_MIN);
 		});
 	}
 }

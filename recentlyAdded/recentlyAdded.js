@@ -100,47 +100,50 @@ function updatePlaylist(ele, id, obj) {
 			self = this;
 		logger.time().file().info('Logging in to spotify');
 		refreshToken(ele.token, ele.refresh).then(data => {
-				newTokens.token = data.body.access_token;
-				newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
-				spotifyApi.setAccessToken(newTokens.token);
-				spotifyApi.setRefreshToken(newTokens.refresh);
-				logger.time().file().time().info('Getting user info');
-				return spotifyApi.getMe();
-			}).then(userInfo => {
-				self.userId = userInfo.body.id;
-				logger.time().file().info('preparing playlist');
-				return preparePlaylist(self.userId,
-					ele.oldPlaylist);
-			}).then(playlistId => {
-				self.newPlaylistId = playlistId;
-				return spotifyApi.getMySavedTracks({
-					limit: ele.numTracks,
-					offset: 0
-				});
-			}).then(savedTracks => {
-				logger.time().file().info('filling playlist');
-				return spotifyApi.addTracksToPlaylist(self.userId,
-					self.newPlaylistId,
-					createTrackListArray(savedTracks.body.items));
-			}).then(() => {
-				var newData = {
-					userName: ele.userName,
-					token: newTokens.token,
-					refresh: newTokens.refresh,
-					numTracks: ele.numTracks,
-					oldPlaylist: self.newPlaylistId
-				};
-				obj[id] = newData;
-				jsonfile.writeFile(config.fileLoc, obj, function(err) {
-					if (err) {
-						logger.time().file().tag('writeFile').error('error writing file');
-					}
-				});
-			})
-			.catch(err => {
-				logger.time().file().error(err);
-				logger.time().file().error(err.stack);
+			newTokens.token = data.body.access_token;
+			newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
+			spotifyApi.setAccessToken(newTokens.token);
+			spotifyApi.setRefreshToken(newTokens.refresh);
+			logger.time().file().time().info('Getting user info');
+			return spotifyApi.getMe();
+		}).then(userInfo => {
+			self.userId = userInfo.body.id;
+			logger.time().file().info('preparing playlist');
+			return preparePlaylist(self.userId,
+				ele.oldPlaylist);
+		}).then(playlistId => {
+			self.newPlaylistId = playlistId;
+			return spotifyApi.getMySavedTracks({
+				limit: ele.numTracks,
+				offset: 0
 			});
+		}).then(savedTracks => {
+			logger.time().file().info('filling playlist');
+			return spotifyApi.addTracksToPlaylist(self.userId,
+				self.newPlaylistId,
+				createTrackListArray(savedTracks.body.items));
+		}).then(() => {
+			var newData = {
+				userName: ele.userName,
+				token: newTokens.token,
+				refresh: newTokens.refresh,
+				numTracks: ele.numTracks,
+				oldPlaylist: self.newPlaylistId
+			};
+			obj[id] = newData;
+			jsonfile.writeFile(config.fileLoc, obj, function(err) {
+				if (err) {
+					logger.time().file().tag('writeFile').error('error writing file');
+				}
+			});
+		}).catch(err => {
+			logger.time().file().error(err);
+			logger.time().file().error(err.stack);
+			//try again in a few minutes
+			setTimeout(() => {
+				updatePlaylist(ele, id, obj);
+			}, 5 * ONE_MIN);
+		});
 	}
 }
 
