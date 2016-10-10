@@ -31,7 +31,7 @@ function convertToSpotify(topTracks, numNeeded) {
 	return new Promise((resolve, reject) => {
 		var tracks = [];
 		topTracks.forEach((ele, id) => {
-			setTimeout({} => {
+			setTimeout(() => {
 				spotifyApi.searchTracks("track:" + ele.name + " artist:" + ele.artist.name)
 					.then(spotifyData => {
 						var results = spotifyData.body.tracks.items;
