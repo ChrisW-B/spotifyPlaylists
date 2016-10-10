@@ -6,24 +6,25 @@ var Lastfm = require('lastfm-njs'),
 	scribe = require('scribe-js')({
 		createDefaultlog: false
 	}),
-	console = process.console;
-var logger = scribe.console({
-	logWriter: {
-		rootPath: '../website/logs'
-	}
-});
-var lastfm = new Lastfm({
-	apiKey: config.lastfm.token,
-	apiSecret: config.lastfm.secret,
-	username: config.lastfm.username,
-	password: config.lastfm.password
-});
-// Create the api object with the credentials
-var spotifyApi = new SpotifyWebApi({
-	clientId: config.spotify.token,
-	clientSecret: config.spotify.secret,
-	redirectUri: config.spotify.redirectUri
-});
+	console = process.console,
+	logger.time().file(). = scribe.console({
+		logWriter: {
+			rootPath: './website/logs'
+		}
+	}),
+	lastfm = new Lastfm({
+		apiKey: config.lastfm.token,
+		apiSecret: config.lastfm.secret,
+		username: config.lastfm.username,
+		password: config.lastfm.password
+	}),
+	spotifyApi = new SpotifyWebApi({
+		clientId: config.spotify.token,
+		clientSecret: config.spotify.secret,
+		redirectUri: config.spotify.redirectUri
+	});
+
+const ONE_MIN = 60 * 1000;
 
 function convertToSpotify(topTracks, numNeeded) {
 	// takes list of last.fm tracks and tries to find them in spotify
@@ -100,7 +101,7 @@ function createNewPlaylist(userId) {
 	});
 }
 
-function preparePlaylist(userId, oldPlaylistId, offset) {
+function preparePlaylist(userId, oldPlaylistId, offset = 0) {
 	return new Promise((resolve, reject) => {
 		spotifyApi.getUserPlaylists(userId, {
 			limit: 20,
@@ -145,72 +146,72 @@ function updatePlaylist(ele, id, obj) {
 			newTokens = {},
 			newPlaylistId = "",
 			self = this;
-		logger.info('Logging in to spotify');
-		refreshToken(ele.token, ele.refresh)
-			.then(data => {
+		logger.time().file().info('Logging in to spotify');
+		refreshToken(ele.token, ele.refresh).then(
+			data => {
 				newTokens.token = data.body.access_token;
 				newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
 				spotifyApi.setAccessToken(newTokens.token);
 				spotifyApi.setRefreshToken(newTokens.refresh);
-				logger.info('logging in to lastfm');
+				logger.time().file().info('logging in to lastfm');
 				return lastfm.auth_getMobileSession();
 			}).then(() => {
-				logger.info('getting last.fm');
-				return lastfm.user_getTopTracks({
-					user: ele.lastfmId,
-					limit: Number(ele.numTracks) + 50, //add 50 so we can skip ones not in library
-					period: ele.timeSpan
-				});
-			}).then(lastFmTrackList => {
-				logger.info('converting to spotify');
-				return convertToSpotify(lastFmTrackList.track, ele.numTracks);
-			}).then(spotifyTrackList => {
-				logger.info('sorting tracks');
-				return sortSpotifyTracks(spotifyTrackList, ele.numTracks);
-			}).then(sortedSpotify => {
-				self.tracklist = sortedSpotify;
-				logger.info('getting user');
-				return spotifyApi.getMe();
-			}).then(userInfo => {
-				self.userInfo = userInfo;
-				logger.info('preparing playlist')
-				return preparePlaylist(self.userInfo.body.id, ele.oldPlaylist, 0);
-			}).then(playlistId => {
-				logger.info('filling playlist');
-				self.newPlaylistId = playlistId;
-				return fillPlaylist(self.userInfo.body.id, playlistId, self.tracklist);
-			})
-			.then(() => {
-				var newData = {
-					userName: ele.userName,
-					lastFmId: ele.lastFmId,
-					numTracks: ele.numTracks,
-					timeSpan: ele.timeSpan,
-					token: newTokens.token,
-					refresh: newTokens.refresh,
-					oldPlaylist: self.newPlaylistId
-				};
-				logger.info("writing ", newData);
-				obj[id] = newData;
-				jsonfile.writeFile(config.fileLoc, obj, function(err) {
-					if (err) {
-						logger.time().file().warning('error writing file');
-					}
-				});
-			})
-			.catch((err) => {
-				logger.time().file().error(err);
-				logger.time().file().error(err.stack);
+			logger.time().file().info('getting last.fm');
+			return lastfm.user_getTopTracks({
+				user: ele.lastfmId,
+				limit: Number(ele.numTracks) + 50, //add 50 so we can skip ones not in library
+				period: ele.timeSpan
 			});
+		}).then(lastFmTrackList => {
+			logger.time().file().info('converting to spotify');
+			return convertToSpotify(lastFmTrackList.track, ele.numTracks);
+		}).then(spotifyTrackList => {
+			logger.time().file().info('sorting tracks');
+			return sortSpotifyTracks(spotifyTrackList, ele.numTracks);
+		}).then(sortedSpotify => {
+			self.tracklist = sortedSpotify;
+			logger.time().file().info('getting user');
+			return spotifyApi.getMe();
+		}).then(userInfo => {
+			self.userInfo = userInfo;
+			logger.time().file().info('preparing playlist');
+			return preparePlaylist(self.userInfo.body.id, ele.oldPlaylist);
+		}).then(playlistId => {
+			logger.time().file().info('filling playlist');
+			self.newPlaylistId = playlistId;
+			return fillPlaylist(self.userInfo.body.id, playlistId, self.tracklist);
+		}).then(() => {
+			var newData = {
+				userName: ele.userName,
+				lastFmId: ele.lastFmId,
+				numTracks: ele.numTracks,
+				timeSpan: ele.timeSpan,
+				token: newTokens.token,
+				refresh: newTokens.refresh,
+				oldPlaylist: self.newPlaylistId
+			};
+			logger.time().file().info("writing ", newData);
+			obj[id] = newData;
+			jsonfile.writeFile(config.fileLoc, obj, function(err) {
+				if (err) {
+					logger.time().file().warning('error writing file');
+				}
+			});
+		}).catch((err) => {
+			logger.time().file().error(err);
+			logger.time().file().error(err.stack);
+		});
 	}
 }
 
 function main() {
-	logger.info('Starting');
+	logger.time().file().info('Starting');
 	jsonfile.readFile(config.fileLoc, function(err, obj) {
 		if (!err) {
 			obj.forEach((ele, id) => {
-				updatePlaylist(ele, id, obj);
+				setTimeout(() => {
+					updatePlaylist(ele, id, obj)
+				}, 5 * ONE_MIN * id);
 			});
 		} else {
 			logger.time().file().error('error', err);
