@@ -48,7 +48,7 @@ function convertToSpotify(topTracks, numNeeded) {
 					}).catch((err) => {
 						reject(err);
 					});
-			}, id * (ONE_MIN / 20));
+			}, id * (ONE_MIN / 30));
 		});
 	});
 }
@@ -143,11 +143,7 @@ function sortSpotifyTracks(tracks, numTracks) {
 
 function updatePlaylist(ele, id, obj) {
 	if (ele.hasOwnProperty("token")) {
-		var tracklist = [],
-			userInfo = {},
-			newTokens = {},
-			newPlaylistId = "",
-			self = this;
+		var newTokens = {};
 		logger.time().file().info('Logging in to spotify');
 		refreshToken(
 			ele.token,
@@ -159,31 +155,42 @@ function updatePlaylist(ele, id, obj) {
 			logger.time().file().info('logging in to lastfm');
 			return lastfm.auth_getMobileSession();
 		}).then(() => {
-			logger.time().file().info('getting last.fm');
+			logger.time().file().info('getting last.fm top tracks');
 			return lastfm.user_getTopTracks({
 				user: ele.lastfmId,
 				limit: Number(ele.numTracks) + 50, //add 50 so we can skip ones not in library
 				period: ele.timeSpan
 			});
 		}).then(lastFmTrackList => {
-			logger.time().file().info('converting to spotify');
-			return convertToSpotify(lastFmTrackList.track, ele.numTracks);
-		}).then(spotifyTrackList => {
-			logger.time().file().info('sorting tracks');
-			return sortSpotifyTracks(spotifyTrackList, ele.numTracks);
-		}).then(sortedSpotify => {
-			self.tracklist = sortedSpotify;
-			logger.time().file().info('getting user');
-			return spotifyApi.getMe();
-		}).then(userInfo => {
-			self.userInfo = userInfo;
-			logger.time().file().info('preparing playlist');
-			return preparePlaylist(self.userInfo.body.id, ele.oldPlaylist);
-		}).then(playlistId => {
+			logger.time().file().info('converting to spotify and getting userinfo');
+			return Promise.all([
+				spotifyApi.getMe(),
+				convertToSpotify(lastFmTrackList.track, ele.numTracks)
+			]);
+		}).then(values => {
+			logger.time().file().info('sorting tracks, getting user, and preparing playlist');
+			var spotifyInfo = values[0],
+				convertedList = values[1];
+			return Promise.all([
+				new Promise(
+					resolve => {
+						resolve(spotifyInfo.body.id);
+					}),
+				preparePlaylist(spotifyInfo.body.id, ele.oldPlaylist),
+				sortSpotifyTracks(convertedList, ele.numTracks)
+			]);
+		}).then(values => {
 			logger.time().file().info('filling playlist');
-			self.newPlaylistId = playlistId;
-			return fillPlaylist(self.userInfo.body.id, playlistId, self.tracklist);
-		}).then(() => {
+			var userId = values[0],
+				newPlaylistId = values[1],
+				sortedTracks = values[2];
+			return Promise.all([
+				new Promise(resolve => {
+					resolve(newPlaylistId)
+				}),
+				fillPlaylist(userId, newPlaylistId, sortedTracks)
+			]);
+		}).then(values => {
 			var newData = {
 				userName: ele.userName,
 				lastFmId: ele.lastFmId,
@@ -191,7 +198,7 @@ function updatePlaylist(ele, id, obj) {
 				timeSpan: ele.timeSpan,
 				token: newTokens.token,
 				refresh: newTokens.refresh,
-				oldPlaylist: self.newPlaylistId
+				oldPlaylist: values[0]
 			};
 			logger.time().file().info("writing ", newData);
 			obj[id] = newData;

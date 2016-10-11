@@ -94,10 +94,7 @@ function refreshToken(access, refresh) {
 
 function updatePlaylist(ele, id, obj) {
 	if (ele.hasOwnProperty("token")) {
-		var userId = "",
-			newTokens = {},
-			newPlaylistId = "",
-			self = this;
+		var newTokens = {};
 		logger.time().file().info('Logging in to spotify');
 		refreshToken(ele.token, ele.refresh).then(data => {
 			newTokens.token = data.body.access_token;
@@ -107,28 +104,36 @@ function updatePlaylist(ele, id, obj) {
 			logger.time().file().time().info('Getting user info');
 			return spotifyApi.getMe();
 		}).then(userInfo => {
-			self.userId = userInfo.body.id;
-			logger.time().file().info('preparing playlist');
-			return preparePlaylist(self.userId,
-				ele.oldPlaylist);
-		}).then(playlistId => {
-			self.newPlaylistId = playlistId;
-			return spotifyApi.getMySavedTracks({
-				limit: ele.numTracks,
-				offset: 0
-			});
-		}).then(savedTracks => {
+			logger.time().file().info('preparing playlist and getting saved tracks');
+			return Promise.all([
+				preparePlaylist(userInfo.body.id, ele.oldPlaylist),
+				spotifyApi.getMySavedTracks({
+					limit: ele.numTracks
+				}), new Promise(resolve => {
+					resolve(userInfo.body.id);
+				})
+			]);
+		}).then(values => {
 			logger.time().file().info('filling playlist');
-			return spotifyApi.addTracksToPlaylist(self.userId,
-				self.newPlaylistId,
-				createTrackListArray(savedTracks.body.items));
-		}).then(() => {
+			var newPlaylistId = values[0],
+				savedTracks = values[1],
+				userId = values[2];
+			return Promise.all([
+				spotifyApi.addTracksToPlaylist(userId,
+					newPlaylistId,
+					createTrackListArray(savedTracks.body.items)),
+				new Promise(resolve => {
+					resolve(newPlaylistId);
+				})
+			]);
+		}).then((values) => {
+			var newPlaylistId = values[1];
 			var newData = {
 				userName: ele.userName,
 				token: newTokens.token,
 				refresh: newTokens.refresh,
 				numTracks: ele.numTracks,
-				oldPlaylist: self.newPlaylistId
+				oldPlaylist: newPlaylistId
 			};
 			obj[id] = newData;
 			jsonfile.writeFile(config.fileLoc, obj, function(err) {
