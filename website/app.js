@@ -8,7 +8,12 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 	Redis = require('redisng'),
 	redis = new Redis(),
 	console = process.console,
-	app = express();
+	app = express(),
+	logger = scribe.console({
+		logWriter: {
+			rootPath: './logs'
+		}
+	});
 config.recentlyAdded.spotifyApi = new SpotifyWebApi({
 	clientId: config.recentlyAdded.clientId,
 	clientSecret: config.recentlyAdded.clientSecret,
@@ -35,7 +40,7 @@ app.use(bodyParser.urlencoded({
 	extended: false
 }));
 app.use(bodyParser.json());
-app.use(scribe.express.logger(console)); //Log each request
+app.use(scribe.express.logger(logger)); //Log each request
 app.use('/logs', scribe.webPanel());
 app.get('/', function(req, res) {
 	res.render('pages/index');
@@ -104,7 +109,7 @@ app.post('/setup/recentlyadded', function(req, res) {
 		}
 	}).catch((err) => {
 		res.redirect('/recentlyadded/error');
-		console.log(err.message, err.stack);
+		logger.log(err.message, err.stack);
 		redis.close();
 	});
 });
@@ -145,7 +150,7 @@ app.post('/setup/mostplayed', function(req, res) {
 		}
 	}).catch((err) => {
 		res.redirect('/mostplayed/error');
-		console.log(err.message, err.stack);
+		logger.log(err.message, err.stack);
 		redis.close();
 	});
 });
@@ -181,7 +186,7 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 			userRefreshToken = data.body.refresh_token;
 		config.recentlyAdded.spotifyApiUnsubscribe.setAccessToken(userAccessToken);
 		config.recentlyAdded.spotifyApiUnsubscribe.setRefreshToken(userRefreshToken);
-		Promise.all([config.mostPlayed.spotifyApiUnsubscribe.getMe(), redis.connect()]).then(data => {
+		Promise.all([config.recentlyAdded.spotifyApiUnsubscribe.getMe(), redis.connect()]).then(data => {
 			var userId = data[0].body.id;
 			return Promise.all([redis.del("recent:" + userId), redis.srem("users", "recent:" + userId)]);
 		}).then(() => {
@@ -190,7 +195,7 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 		}).catch((err) => {
 			res.redirect('/error');
 			redis.close();
-			console.log(err.message, err.stack);
+			logger.error(err.message, err.stack);
 		});
 	});
 });
@@ -209,7 +214,7 @@ app.get('/stop/mostplayed/callback', function(req, res) {
 		}).catch((err) => {
 			res.redirect('/error');
 			redis.close();
-			console.log(err.message, err.stack);
+			logger.err(err.message, err.stack);
 		});
 	});
 });
@@ -234,7 +239,7 @@ app.get('/recentlyadded/thanks', function(req, res) {
 	});
 });
 app.listen(5621, function() {
-	console.log('SpotifyApps listening on port 5621!');
+	logger.log('SpotifyApps listening on port 5621!');
 });
 
 function getCreds(type, unsub) {
@@ -246,13 +251,13 @@ function authorize(code, type, unsub, callback) {
 		type.spotifyApi.authorizationCodeGrant(code).then(function(data) {
 			callback(data);
 		}, function(err) {
-			console.log('Something went wrong! in auth', err);
+			logger.log('Something went wrong! in auth', err);
 		});
 	} else {
 		type.spotifyApiUnsubscribe.authorizationCodeGrant(code).then(function(data) {
 			callback(data);
 		}, function(err) {
-			console.log('Something went wrong! in auth', err);
+			logger.log('Something went wrong! in auth', err);
 		});
 	}
 }
