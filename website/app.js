@@ -132,7 +132,7 @@ app.post('/setup/mostplayed', function(req, res) {
 			"numTracks", numTracks,
 			"token", userAccessToken,
 			"refresh", userRefreshToken,
-			"timespan", timespan,
+			"timespan", timeSpan,
 			"oldPlaylist", "null");
 	}).then((success) => {
 		if (success) {
