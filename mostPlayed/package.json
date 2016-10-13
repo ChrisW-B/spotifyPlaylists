@@ -21,7 +21,9 @@
   "dependencies": {
     "jsonfile": "^2.x",
     "lastfm-njs": "^0.x",
+    "redisng": "^2.0.0",
     "scribe-js": "^2.x",
+    "sleep-promise": "^2.0.0",
     "spotify-web-api-node": "^2.x",
     "util": "^0.x"
   }

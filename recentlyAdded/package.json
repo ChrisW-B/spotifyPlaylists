@@ -21,6 +21,7 @@
     "jsonfile": "^2.4.0",
     "redisng": "^2.0.0",
     "scribe-js": "^2.0.4",
+    "sleep-promise": "^2.0.0",
     "spotify-web-api-node": "^2.3.5",
     "util": "^0.10.3"
   }

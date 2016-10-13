@@ -1,8 +1,10 @@
 var Lastfm = require('lastfm-njs'),
 	SpotifyWebApi = require('spotify-web-api-node'),
-	jsonfile = require('jsonfile'),
 	util = require('util'),
+	sleep = require('sleep-promise'),
 	config = require('./config'),
+	Redis = require('redisng'),
+	redis = new Redis(),
 	scribe = require('scribe-js')({
 		createDefaultlog: false
 	}),
@@ -23,35 +25,37 @@ var Lastfm = require('lastfm-njs'),
 		clientSecret: config.spotify.secret,
 		redirectUri: config.spotify.redirectUri
 	});
+const ONE_SEC = 1000,
+	ONE_MIN = 60 * ONE_SEC;
 
-const ONE_MIN = 60 * 1000;
-
-function convertToSpotify(topTracks, numNeeded) {
+function convertToSpotify(topTracks) {
 	// takes list of last.fm tracks and tries to find them in spotify
-	return new Promise((resolve, reject) => {
-		var tracks = [];
-		topTracks.forEach((ele, id) => {
-			setTimeout(() => {
-				spotifyApi.searchTracks("track:" + ele.name + " artist:" + ele.artist.name)
-					.then(spotifyData => {
-						var results = spotifyData.body.tracks.items;
-						if (results.length > 0 && results[0].uri) {
-							var newTrack = {
-								id: results[0].uri,
-								rank: ele['@attr'].rank
-							};
-							tracks.push(newTrack);
-						}
-						if (tracks.length == numNeeded) {
-							resolve(tracks);
-						}
-					}).catch((err) => {
-						reject(err);
-					});
-			}, id * (ONE_MIN / 30));
-		});
-	});
+	return Promise.all(topTracks.map((ele, id) => {
+		return new Promise((resolve) => {
+			sleep(ONE_SEC * id)
+				.then(() => {
+					logger.time().file().info(`Searching for ${ele.name} by ${ele.artist.name}`);
+					return spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`)
+				})
+				.then((spotifyData) => {
+					var results = spotifyData.body.tracks.items;
+					if (results.length > 0 && results[0].uri) {
+						resolve({
+							id: results[0].uri,
+							rank: ele['@attr'].rank
+						});
+					} else {
+						logger.time().file().err(`couldn't find ${ele.name} by ${ele.artist.name}`);
+						resolve(undefined);
+					}
+				}).catch(err => {
+					logger.time().file().err(`${err} \n\n ${err.stack} \ncouldn't find ${ele.name} by ${ele.artist.name}`);
+					resolve(undefined);
+				});
+		})
+	}))
 }
+
 
 function fillPlaylist(userId, playlistId, tracklist) {
 	//add list of spotify tracks to a playlist
@@ -70,9 +74,9 @@ function clearExistingPlaylist(userId, playlist) {
 			for (var j = 0; j < playlist.tracks.total; j++) {
 				numsToDelete.push(j);
 			}
-			spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id).then(() => {
-				resolve(playlist.id);
-			}).catch((err) => {
+			spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id).then(() =>
+				resolve(playlist.id)
+			).catch((err) => {
 				reject(err);
 			});
 		}
@@ -96,15 +100,13 @@ function createNewPlaylist(userId) {
 		}).then(playlist => {
 			resolve(playlist.body.id);
 		}).catch(err => {
-			setTimeout(function() {
-				return createNewPlaylist(userId);
-			}, 5000);
+			reject(err);
 		})
 	});
 }
 
 function preparePlaylist(userId, oldPlaylistId, offset = 0) {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		spotifyApi.getUserPlaylists(userId, {
 			limit: 20,
 			offset: offset
@@ -121,6 +123,50 @@ function preparePlaylist(userId, oldPlaylistId, offset = 0) {
 	});
 }
 
+function insertMissingTracks(trackList, lastFmId, period) {
+	var nextTrackSet;
+	return Promise.all(trackList.map((ele) => {
+		if (ele !== undefined) {
+			return new Promise(resolve => {
+				resolve(ele);
+			});
+		} else {
+			if (nextTrackSet === undefined) {
+				return lastfm.user_getTopTracks({
+					user: lastfmId,
+					limit: tracklist.length,
+					period: period,
+					page: 2
+				}).then(lastFmTrackList => {
+					var tracks = lastFmTrackList.track;
+					return convertToSpotify(tracks);
+				}).then(spotifyList => {
+					nextTrackSet = spotifyList;
+					for (var i = 0; i < nextTrackSet.length; i++) {
+						var temp = nextTrackSet[i];
+						nextTrackSet[i] = undefined;
+						if (temp !== undefined) {
+							return new Promise(resolve => {
+								resolve(temp);
+							});
+						}
+					}
+				})
+			} else {
+				for (var i = 0; i < nextTrackSet.length; i++) {
+					var temp = nextTrackSet[i];
+					nextTrackSet[i] = undefined;
+					if (temp !== undefined) {
+						return new Promise(resolve => {
+							resolve(temp);
+						});
+					}
+				}
+			}
+		}
+	}));
+}
+
 function refreshToken(access, refresh) {
 	//gets refresh token
 	spotifyApi.setAccessToken(access);
@@ -128,108 +174,111 @@ function refreshToken(access, refresh) {
 	return spotifyApi.refreshAccessToken();
 };
 
-function sortSpotifyTracks(tracks, numTracks) {
+function sortSpotifyTracks(tracks) {
 	return new Promise((resolve, reject) => {
-		var spotifyList = [];
 		tracks.sort(function(a, b) {
 			return a.rank - b.rank;
 		});
-		for (var i = 0; i < numTracks; i++) {
-			spotifyList.push(tracks[i]);
-		}
-		resolve(spotifyList);
+		resolve(tracks);
 	});
 }
 
-function updatePlaylist(ele, id, obj) {
-	if (ele.hasOwnProperty("token")) {
-		var newTokens = {};
+function updatePlaylist(userId, delayInc) {
+	var newTokens = {},
+		ele = {};
+	logger.time().file().info('Getting database items');
+	return sleep(delayInc * ONE_MIN * 5).then(() => Promise.all([
+		redis.hget(userId, 'numTracks'),
+		redis.hget(userId, 'refresh'),
+		redis.hget(userId, 'token'),
+		redis.hget(userId, 'oldPlaylist'),
+		redis.hget(userId, 'lastFmId'),
+		redis.hget(userId, 'timespan')
+	])).then(data => {
+		ele.numTracks = data[0];
+		ele.refresh = data[1];
+		ele.token = data[2];
+		ele.oldPlaylist = data[3];
+		ele.lastFmId = data[4];
+		ele.timespan = data[5];
 		logger.time().file().info('Logging in to spotify');
-		refreshToken(
-			ele.token,
-			ele.refresh).then(data => {
-			newTokens.token = data.body.access_token;
-			newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
-			spotifyApi.setAccessToken(newTokens.token);
-			spotifyApi.setRefreshToken(newTokens.refresh);
-			logger.time().file().info('logging in to lastfm');
-			return lastfm.auth_getMobileSession();
-		}).then(() => {
-			logger.time().file().info('getting last.fm top tracks');
-			return lastfm.user_getTopTracks({
-				user: ele.lastfmId,
-				limit: Number(ele.numTracks) + 50, //add 50 so we can skip ones not in library
-				period: ele.timeSpan
-			});
-		}).then(lastFmTrackList => {
-			logger.time().file().info('converting to spotify and getting userinfo');
-			return Promise.all([
-				spotifyApi.getMe(),
-				convertToSpotify(lastFmTrackList.track, ele.numTracks)
-			]);
-		}).then(values => {
-			logger.time().file().info('sorting tracks, getting user, and preparing playlist');
-			var spotifyInfo = values[0],
-				convertedList = values[1];
-			return Promise.all([
-				new Promise(
-					resolve => {
-						resolve(spotifyInfo.body.id);
-					}),
-				preparePlaylist(spotifyInfo.body.id, ele.oldPlaylist),
-				sortSpotifyTracks(convertedList, ele.numTracks)
-			]);
-		}).then(values => {
-			logger.time().file().info('filling playlist');
-			var userId = values[0],
-				newPlaylistId = values[1],
-				sortedTracks = values[2];
-			return Promise.all([
-				new Promise(resolve => {
-					resolve(newPlaylistId)
-				}),
-				fillPlaylist(userId, newPlaylistId, sortedTracks)
-			]);
-		}).then(values => {
-			var newData = {
-				userName: ele.userName,
-				lastFmId: ele.lastFmId,
-				numTracks: ele.numTracks,
-				timeSpan: ele.timeSpan,
-				token: newTokens.token,
-				refresh: newTokens.refresh,
-				oldPlaylist: values[0]
-			};
-			logger.time().file().info("writing ", newData);
-			obj[id] = newData;
-			jsonfile.writeFile(config.fileLoc, obj, function(err) {
-				if (err) {
-					logger.time().file().warning('error writing file');
+		return refreshToken(ele.token, ele.refresh)
+	}).then(data => {
+		newTokens.token = data.body.access_token;
+		newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
+		spotifyApi.setAccessToken(newTokens.token);
+		spotifyApi.setRefreshToken(newTokens.refresh);
+		logger.time().file().info('logging in to lastfm');
+		return lastfm.auth_getMobileSession();
+	}).then(() => {
+		logger.time().file().info('getting last.fm top tracks');
+		return lastfm.user_getTopTracks({
+			user: ele.lastfmId,
+			limit: Number(ele.numTracks),
+			period: ele.timespan
+		});
+	}).then(lastFmTrackList => {
+		logger.time().file().info('converting to spotify and getting userinfo');
+		return convertToSpotify(lastFmTrackList.track, ele.numTracks);
+	}).then((spotifyList) => {
+		return Promise.all([
+			spotifyApi.getMe(),
+			insertMissingTracks(spotifyList, ele.lastFmId, ele.timeSpan)
+		]);
+	}).then(values => {
+		logger.time().file().info('sorting tracks, getting user, and preparing playlist');
+		var spotifyId = values[0].body.id,
+			convertedList = values[1];
+		return Promise.all([
+			new Promise(resolve => {
+				resolve(spotifyId)
+			}),
+			preparePlaylist(spotifyId, ele.oldPlaylist),
+			sortSpotifyTracks(convertedList)
+		]);
+	}).then(values => {
+		logger.time().file().info('filling playlist');
+		var userId = values[0],
+			newPlaylistId = values[1],
+			sortedTracks = values[2];
+		return Promise.all([
+			new Promise(resolve => {
+				resolve(newPlaylistId)
+			}),
+			fillPlaylist(userId, newPlaylistId, sortedTracks)
+		]);
+	}).then((values) => {
+		var newPlaylistId = values[0];
+		return Promise.all([
+			redis.hset(userId, 'token', newTokens.token),
+			redis.hset(userId, 'refresh', newTokens.refresh),
+			redis.hset(userId, 'oldPlaylist', newPlaylistId)
+		]);
+	}).catch(err => {
+		logger.time().file().error(err);
+		logger.time().file().error(err.stack);
+		//try again in a few minutes
+		setTimeout(() => {
+			updatePlaylist(ele, id, obj);
+		}, 5 * ONE_MIN);
+	});
+}
+
+(() => {
+	logger.time().file().tag('main').info('Starting');
+	redis.connect().then(() => redis.smembers('users'))
+		.then(users => {
+			var promises = [];
+			var delayInc = 0;
+			users.forEach((userId) => {
+				if (userId.includes('most')) {
+					logger.time().file().info('updating', userId);
+					promises.push(updatePlaylist(userId, delayInc));
+					delayInc++;
 				}
 			});
-		}).catch(err => {
-			logger.time().file().error(err);
-			logger.time().file().error(err.stack);
-			//try again in a few minutes
-			setTimeout(() => {
-				updatePlaylist(ele, id, obj);
-			}, 5 * ONE_MIN);
-		});
-	}
-}
-
-function main() {
-	logger.time().file().info('Starting');
-	jsonfile.readFile(config.fileLoc, function(err, obj) {
-		if (!err) {
-			obj.forEach((ele, id) => {
-				setTimeout(() => {
-					updatePlaylist(ele, id, obj)
-				}, 5 * ONE_MIN * id);
-			});
-		} else {
-			logger.time().file().error('error', err);
-		}
-	});
-}
-main();
+			return Promise.all(promises);
+		})
+		.then(() => redis.close())
+		.catch((err) => logger.time().file().tag('main').error('error', err, err.stack));
+})();

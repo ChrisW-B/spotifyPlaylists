@@ -3,6 +3,7 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 	util = require('util'),
 	Redis = require('redisng'),
 	redis = new Redis(),
+	sleep = require('sleep-promise'),
 	config = require('./config'),
 	scribe = require('scribe-js')({
 		createDefaultlog: false
@@ -94,24 +95,18 @@ function refreshToken(access, refresh) {
 	return spotifyApi.refreshAccessToken();
 };
 
-function sleep(time) {
-	return new Promise(resolve => {
-		setTimeout(resolve, time)
-	})
-}
-
 function updatePlaylist(userId, delayInc) {
-	var newTokens = {};
-	var ele = {};
+	var newTokens = {},
+		ele = {};
 	return sleep(5 * delayInc * ONE_MIN).then(() => {
 		return Promise.all([
-			redis.hget(userId, 'numtracks'),
+			redis.hget(userId, 'numTracks'),
 			redis.hget(userId, 'refresh'),
 			redis.hget(userId, 'token'),
 			redis.hget(userId, 'oldPlaylist')
 		])
 	}).then(data => {
-		ele.numtracks = data[0];
+		ele.numTracks = data[0];
 		ele.refresh = data[1];
 		ele.token = data[2];
 		ele.oldPlaylist = data[3];
@@ -166,6 +161,7 @@ function updatePlaylist(userId, delayInc) {
 }
 
 (() => {
+	logger.time().file().tag('main').info('Starting');
 	redis.connect().then(() => {
 		return redis.smembers('users');
 	}).then(users => {
@@ -182,6 +178,6 @@ function updatePlaylist(userId, delayInc) {
 	}).then(() => {
 		redis.close();
 	}).catch(() => {
-		logger.time().file().tag('main').error(err);
+		logger.time().file().tag('main').error('error', err, err.stack);
 	});
 })();
