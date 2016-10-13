@@ -23,7 +23,7 @@
     "ejs": "^2.5.2",
     "express": "^4.14.0",
     "http": "0.0.0",
-    "jsonfile": "^2.4.0",
+    "redisng": "^2.0.0",
     "scribe-js": "^2.0.4",
     "spotify-web-api-node": "^2.3.5",
     "util": "^0.10.3"

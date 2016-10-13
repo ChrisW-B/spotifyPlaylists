@@ -19,6 +19,7 @@
   "homepage": "https://github.com/ChrisW-B/spotifyPlaylists#readme",
   "dependencies": {
     "jsonfile": "^2.4.0",
+    "redisng": "^2.0.0",
     "scribe-js": "^2.0.4",
     "spotify-web-api-node": "^2.3.5",
     "util": "^0.10.3"
