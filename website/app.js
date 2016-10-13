@@ -2,10 +2,11 @@ var SpotifyWebApi = require('spotify-web-api-node'),
 	http = require('http'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
-	jsonfile = require('jsonfile'),
 	util = require('util'),
 	config = require('./config'),
 	scribe = require('scribe-js')(),
+	Redis = require('redisng'),
+	redis = new Redis(),
 	console = process.console,
 	app = express();
 config.recentlyAdded.spotifyApi = new SpotifyWebApi({
@@ -71,96 +72,84 @@ app.get('/setup/recentlyadded', function(req, res) {
 	});
 });
 app.post('/setup/recentlyadded', function(req, res) {
-	var lastFmId = req.body.lastFmId,
+	var userId = "",
+		lastFmId = req.body.lastFmId,
 		numTracks = req.body.numTracks,
 		userAccessToken = req.body.token,
 		userRefreshToken = req.body.refresh;
 	config.recentlyAdded.spotifyApi.setAccessToken(userAccessToken);
 	config.recentlyAdded.spotifyApi.setRefreshToken(userRefreshToken);
-	config.recentlyAdded.spotifyApi.getMe().then(function(data) {
-		jsonfile.readFile(config.recentlyAdded.fileLoc, function(err, obj) {
-			if (notRegistered(obj, data.body.id)) {
-				if (!err) {
-					obj.push({
-						userName: data.body.id,
-						numTracks: numTracks,
-						token: userAccessToken,
-						refresh: userRefreshToken,
-						oldPlaylist: "null"
-					});
-				} else {
-					obj = [{
-						userName: data.body.id,
-						numTracks: numTracks,
-						token: userAccessToken,
-						refresh: userRefreshToken,
-						oldPlaylist: "null"
-					}];
-				}
-				jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
-					if (err) {
-						console.log(err);
-						res.redirect('/error');
-					} else {
-						res.redirect('/recentlyadded/thanks');
-					}
-				});
-			} else {
-				res.redirect('/recentlyadded/error');
-			}
+	Promise.all([config.recentlyAdded.spotifyApi.getMe(), redis.connect()]).then(data => {
+		userId = data[0].body.id;
+		return redis.exists('recent:' + userId);
+	}).then((exists) => {
+		if (!exists) return redis.sadd('users', "recent:" + userId)
+		else return new Promise((_, rej) => {
+			rej('user already added');
 		});
-	}, function(err) {
-		console.log('Something went wrong in getMe!', err);
+	}).then(() => {
+		return redis.hmset("recent:" + userId,
+			"numTracks", numTracks,
+			"token", userAccessToken,
+			"refresh", userRefreshToken,
+			"oldPlaylist", "null");
+	}).then((success) => {
+		if (success) {
+			res.redirect('/recentlyadded/thanks');
+			redis.close();
+		} else {
+			new Promise((_, rej) => {
+				rej('error adding info');
+			});
+		}
+	}).catch((err) => {
+		res.redirect('/recentlyadded/error');
+		console.log(err.message, err.stack);
+		redis.close();
 	});
 });
+
 app.post('/setup/mostplayed', function(req, res) {
-	var lastFmId = req.body.lastFmId,
+	var userId = "",
+		lastFmId = req.body.lastFmId,
 		timeSpan = req.body.timeSpan,
 		numTracks = req.body.numTracks,
 		userAccessToken = req.body.token,
 		userRefreshToken = req.body.refresh;
 	config.mostPlayed.spotifyApi.setAccessToken(userAccessToken);
 	config.mostPlayed.spotifyApi.setRefreshToken(userRefreshToken);
-	config.mostPlayed.spotifyApi.getMe().then(function(data) {
-		jsonfile.readFile(config.mostPlayed.fileLoc, function(err, obj) {
-			if (notRegistered(obj, data.body.id)) {
-				if (!err) {
-					obj.push({
-						userName: data.body.id,
-						lastFmId: escape(lastFmId),
-						numTracks: numTracks,
-						timeSpan: timeSpan,
-						token: userAccessToken,
-						refresh: userRefreshToken,
-						oldPlaylist: "null"
-					});
-				} else {
-					obj = [{
-						userName: data.body.id,
-						lastFmId: escape(lastFmId),
-						numTracks: numTracks,
-						timeSpan: timeSpan,
-						token: userAccessToken,
-						refresh: userRefreshToken,
-						oldPlaylist: "null"
-					}];
-				}
-				jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
-					if (err) {
-						console.log(err);
-						res.redirect('/error');
-					} else {
-						res.redirect('/mostplayed/thanks');
-					}
-				});
-			} else {
-				res.redirect('/mostplayed/error');
-			}
+	Promise.all([config.mostPlayed.spotifyApi.getMe(), redis.connect()]).then(data => {
+		userId = data[0].body.id;
+		return redis.exists('most:' + userId);
+	}).then((exists) => {
+		if (!exists) return redis.sadd('users', "most:" + userId)
+		else return new Promise((_, rej) => {
+			rej('user already added');
 		});
-	}, function(err) {
-		console.log('Something went wrong in getMe!', err);
+	}).then(() => {
+		return redis.hmset("most:" + userId,
+			"lastFmId", escape(lastFmId),
+			"numTracks", numTracks,
+			"token", userAccessToken,
+			"refresh", userRefreshToken,
+			"timespan", timespan,
+			"oldPlaylist", "null");
+	}).then((success) => {
+		if (success) {
+			res.redirect('/mostplayed/thanks');
+			redis.close();
+		} else {
+			new Promise((_, rej) => {
+				rej('error adding info');
+			});
+		}
+	}).catch((err) => {
+		res.redirect('/mostplayed/error');
+		console.log(err.message, err.stack);
+		redis.close();
 	});
 });
+
 app.get('/error', function(req, res) {
 	res.render('pages/error');
 });
@@ -192,44 +181,35 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 			userRefreshToken = data.body.refresh_token;
 		config.recentlyAdded.spotifyApiUnsubscribe.setAccessToken(userAccessToken);
 		config.recentlyAdded.spotifyApiUnsubscribe.setRefreshToken(userRefreshToken);
-		config.recentlyAdded.spotifyApiUnsubscribe.getMe().then(function(data) {
-			jsonfile.readFile(config.recentlyAdded.fileLoc, function(err, obj) {
-				obj = removeFromList(obj, data.body.id);
-				jsonfile.writeFile(config.recentlyAdded.fileLoc, obj, function(err) {
-					if (err) {
-						console.log(err);
-						res.redirect('/error');
-					} else {
-						res.redirect('/recentlyadded/goodbye');
-					}
-				});
-			});
-		}, function(err) {
-			console.log('Something went wrong in getMe!', err);
+		Promise.all([config.mostPlayed.spotifyApiUnsubscribe.getMe(), redis.connect()]).then(data => {
+			var userId = data[0].body.id;
+			return Promise.all([redis.del("recent:" + userId), redis.srem("users", "recent:" + userId)]);
+		}).then(() => {
+			res.redirect('/recentlyadded/goodbye');
+			redis.close();
+		}).catch((err) => {
+			res.redirect('/error');
+			redis.close();
+			console.log(err.message, err.stack);
 		});
 	});
 });
 app.get('/stop/mostplayed/callback', function(req, res) {
 	authorize(req.query.code, config.mostPlayed, true, function(data) {
 		var userAccessToken = data.body.access_token,
-			userRefreshToken = data.body.refresh_token,
-			file = '../data/mostPlayed.json';
+			userRefreshToken = data.body.refresh_token;
 		config.mostPlayed.spotifyApiUnsubscribe.setAccessToken(userAccessToken);
 		config.mostPlayed.spotifyApiUnsubscribe.setRefreshToken(userRefreshToken);
-		config.mostPlayed.spotifyApiUnsubscribe.getMe().then(function(data) {
-			jsonfile.readFile(config.mostPlayed.fileLoc, function(err, obj) {
-				obj = removeFromList(obj, data.body.id);
-				jsonfile.writeFile(config.mostPlayed.fileLoc, obj, function(err) {
-					if (err) {
-						console.log(err);
-						res.redirect('/error');
-					} else {
-						res.redirect('/mostplayed/goodbye');
-					}
-				});
-			});
-		}, function(err) {
-			console.log('Something went wrong in getMe!', err);
+		Promise.all([config.mostPlayed.spotifyApiUnsubscribe.getMe(), redis.connect()]).then(data => {
+			var userId = data[0].body.id;
+			return Promise.all([redis.del("most:" + userId), redis.srem("users", "most:" + userId)]);
+		}).then(() => {
+			res.redirect('/mostplayed/goodbye');
+			redis.close();
+		}).catch((err) => {
+			res.redirect('/error');
+			redis.close();
+			console.log(err.message, err.stack);
 		});
 	});
 });
@@ -275,28 +255,4 @@ function authorize(code, type, unsub, callback) {
 			console.log('Something went wrong! in auth', err);
 		});
 	}
-}
-
-function notRegistered(authInfo, userName) {
-	var foundUsername = true;
-	if (authInfo) {
-		authInfo.forEach(function(ele, id) {
-			if (ele.userName == userName) {
-				foundUsername = false;
-			}
-		});
-	}
-	return foundUsername;
-}
-
-function removeFromList(array, userName) {
-	for (var i = 0; i < array.length; i++) {
-		if (array[i].userName == userName) {
-			console.log('removing');
-			array.splice(i, 1);
-			break;
-		}
-	}
-	console.log(array);
-	return array;
 }

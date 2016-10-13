@@ -4,3 +4,6 @@ config.js
 data
 node_modules
 logs
+yarn.lock
+
+*.rdb

@@ -1,6 +1,9 @@
 var SpotifyWebApi = require('spotify-web-api-node'),
 	jsonfile = require('jsonfile'),
 	util = require('util'),
+	Redis = require('redisng'),
+	redis = new Redis(),
+	sleep = require('sleep-promise'),
 	config = require('./config'),
 	scribe = require('scribe-js')({
 		createDefaultlog: false
@@ -92,77 +95,89 @@ function refreshToken(access, refresh) {
 	return spotifyApi.refreshAccessToken();
 };
 
-function updatePlaylist(ele, id, obj) {
-	if (ele.hasOwnProperty("token")) {
-		var newTokens = {};
+function updatePlaylist(userId, delayInc) {
+	var newTokens = {},
+		ele = {};
+	return sleep(5 * delayInc * ONE_MIN).then(() => {
+		return Promise.all([
+			redis.hget(userId, 'numTracks'),
+			redis.hget(userId, 'refresh'),
+			redis.hget(userId, 'token'),
+			redis.hget(userId, 'oldPlaylist')
+		])
+	}).then(data => {
+		ele.numTracks = data[0];
+		ele.refresh = data[1];
+		ele.token = data[2];
+		ele.oldPlaylist = data[3];
 		logger.time().file().info('Logging in to spotify');
-		refreshToken(ele.token, ele.refresh).then(data => {
-			newTokens.token = data.body.access_token;
-			newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
-			spotifyApi.setAccessToken(newTokens.token);
-			spotifyApi.setRefreshToken(newTokens.refresh);
-			logger.time().file().time().info('Getting user info');
-			return spotifyApi.getMe();
-		}).then(userInfo => {
-			logger.time().file().info('preparing playlist and getting saved tracks');
-			return Promise.all([
-				preparePlaylist(userInfo.body.id, ele.oldPlaylist),
-				spotifyApi.getMySavedTracks({
-					limit: ele.numTracks
-				}), new Promise(resolve => {
-					resolve(userInfo.body.id);
-				})
-			]);
-		}).then(values => {
-			logger.time().file().info('filling playlist');
-			var newPlaylistId = values[0],
-				savedTracks = values[1],
-				userId = values[2];
-			return Promise.all([
-				spotifyApi.addTracksToPlaylist(userId,
-					newPlaylistId,
-					createTrackListArray(savedTracks.body.items)),
-				new Promise(resolve => {
-					resolve(newPlaylistId);
-				})
-			]);
-		}).then((values) => {
-			var newPlaylistId = values[1];
-			var newData = {
-				userName: ele.userName,
-				token: newTokens.token,
-				refresh: newTokens.refresh,
-				numTracks: ele.numTracks,
-				oldPlaylist: newPlaylistId
-			};
-			obj[id] = newData;
-			jsonfile.writeFile(config.fileLoc, obj, function(err) {
-				if (err) {
-					logger.time().file().tag('writeFile').error('error writing file');
-				}
-			});
-		}).catch(err => {
-			logger.time().file().error(err);
-			logger.time().file().error(err.stack);
-			//try again in a few minutes
-			setTimeout(() => {
-				updatePlaylist(ele, id, obj);
-			}, 5 * ONE_MIN);
-		});
-	}
-}
-
-function main() {
-	jsonfile.readFile(config.fileLoc, function(err, obj) {
-		if (!err) {
-			obj.forEach((ele, id) => {
-				setTimeout(() => {
-					updatePlaylist(ele, id, obj)
-				}, 5 * ONE_MIN * id);
-			});
-		} else {
-			logger.time().file().tag('main').error(err);
-		}
+		return refreshToken(ele.token, ele.refresh)
+	}).then(data => {
+		newTokens.token = data.body.access_token;
+		newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
+		spotifyApi.setAccessToken(newTokens.token);
+		spotifyApi.setRefreshToken(newTokens.refresh);
+		logger.time().file().time().info('Getting user info');
+		return spotifyApi.getMe();
+	}).then(userInfo => {
+		logger.time().file().info('preparing playlist and getting saved tracks');
+		return Promise.all([
+			preparePlaylist(userInfo.body.id, ele.oldPlaylist),
+			spotifyApi.getMySavedTracks({
+				limit: ele.numTracks
+			}), new Promise(resolve => {
+				resolve(userInfo.body.id);
+			})
+		]);
+	}).then(values => {
+		logger.time().file().info('filling playlist');
+		var newPlaylistId = values[0],
+			savedTracks = values[1],
+			spotifyId = values[2];
+		return Promise.all([
+			spotifyApi.addTracksToPlaylist(spotifyId,
+				newPlaylistId,
+				createTrackListArray(savedTracks.body.items)),
+			new Promise(resolve => {
+				resolve(newPlaylistId);
+			})
+		]);
+	}).then((values) => {
+		var newPlaylistId = values[1];
+		logger.time().file().info('Updating database');
+		return Promise.all([
+			redis.hset(userId, 'token', newTokens.token),
+			redis.hset(userId, 'refresh', newTokens.refresh),
+			redis.hset(userId, 'oldPlaylist', newPlaylistId)
+		]);
+	}).catch(err => {
+		logger.time().file().error(err);
+		logger.time().file().error(err.stack);
+		//try again in a few minutes
+		setTimeout(() => {
+			updatePlaylist(ele, id, obj);
+		}, 5 * ONE_MIN);
 	});
 }
-main();
+
+(() => {
+	logger.time().file().tag('main').info('Starting');
+	redis.connect().then(() => {
+		return redis.smembers('users');
+	}).then(users => {
+		var promises = [];
+		var delayInc = 0;
+		users.forEach((userId) => {
+			if (userId.includes('recent')) {
+				logger.time().file().info('updating', userId);
+				promises.push(updatePlaylist(userId, delayInc));
+				delayInc++;
+			}
+		});
+		return Promise.all(promises);
+	}).then(() => {
+		redis.close();
+	}).catch(() => {
+		logger.time().file().tag('main').error('error', err, err.stack);
+	});
+})();
