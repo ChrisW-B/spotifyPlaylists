@@ -3,6 +3,8 @@ A nodejs/express based web app that contains a website and 2 backend services
 
 Available [here](http://spotifyapps.chriswbarry.com/ "SpotifyApps")
 
+To use this, you need to have [redis](http://redis.io/topics/quickstart) installed 
+
 ## Website Folder
 This contains the website itself, where users can register for access. It saves authenticated user info in data/[playlisttype].json
 It also allows user info to be deleted by authenticated users
@@ -15,7 +17,7 @@ Contains a node.js script that uses the Last.fm ID provided to create a playlist
 If it cannot find the song on Spotify, it ignores it and does not add it to the playlist
 
 ## Config File
-Your config file should look similar to the following
+Your config files should look similar to the following
 
 ### For Website
 ```javascript
@@ -28,18 +30,16 @@ config.mostPlayed = {
     scopes: ['playlist-read-private', 'playlist-modify-private', 'playlist-modify-public'],
     clientId: 'XXX',
     clientSecret: 'XXX',
-    redirectUri: 'http://spotifyapps.chriswbarry.com/mostplayed/callback',
-    cancelUri: 'http://spotifyapps.chriswbarry.com/stop/mostPlayed/callback',
-    fileLoc: '../data/mostPlayed.json'
+    redirectUri: 'http://[your website here]/mostplayed/callback',
+    cancelUri: 'http://[your website here]/stop/mostPlayed/callback',
 };
 
 config.recentlyAdded = {
     scopes: ['user-read-private', 'playlist-read-private', 'playlist-modify-private', 'playlist-modify-public', 'user-library-read'],
     clientId: 'YYY',
     clientSecret: 'YYY',
-    redirectUri: 'http://spotifyapps.chriswbarry.com/recentlyAdded/callback',
-    cancelUri: 'http://spotifyapps.chriswbarry.com/stop/recentlyAdded/callback',
-    fileLoc: '../data/recentlyAdded.json'
+    redirectUri: 'http://[your website here]/recentlyAdded/callback',
+    cancelUri: 'http://[your website here]/stop/recentlyAdded/callback',
 };
 
 module.exports = config;
@@ -65,8 +65,6 @@ config.lastfm = {
     password: 'lastfmpass'
 }
 
-config.fileLoc = '../data/mostPlayed.json';
-
 module.exports = config;
 
 ```
@@ -76,8 +74,7 @@ module.exports = config;
 
 var config = {
     clientId: 'YYY',
-    clientSecret: 'YYY',
-    fileLoc: '../data/recentlyAdded.json'
+    clientSecret: 'YYY'
 };
 
 module.exports = config;
