@@ -94,15 +94,23 @@ function refreshToken(access, refresh) {
 	return spotifyApi.refreshAccessToken();
 };
 
-function updatePlaylist(userId) {
+function sleep(time) {
+	return new Promise(resolve => {
+		setTimeout(resolve, time)
+	})
+}
+
+function updatePlaylist(userId, delayInc) {
 	var newTokens = {};
 	var ele = {};
-	Promise.all([
-		redis.hget(userId, 'numtracks'),
-		redis.hget(userId, 'refresh'),
-		redis.hget(userId, 'token'),
-		redis.hget(userId, 'oldPlaylist')
-	]).then(data => {
+	return sleep(5 * delayInc * ONE_MIN).then(() => {
+		return Promise.all([
+			redis.hget(userId, 'numtracks'),
+			redis.hget(userId, 'refresh'),
+			redis.hget(userId, 'token'),
+			redis.hget(userId, 'oldPlaylist')
+		])
+	}).then(data => {
 		ele.numtracks = data[0];
 		ele.refresh = data[1];
 		ele.token = data[2];
@@ -161,14 +169,18 @@ function updatePlaylist(userId) {
 	redis.connect().then(() => {
 		return redis.smembers('users');
 	}).then(users => {
-		users.forEach((userId, id) => {
-			setTimeout(() => {
-				if (userId.includes('recent')) {
-					logger.time().file().info('updating', userId);
-					updatePlaylist(userId);
-				}
-			}, 5 * ONE_MIN * id);
+		var promises = [];
+		var delayInc = 0;
+		users.forEach((userId) => {
+			if (userId.includes('recent')) {
+				logger.time().file().info('updating', userId);
+				promises.push(updatePlaylist(userId, delayInc));
+				delayInc++;
+			}
 		});
+		return Promise.all(promises);
+	}).then(() => {
+		redis.close();
 	}).catch(() => {
 		logger.time().file().tag('main').error(err);
 	});
