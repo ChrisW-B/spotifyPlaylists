@@ -245,8 +245,8 @@ app.listen(5621, function() {
 });
 
 //run periodically
-setInterval(() => recentlyAdded.start(), 5 * ONE_MIN);
-setTimeout(() => (setInterval(() => mostPlayed.start(), 5 * ONE_MIN)), 2 * ONE_MIN); //offset start
+setInterval(() => recentlyAdded.start(), 5 * ONE_HOUR);
+setTimeout(() => (setInterval(() => mostPlayed.start(), 5 * ONE_HOUR)), 2 * ONE_HOUR); //offset start
 
 function getCreds(type, unsub) {
     return (unsub) ?
