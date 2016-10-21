@@ -1,7 +1,6 @@
-/* eslint-env node */
 'use strict';
 
-var SpotifyWebApi = require('spotify-web-api-node'),
+const SpotifyWebApi = require('spotify-web-api-node'),
     express = require('express'),
     bodyParser = require('body-parser'),
     config = require('./config'),
@@ -9,6 +8,10 @@ var SpotifyWebApi = require('spotify-web-api-node'),
     Redis = require('redisng'),
     redis = new Redis(),
     logger = process.console,
+    Recent = require('./recentlyAdded'),
+    Most = require('./mostPlayed'),
+    mostPlayed = new Most(),
+    recentlyAdded = new Recent(),
     app = express();
 config.recentlyAdded.spotifyApi = new SpotifyWebApi({
     clientId: config.recentlyAdded.clientId,
@@ -30,6 +33,10 @@ config.mostPlayed.spotifyApiUnsubscribe = new SpotifyWebApi({
     clientSecret: config.mostPlayed.clientSecret,
     redirectUri: config.mostPlayed.cancelUri
 });
+
+const ONE_SEC = 1000,
+    ONE_MIN = 60 * ONE_SEC,
+    ONE_HOUR = 60 * ONE_MIN;
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({
@@ -73,8 +80,8 @@ app.get('/setup/recentlyadded', function(req, res) {
     });
 });
 app.post('/setup/recentlyadded', function(req, res) {
-    var userId = '',
-        numTracks = req.body.numTracks,
+    let userId = '';
+    const numTracks = req.body.numTracks,
         userAccessToken = req.body.token,
         userRefreshToken = req.body.refresh;
     config.recentlyAdded.spotifyApi.setAccessToken(userAccessToken);
@@ -110,8 +117,8 @@ app.post('/setup/recentlyadded', function(req, res) {
 });
 
 app.post('/setup/mostplayed', function(req, res) {
-    var userId = '',
-        lastFmId = req.body.lastFmId,
+    let userId = '';
+    const lastFmId = req.body.lastFmId,
         timeSpan = req.body.timeSpan,
         numTracks = req.body.numTracks,
         userAccessToken = req.body.token,
@@ -177,12 +184,12 @@ app.get('/stop/recentlyadded', function(req, res) {
 });
 app.get('/stop/recentlyadded/callback', function(req, res) {
     authorize(req.query.code, config.recentlyAdded, true, function(data) {
-        var userAccessToken = data.body.access_token,
+        const userAccessToken = data.body.access_token,
             userRefreshToken = data.body.refresh_token;
         config.recentlyAdded.spotifyApiUnsubscribe.setAccessToken(userAccessToken);
         config.recentlyAdded.spotifyApiUnsubscribe.setRefreshToken(userRefreshToken);
         Promise.all([config.recentlyAdded.spotifyApiUnsubscribe.getMe(), redis.connect()]).then(data => {
-            var userId = data[0].body.id;
+            const userId = data[0].body.id;
             return Promise.all([redis.del('recent:' + userId), redis.srem('users', 'recent:' + userId)]);
         }).then(() => {
             res.redirect('/recentlyadded/goodbye');
@@ -196,12 +203,12 @@ app.get('/stop/recentlyadded/callback', function(req, res) {
 });
 app.get('/stop/mostplayed/callback', function(req, res) {
     authorize(req.query.code, config.mostPlayed, true, function(data) {
-        var userAccessToken = data.body.access_token,
+        const userAccessToken = data.body.access_token,
             userRefreshToken = data.body.refresh_token;
         config.mostPlayed.spotifyApiUnsubscribe.setAccessToken(userAccessToken);
         config.mostPlayed.spotifyApiUnsubscribe.setRefreshToken(userRefreshToken);
         Promise.all([config.mostPlayed.spotifyApiUnsubscribe.getMe(), redis.connect()]).then(data => {
-            var userId = data[0].body.id;
+            const userId = data[0].body.id;
             return Promise.all([redis.del('most:' + userId), redis.srem('users', 'most:' + userId)]);
         }).then(() => {
             res.redirect('/mostplayed/goodbye');
@@ -237,22 +244,24 @@ app.listen(5621, function() {
     logger.log('SpotifyApps listening on port 5621!');
 });
 
+//run periodically
+setInterval(() => recentlyAdded.start(), 5 * ONE_HOUR);
+setTimeout(() => (setInterval(() => mostPlayed.start(), 5 * ONE_HOUR)), 2 * ONE_HOUR); //offset start
+
 function getCreds(type, unsub) {
-    return (unsub) ? type.spotifyApiUnsubscribe.createAuthorizeURL(type.scopes) : type.spotifyApi.createAuthorizeURL(type.scopes);
+    return (unsub) ?
+        type.spotifyApiUnsubscribe.createAuthorizeURL(type.scopes) :
+        type.spotifyApi.createAuthorizeURL(type.scopes);
 }
 
 function authorize(code, type, unsub, callback) {
     if (!unsub) {
-        type.spotifyApi.authorizationCodeGrant(code).then(function(data) {
-            callback(data);
-        }, function(err) {
-            logger.log('Something went wrong! in auth', err);
-        });
+        type.spotifyApi.authorizationCodeGrant(code)
+            .then(data => callback(data))
+            .catch(err => logger.log('Something went wrong! in auth', err));
     } else {
-        type.spotifyApiUnsubscribe.authorizationCodeGrant(code).then(function(data) {
-            callback(data);
-        }, function(err) {
-            logger.log('Something went wrong! in auth', err);
-        });
+        type.spotifyApiUnsubscribe.authorizationCodeGrant(code)
+            .then(data => callback(data))
+            .catch(err => logger.log('Something went wrong! in auth', err));
     }
 }

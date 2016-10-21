@@ -1,15 +1,16 @@
 {
-  "name": "spotify-autoplaylists-recentlyadded",
+  "name": "spotify-autoplaylists-website",
   "version": "1.0.0",
-  "description": "Create a playlist of your recently added songs periodically",
-  "main": "recentlyAdded.js",
+  "description": "A website for hosting my autoplaylists apps",
+  "main": "app.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ChrisW-B/spotifyPlaylists.git"
   },
   "keywords": [
     "spotify",
-    "playlist"
+    "playlist",
+    "website"
   ],
   "author": "Chris Barry <me@chrisb.xyz>",
   "license": "ISC",
@@ -18,11 +19,13 @@
   },
   "homepage": "https://github.com/ChrisW-B/spotifyPlaylists#readme",
   "dependencies": {
-    "jsonfile": "^2.4.0",
+    "body-parser": "^1.15.2",
+    "ejs": "^2.5.2",
+    "express": "^4.14.0",
+    "lastfm-njs": "^0.2.4",
     "redisng": "^2.0.0",
     "scribe-js": "^2.0.4",
     "sleep-promise": "^2.0.0",
-    "spotify-web-api-node": "^2.3.5",
-    "util": "^0.10.3"
+    "spotify-web-api-node": "^2.3.6"
   }
 }
