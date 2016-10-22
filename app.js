@@ -111,7 +111,7 @@ app.post('/setup/recentlyadded', function(req, res) {
         }
     }).catch((err) => {
         res.redirect('/recentlyadded/error');
-        logger.log(err.message, err.stack);
+        logger.time().file().error(err.message, err.stack);
         redis.close();
     });
 });
@@ -152,7 +152,7 @@ app.post('/setup/mostplayed', function(req, res) {
         }
     }).catch((err) => {
         res.redirect('/mostplayed/error');
-        logger.log(err.message, err.stack);
+        logger.time().file().error(err.message, err.stack);
         redis.close();
     });
 });
@@ -241,12 +241,16 @@ app.get('/recentlyadded/thanks', function(req, res) {
     });
 });
 app.listen(5621, function() {
-    logger.log('SpotifyApps listening on port 5621!');
+    logger.time().file().info('SpotifyApps listening on port 5621!');
 });
 
 //run periodically
-setInterval(() => recentlyAdded.start(), 5 * ONE_HOUR);
-setTimeout(() => (setInterval(() => mostPlayed.start(), 5 * ONE_HOUR)), 2 * ONE_HOUR); //offset start
+setInterval(recentlyAdded.start, 5 * ONE_HOUR);
+setTimeout(() => setInterval(mostPlayed.start, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset start
+
+//run after start
+recentlyAdded.start();
+setTimeout(mostPlayed.start, 3 * ONE_MIN);
 
 function getCreds(type, unsub) {
     return (unsub) ?
@@ -258,10 +262,10 @@ function authorize(code, type, unsub, callback) {
     if (!unsub) {
         type.spotifyApi.authorizationCodeGrant(code)
             .then(data => callback(data))
-            .catch(err => logger.log('Something went wrong! in auth', err));
+            .catch(err => logger.time().file().error('Something went wrong! in auth', err));
     } else {
         type.spotifyApiUnsubscribe.authorizationCodeGrant(code)
             .then(data => callback(data))
-            .catch(err => logger.log('Something went wrong! in auth', err));
+            .catch(err => logger.time().file().error('Something went wrong! in auth', err));
     }
 }
