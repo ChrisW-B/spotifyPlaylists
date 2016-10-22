@@ -16,7 +16,7 @@ const RecentlyAdded = function() {
     const ONE_MIN = 60 * 1000,
         self = this;
     self.createTrackListArray = (recentlyAdded) => {
-        // picks out the relevent data from the recently added songs list
+        // picks out the relevent data from the Recently Added songs list
         let tracks = [];
         recentlyAdded.forEach(ele => {
             tracks.push(ele.track.uri);
@@ -89,9 +89,10 @@ const RecentlyAdded = function() {
         return spotifyApi.refreshAccessToken();
     };
 
-    self.updatePlaylist = (userId, delayInc) => {
+    self.updatePlaylist = (userId, delayInc = 0) => {
         const newTokens = {},
             ele = {};
+        logger.time().tag('Recently Added').file().info('Getting database items');
         return sleep(5 * delayInc * ONE_MIN).then(() => {
             return Promise.all([
                 redis.hget(userId, 'numTracks'),
@@ -104,17 +105,17 @@ const RecentlyAdded = function() {
             ele.refresh = data[1];
             ele.token = data[2];
             ele.oldPlaylist = data[3];
-            logger.time().file().info('Logging in to spotify');
+            logger.time().tag('Recently Added').file().info('Logging in to spotify');
             return self.refreshToken(ele.token, ele.refresh);
         }).then(data => {
             newTokens.token = data.body.access_token;
             newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
             spotifyApi.setAccessToken(newTokens.token);
             spotifyApi.setRefreshToken(newTokens.refresh);
-            logger.time().file().time().info('Getting user info');
+            logger.time().tag('Recently Added').file().time().info('Getting user info');
             return spotifyApi.getMe();
         }).then(userInfo => {
-            logger.time().file().info('preparing playlist and getting saved tracks');
+            logger.time().tag('Recently Added').file().info('preparing playlist and getting saved tracks');
             return Promise.all([
                 self.preparePlaylist(userInfo.body.id, ele.oldPlaylist),
                 spotifyApi.getMySavedTracks({
@@ -124,7 +125,7 @@ const RecentlyAdded = function() {
                 })
             ]);
         }).then(values => {
-            logger.time().file().info('filling playlist');
+            logger.time().tag('Recently Added').file().info('filling playlist');
             const newPlaylistId = values[0],
                 savedTracks = values[1],
                 spotifyId = values[2];
@@ -138,15 +139,15 @@ const RecentlyAdded = function() {
             ]);
         }).then((values) => {
             const newPlaylistId = values[1];
-            logger.time().file().info('Updating database');
+            logger.time().tag('Recently Added').file().info('Updating database');
             return Promise.all([
                 redis.hset(userId, 'token', newTokens.token),
                 redis.hset(userId, 'refresh', newTokens.refresh),
                 redis.hset(userId, 'oldPlaylist', newPlaylistId)
             ]);
         }).catch(err => {
-            logger.time().file().error(err);
-            logger.time().file().error(err.stack);
+            logger.time().tag('Recently Added').file().error(err);
+            logger.time().tag('Recently Added').file().error(err.stack);
             //try again in a few minutes
             setTimeout(() => {
                 self.updatePlaylist(ele, delayInc);
@@ -155,7 +156,7 @@ const RecentlyAdded = function() {
     };
 
     self.start = () => {
-        logger.time().file().tag('main').info('Starting');
+        logger.time().tag('Recently Added').file().info('Starting');
         redis.connect().then(() => {
             return redis.smembers('users');
         }).then(users => {
@@ -163,17 +164,17 @@ const RecentlyAdded = function() {
             let delayInc = 0;
             users.forEach((userId) => {
                 if (userId.includes('recent')) {
-                    logger.time().file().info('updating', userId);
+                    logger.time().tag('Recently Added').file().info('updating', userId);
                     promises.push(self.updatePlaylist(userId, delayInc));
                     delayInc++;
                 }
             });
             return Promise.all(promises);
         }).then(() => {
-            logger.time().file().info('Done with recently added!');
+            logger.time().tag('Recently Added').file().info('Done!');
             redis.close();
         }).catch((err) => {
-            logger.time().file().tag('main').error('error', err, err.stack);
+            logger.time().tag('Recently Added').file().error('error', err, err.stack);
         });
     };
 };

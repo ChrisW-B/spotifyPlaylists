@@ -30,7 +30,7 @@ const MostPlayed = function() {
             return new Promise((resolve) => {
                 sleep(ONE_SEC * id)
                     .then(() => {
-                        logger.time().file().info(`Searching for ${ele.name} by ${ele.artist.name}`);
+                        logger.time().tag('Most Played').file().info(`Searching for ${ele.name} by ${ele.artist.name}`);
                         return spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`);
                     })
                     .then((spotifyData) => {
@@ -41,11 +41,11 @@ const MostPlayed = function() {
                                 rank: ele['@attr'].rank
                             });
                         } else {
-                            logger.time().file().err(`couldn't find ${ele.name} by ${ele.artist.name}`);
+                            logger.time().tag('Most Played').file().err(`couldn't find ${ele.name} by ${ele.artist.name}`);
                             resolve(undefined);
                         }
                     }).catch(err => {
-                        logger.time().file().err(`${err} \n\n ${err.stack} \ncouldn't find ${ele.name} by ${ele.artist.name}`);
+                        logger.time().tag('Most Played').file().err(`${err} \n\n ${err.stack} \ncouldn't find ${ele.name} by ${ele.artist.name}`);
                         resolve(undefined);
                     });
             });
@@ -179,10 +179,10 @@ const MostPlayed = function() {
         });
     };
 
-    self.updatePlaylist = (userId, delayInc) => {
+    self.updatePlaylist = (userId, delayInc = 0) => {
         const newTokens = {},
             ele = {};
-        logger.time().file().info('Getting database items');
+        logger.time().tag('Most Played').file().info('Getting database items');
         return sleep(delayInc * ONE_MIN * 5).then(() => Promise.all([
             redis.hget(userId, 'numTracks'),
             redis.hget(userId, 'refresh'),
@@ -197,24 +197,24 @@ const MostPlayed = function() {
             ele.oldPlaylist = data[3];
             ele.lastFmId = data[4];
             ele.timespan = data[5];
-            logger.time().file().info('Logging in to spotify');
+            logger.time().tag('Most Played').file().info('Logging in to spotify');
             return self.refreshToken(ele.token, ele.refresh);
         }).then(data => {
             newTokens.token = data.body.access_token;
             newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
             spotifyApi.setAccessToken(newTokens.token);
             spotifyApi.setRefreshToken(newTokens.refresh);
-            logger.time().file().info('logging in to lastfm');
+            logger.time().tag('Most Played').file().info('logging in to lastfm');
             return lastfm.auth_getMobileSession();
         }).then(() => {
-            logger.time().file().info('getting last.fm top tracks');
+            logger.time().tag('Most Played').file().info('getting last.fm top tracks');
             return lastfm.user_getTopTracks({
                 user: ele.lastfmId,
                 limit: Number(ele.numTracks),
                 period: ele.timespan
             });
         }).then(lastFmTrackList => {
-            logger.time().file().info('converting to spotify and getting userinfo');
+            logger.time().tag('Most Played').file().info('converting to spotify and getting userinfo');
             return self.convertToSpotify(lastFmTrackList.track, ele.numTracks);
         }).then((spotifyList) => {
             return Promise.all([
@@ -222,7 +222,7 @@ const MostPlayed = function() {
                 self.insertMissingTracks(spotifyList, ele.lastFmId, ele.timeSpan)
             ]);
         }).then(values => {
-            logger.time().file().info('sorting tracks, getting user, and preparing playlist');
+            logger.time().tag('Most Played').file().info('sorting tracks, getting user, and preparing playlist');
             const spotifyId = values[0].body.id,
                 convertedList = values[1];
             return Promise.all([
@@ -233,7 +233,7 @@ const MostPlayed = function() {
                 self.sortSpotifyTracks(convertedList)
             ]);
         }).then(values => {
-            logger.time().file().info('filling playlist');
+            logger.time().tag('Most Played').file().info('filling playlist');
             const userId = values[0],
                 newPlaylistId = values[1],
                 sortedTracks = values[2];
@@ -251,8 +251,7 @@ const MostPlayed = function() {
                 redis.hset(userId, 'oldPlaylist', newPlaylistId)
             ]);
         }).catch(err => {
-            logger.time().file().error(err);
-            logger.time().file().error(err.stack);
+            logger.time().tag('Most Played').file().error(err, err.stack);
             //try again in a few minutes
             setTimeout(() => {
                 self.updatePlaylist(ele, delayInc);
@@ -261,7 +260,7 @@ const MostPlayed = function() {
     };
 
     self.start = () => {
-        logger.time().file().tag('main').info('Starting');
+        logger.time().tag('Most Played').file().info('Starting');
         redis.connect()
             .then(() => redis.smembers('users'))
             .then(users => {
@@ -269,7 +268,7 @@ const MostPlayed = function() {
                 let delayInc = 0;
                 users.forEach((userId) => {
                     if (userId.includes('most')) {
-                        logger.time().file().info('updating', userId);
+                        logger.time().tag('Most Played').file().info('updating', userId);
                         promises.push(self.updatePlaylist(userId, delayInc));
                         delayInc++;
                     }
@@ -277,12 +276,11 @@ const MostPlayed = function() {
                 return Promise.all(promises);
             })
             .then(() => {
-                logger.time().file().info('Done with most played!');
+                logger.time().tag('Most Played').file().info('Done!');
                 redis.close();
             })
-            .catch((err) => logger.time().file().tag('main').error('error', err, err.stack));
+            .catch((err) => logger.time().tag('Most Played').file().error(err, err.stack));
     };
-
 };
 
 module.exports = MostPlayed;
