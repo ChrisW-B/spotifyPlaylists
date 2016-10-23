@@ -1,0 +1,31 @@
+<!-- views/pages/loggedin.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+    <title>Autoplaylists for Spotify</title>
+</head>
+<body>
+
+    <header>
+        <% include ../partials/loggedin_header %>
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <div class="container">
+                <h1>Welcome <%= user %>!</h1>
+                <p>Your playlists:</p>
+                <ul class="list-group container enabledplaylists"></ul>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+</body>
+</html>
+<% include ../partials/scripts %>
+<% include ../partials/css %> 

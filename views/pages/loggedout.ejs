@@ -1,0 +1,33 @@
+<!-- views/pages/loggedout.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+    <title>Autoplaylists for Spotify</title>
+</head>
+<body>
+    <header>
+        <% include ../partials/header %>
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <div class="container">
+                <h1>Welcome!</h1>
+                <p>Spotify Playlists will create and update playlists for you every few hours</p>
+                
+                <a href="/login">
+                    <img src="../images/spotify-login.png">
+                </a>
+                <h6>Don't worry, we won't change anything until you tell us to</h6>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+</body>
+</html>
+<% include ../partials/css %> 
