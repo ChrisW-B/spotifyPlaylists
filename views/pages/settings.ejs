@@ -18,24 +18,23 @@
             <h1>
                 One more step
             </h1>
-            <% if(type === 'Most Played'){ %>
+            <form name="settings" id="settings" action="/save" method="POST">
+            <% if(type === 'most'){ %>
                 <p>
                     We need your <a href="http://last.fm/">Last.fm</a> username to keep track what you've listened to
                 </p>
-                <form name="mostplayedsetup" id="mostplayedsetup" action="/setup/mostplayed" method="POST">
-                        <input type="text" name="lastFmId" size="25" placeholder="Enter Last.FM username" required="true">
+                        <input type="text" name="lastfmId" size="25" placeholder="Enter Last.FM username" required="true">
 
                         <h5>How long should your playlist be*?</h5>
 
-                        <select form="mostplayedsetup" name="numTracks">
+                        <select form="settings" name="length">
                             <option value="50">50 Songs</option> 
                             <option value="25" selected>25 Songs</option>
                             <option value="10">10 Songs</option>
                         </select>
 
                         <h5>What timespan should most played be from?</h5>
-
-                        <select form="mostplayedsetup" name="timeSpan">
+                        <select form="settings" name="period">
                             <option value="overall" selected>All Time</option> 
                             <option value="12month">1 Year</option>
                             <option value="6month">6 Months</option>
@@ -44,26 +43,20 @@
                             <option value="7day">1 Week</option>
                         </select>
                         <br><br>
-                        <input type="hidden" name="token" value="<%= access %>">
-                        <input type="hidden" name="refresh" value="<%= refresh %>">
+                        <input type="hidden" name="type" value="most">
                         <input type="submit" value="Submit">
-                </form>
             <% } else{ %>  
-                <form name="recentlyaddedsetup" id="recentlyaddedsetup" action="/setup/recentlyadded" method="POST">
                     <h5>How long should your playlist be*?</h5>
-
-                    <select form="recentlyaddedsetup" name="numTracks">
+                    <select form="settings" name="length">
                         <option value="50">50 Songs</option> 
                         <option value="25" selected>25 Songs</option>
                         <option value="10">10 Songs</option>
                     </select>
-
                     <br><br>
-                    <input type="hidden" name="token" value="<%= access %>">
-                    <input type="hidden" name="refresh" value="<%= refresh %>">
+                    <input type="hidden" name="type" value="recent">
                     <input type="submit" value="Submit">
+            <% } %>  
             </form>
-            <% } %>
             <h6>*Playlists can not include local files, only those on spotify</h6>
         </div>
     </main>
@@ -74,4 +67,5 @@
     
 </body>
 </html>
-<% include ../partials/css %>
+<% include ../partials/css %> 
+<% include ../partials/scripts %>

@@ -12,12 +12,12 @@ body {
 	top: -10px;
 	left: 15px;
 }
-.list-group-item:first-child .list-group-button.list-group-item-success,
-.list-group-item:first-child .list-group-button.list-group-item-danger {
+.list-group-item:first-child .list-group-button .list-group-item-success,
+.list-group-item:first-child .list-group-button .list-group-item-danger {
 	border-top-right-radius: 4px;
 }
-.list-group-item:last-child .list-group-button.list-group-item-success,
-.list-group-item:last-child .list-group-button.list-group-item-danger {
+.list-group-item:last-child .list-group-button .list-group-item-success,
+.list-group-item:last-child .list-group-button .list-group-item-danger {
 	border-bottom-right-radius: 4px;
 }
 .list-group-button .glyphicon{

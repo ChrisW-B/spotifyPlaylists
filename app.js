@@ -37,10 +37,11 @@ passport.use(new SpotifyStrategy({
 			access: accessToken,
 			refresh: refreshToken,
 			userId: profile.id
+		}).then(() => {
+			profile.access = accessToken;
+			profile.refresh = refreshToken;
+			return done(null, profile);
 		});
-		profile.access = accessToken;
-		profile.refresh = refreshToken;
-		return done(null, profile);
 	}
 ));
 
@@ -65,6 +66,13 @@ app.use('/logs', scribe.webPanel());
 app.use(bodyParser.urlencoded({
 	extended: false
 }));
+
+const ensureAuthenticated = (req, res, next) => {
+	if (req.isAuthenticated()) {
+		return next();
+	}
+	res.redirect('/');
+};
 
 app.get('/', (req, res) => {
 	if (req.isAuthenticated()) {
@@ -97,7 +105,7 @@ app.get('/logout', ensureAuthenticated, (req, res) => {
 	res.redirect('/');
 });
 
-app.get('/userplaylists', (req, res) => {
+app.get('/userplaylists', ensureAuthenticated, (req, res) => {
 	if (!req.isAuthenticated()) res.send({
 		error: true,
 		errMsg: 'Not authenticated'
@@ -107,13 +115,13 @@ app.get('/userplaylists', (req, res) => {
 		redis.connect()
 			.then(() => {
 				return Promise.all([
-					redis.hget(userId, 'mostPlayed'),
-					redis.hget(userId, 'recentlyAdded')
+					redis.hget(userId, 'most'),
+					redis.hget(userId, 'recent')
 				]);
 			})
 			.then((playlists) => {
-				const mostPlayed = playlists[0],
-					recentlyAdded = playlists[1];
+				const mostPlayed = String(playlists[0]).toLowerCase() === 'true',
+					recentlyAdded = String(playlists[1]).toLowerCase() === 'true'; //convert to boolean
 				res.send({
 					error: false,
 					mostPlayed: mostPlayed,
@@ -135,9 +143,50 @@ app.get('/userplaylists', (req, res) => {
 app.get('/settings', ensureAuthenticated, (req, res) => {
 	res.render('pages/settings', {
 		type: req.query.type,
-		access: req.user.access,
-		refresh: req.user.refresh
 	});
+});
+
+app.get('/toggle', ensureAuthenticated, (req, res) => {
+	const userId = req.user.id,
+		type = req.query.type;
+	redis.connect()
+		.then(() => redis.hget(userId, type))
+		.then(enabled => {
+			enabled = String(enabled).toLowerCase() === 'true';
+			if (enabled) {
+				return disablePlaylist(userId, type, res);
+			} else {
+				return enablePlaylist(userId, type, res);
+			}
+		})
+		.then(() => redis.close())
+		.catch((err) => logger.file().time().error(err.message, err.stack));
+});
+
+app.post('/save', ensureAuthenticated, (req, res) => {
+	const numTracks = req.body.length,
+		lastfm = req.body.lastfmId || '',
+		period = req.body.period || '',
+		type = req.body.type,
+		userId = req.user.id;
+	redis.connect().then(() => {
+		if (type === 'recent') {
+			return redis.hmset(userId,
+				'recent', true,
+				'recent:length', numTracks,
+				'recent:playlist', 'null');
+		} else {
+			return redis.hmset(userId,
+				'most', true,
+				'most:length', numTracks,
+				'most:playlist', 'null',
+				'most:lastfm', lastfm,
+				'most:period', period);
+		}
+	}).then(() => {
+		res.redirect('/');
+		redis.close();
+	}).catch((err) => logger.file().time().error(err.message, err.stack));
 });
 
 app.get('*', (req, res) => {
@@ -151,8 +200,31 @@ app.listen(5621, () => {
 	logger.time().file().info('SpotifyApps listening on port 5621!');
 });
 
+const disablePlaylist = (userId, type, res) => {
+	res.send({
+		isSetup: true
+	});
+	return redis.hset(userId, type, false);
+};
+
+const enablePlaylist = (userId, type, res) => {
+	return redis.hexists(userId, type + ':playlist').then(exists => {
+		if (exists) {
+			res.send({
+				isSetup: true
+			});
+			return redis.hset(userId, type, true);
+		} else {
+			res.send({
+				isSetup: false
+			});
+			return redis.hexists(userId, type + ':playlist');
+		}
+	});
+};
+
 const saveToRedis = data => {
-	redis.connect()
+	return redis.connect()
 		.then(() => redis.exists(data.userId))
 		.then(exists => {
 			if (!exists) return redis.sadd('users', data.userId);
@@ -161,19 +233,17 @@ const saveToRedis = data => {
 			});
 		})
 		.then(() => redis.hmset(data.userId,
-			'access', data.token,
+			'access', data.access,
 			'refresh', data.refresh,
-			'mostPlayed', 'false',
-			'recentlyAdded', 'false'))
-		.then(() => redis.close())
-		.catch((err) => logger.time().file().error(err.message, err.stack));
-};
-
-const ensureAuthenticated = (req, res, next) => {
-	if (req.isAuthenticated()) {
-		return next();
-	}
-	res.redirect('/');
+			'most', 'false',
+			'recent', 'false'))
+		.then(() => {
+			return redis.close();
+		})
+		.catch((err) => {
+			redis.close();
+			logger.time().file().error(err, err.stack);
+		});
 };
 
 // //run periodically
