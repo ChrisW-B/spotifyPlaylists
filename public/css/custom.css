@@ -44,6 +44,17 @@ body {
     border-right-color: transparent;
     border-left-color: transparent;
 }
+.btn-primary.active.focus, 
+.btn-primary.active:focus, 
+.btn-primary.active:hover,
+.btn-primary.focus:active,
+.btn-primary:active:focus, 
+.btn-primary:active:hover,
+.btn-primary:active {
+    background-color:var(--oc-orange-6);
+    border-color: var(--oc-orange-5);
+    box-shadow: none;
+}
 .btn-primary:first-child{
 	border-left-color:  var(--oc-orange-5);
 }

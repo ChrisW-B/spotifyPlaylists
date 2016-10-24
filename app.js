@@ -156,11 +156,12 @@ app.get('/settings', ensureAuthenticated, (req, res) => {
 			]);
 		}
 	}).then((results) => {
+		console.log(results);
 		res.render('pages/settings', {
 			type: results[0],
-			length: results[1],
-			lastfm: results[2],
-			period: results[3]
+			length: results[1] || 25,
+			lastfm: results[2] || '',
+			period: results[3] || 'overall'
 		});
 		redis.close();
 	});
