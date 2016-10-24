@@ -1,12 +1,12 @@
-<!-- views/pages/error.ejs -->
+<!-- views/pages/goodbye.ejs -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <% include ../partials/head %>
-    <title>Error</title>
+    <title>Thanks!</title>
 </head>
-<body class="container">
+<body>
 
     <header>
         <% include ../partials/header %>
@@ -14,11 +14,11 @@
 
     <main>
         <div class="jumbotron">
-        <div class="container">
-            <h1><%= title %></h1>
-            <p> <%= errMsg %></p> 
-            <p> <a href="/"> Try again?</a></p>
-        </div>
+            <div class="container">
+                <h1>Goodbye!</h1>
+                <p>Your playlists will no longer be updated!</p>
+                <p>Feel free to come back anytime you want</p>
+            </div>
         </div>
     </main>
 
@@ -29,4 +29,3 @@
 </body>
 </html>
 <% include ../partials/css %> 
-<% include ../partials/scripts %>

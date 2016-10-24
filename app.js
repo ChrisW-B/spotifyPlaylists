@@ -11,10 +11,10 @@ const express = require('express'),
 	SpotifyStrategy = require('Passport-Spotify').Strategy,
 	redis = new Redis(),
 	logger = process.console,
-	// Recent = require('./recentlyAdded'),
-	// Most = require('./mostPlayed'),
-	// mostPlayed = new Most(),
-	// recentlyAdded = new Recent(),
+	Recent = require('./recentlyAdded'),
+	Most = require('./mostPlayed'),
+	mostPlayed = new Most(),
+	recentlyAdded = new Recent(),
 	app = express();
 
 const ONE_SEC = 1000,
@@ -141,8 +141,28 @@ app.get('/userplaylists', ensureAuthenticated, (req, res) => {
 });
 
 app.get('/settings', ensureAuthenticated, (req, res) => {
-	res.render('pages/settings', {
-		type: req.query.type,
+	const userId = req.user.id,
+		type = req.query.type;
+	redis.connect().then(() => {
+		if (type === 'most') {
+			return Promise.all([new Promise(resolve => resolve(type)),
+				redis.hget(userId, type + ':length'),
+				redis.hget(userId, type + ':lastfm'),
+				redis.hget(userId, type + ':period')
+			]);
+		} else {
+			return Promise.all([new Promise(resolve => resolve(type)),
+				redis.hget(userId, type + ':length')
+			]);
+		}
+	}).then((results) => {
+		res.render('pages/settings', {
+			type: results[0],
+			length: results[1],
+			lastfm: results[2],
+			period: results[3]
+		});
+		redis.close();
 	});
 });
 
@@ -187,6 +207,25 @@ app.post('/save', ensureAuthenticated, (req, res) => {
 		res.redirect('/');
 		redis.close();
 	}).catch((err) => logger.file().time().error(err.message, err.stack));
+});
+
+app.get('/goodbye', (req, res) => {
+	res.render('pages/goodbye');
+});
+
+app.get('/delete', ensureAuthenticated, (req, res) => {
+	const userId = req.user.id;
+	redis.connect().then(() => {
+		return Promise.all([redis.del(userId), redis.srem('users', userId)]);
+	}).then(() => {
+		req.logout();
+		res.redirect('/goodbye');
+		redis.close();
+	}).catch((err) => {
+		res.redirect('/error');
+		redis.close();
+		logger.err(err.message, err.stack);
+	});
 });
 
 app.get('*', (req, res) => {
@@ -246,11 +285,10 @@ const saveToRedis = data => {
 		});
 };
 
-// //run periodically
-// setInterval(recentlyAdded.start, 5 * ONE_HOUR);
-// setTimeout(() => setInterval(mostPlayed.start, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset start
+//run periodically
+setInterval(recentlyAdded.start, 5 * ONE_HOUR);
+setTimeout(() => setInterval(mostPlayed.start, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset start
 
-// //run after start
-// recentlyAdded.start();
-// setTimeout(mostPlayed.start, 3 * ONE_MIN);
-//
+//run after start
+recentlyAdded.start();
+setTimeout(mostPlayed.start, 3 * ONE_MIN);

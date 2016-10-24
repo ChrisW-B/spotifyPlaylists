@@ -1,3 +1,5 @@
+@import './open-color.css';
+
 body {
     padding-top: 50px;
 }
@@ -34,3 +36,36 @@ body {
 .navbar-default .cancel>li>a:hover {
     color: #D23E00;
 }
+
+.btn-primary {
+    color: #000;
+    background-color:transparent;
+    border-color: var(--oc-orange-5);
+    border-right-color: transparent;
+    border-left-color: transparent;
+}
+.btn-primary:first-child{
+	border-left-color:  var(--oc-orange-5);
+}
+.btn-primary:last-child{
+	border-right-color:  var(--oc-orange-5);
+}
+.btn-primary:hover {
+	color: #000;
+    border-color: var(--oc-orange-5);
+    background-color:var(--oc-gray-0);
+}
+
+
+.btn-primary.active, .btn-primary.active:hover {
+    color: #fff;
+    border-color: var(--oc-orange-5);
+    background-color: var(--oc-orange-5);
+    box-shadow: none;
+}
+
+/* enables CSS3 transition for simple collapses, accordion and also navbar in responsive view */
+.collapse { transition: height .3s ease-out; /*-webkit-transition: height .3s ease-out*/ }
+
+/* styles the close button for the dismissible popovers */
+.popover .close { position: absolute; top: 7px; right: 10px; }
