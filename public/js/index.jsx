@@ -31,14 +31,15 @@ class Playlists extends React.Component {
 	}
 	createListItem(isEnabled, name, shortName) {
 		const toggleClass = 'list-group-button list-group-item-' + (isEnabled ? 'danger' : 'success'),
-			toggleGlyph = 'glyphicon glyphicon-' + (isEnabled ? 'minus' : 'plus') + '-sign',
+		toggleGlyph = 'glyphicon glyphicon-' + (isEnabled ? 'remove-circle' : 'plus-sign'),
+			toggleTitle = (isEnabled ? 'Turn Off' : 'Turn On'),
 			itemClass = 'list-group-item list-group-item-' + (isEnabled ? 'success' : 'danger'),
 			toggleKeyName = shortName + '_toggle',
 			settingsKeyName = shortName + '_settings',
-			toggle = <a href='#' onClick={() => this.toggleElement(shortName)} className={toggleClass} key={this.state[toggleKeyName]}>
+			toggle = <a href='#' onClick={() => this.toggleElement(shortName)} className={toggleClass} title={toggleTitle} key={this.state[toggleKeyName]}>
 						<div className={toggleGlyph}></div>
 				   	</a>,
-			settings = <a href={"/settings?type=" +shortName} className="list-group-button list-group-item-warning" key={this.state[settingsKeyName]}>
+			settings = <a href={"/settings?type=" +shortName} className="list-group-button list-group-item-warning" title="Settings" key={this.state[settingsKeyName]}>
 					<div className="glyphicon glyphicon-cog"></div>
 				   </a>;
 		const children = isEnabled ? [toggle, settings] : toggle;

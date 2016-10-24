@@ -66,8 +66,6 @@ body {
     border-color: var(--oc-orange-5);
     background-color:var(--oc-gray-0);
 }
-
-
 .btn-primary.active, .btn-primary.active:hover {
     color: #fff;
     border-color: var(--oc-orange-5);
