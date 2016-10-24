@@ -1,0 +1,97 @@
+<!-- views/pages/settings.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+     <title>Setup your playlist</title>
+</head>
+<body>
+
+    <header>
+         <% include ../partials/loggedin_header %>
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <div class="container">
+
+            <form name="settings" id="settings" action="/save" method="POST">
+             <p>Settings</p>
+            <% if(type === 'most'){ %>
+                <h5>
+                    We need your <a href="http://last.fm/">Last.fm</a> username to keep track what you've listened to
+                </h5>
+                        <input value=<%= lastfm %> type="text" name="lastfmId" size="25" placeholder="Enter Last.FM username" required="true">
+
+                        <h5>How long should your playlist be*?</h5>
+
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-primary" <%= length==50 ? 'active' : '' %>>
+                                <input type="radio" name="length" value="50" autocomplete="off" <%= (length==50) ? 'active' : '' %>> 50 Songs
+                            </label>
+                            <label class="btn btn-primary active" <%= (length==25) ? 'active' : '' %>>
+                                <input type="radio" name="length" value="25" autocomplete="off" <%= (length==25) ? 'checked' : '' %>> 25 Songs
+                            </label>
+                            <label class="btn btn-primary" <%= (length==10) ? 'active' : '' %>>
+                                <input type="radio" name="length" value="10" autocomplete="off" <%= (length==10) ? 'active' : '' %>> 10 Songs
+                            </label>
+                        </div>
+
+
+                        <h5>What timespan should most played be from?</h5>
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-primary <%= (period=='overall') ? 'active' : '' %>">
+                                <input type="radio" name="period" value="overall" autocomplete="off" <%= (period=='overall') ? 'checked' : '' %>> All Time
+                            </label>
+                            <label class="btn btn-primary <%= (period=='12month') ? 'active' : '' %>">
+                                <input type="radio" name="period" value="12month" autocomplete="off" <%= (period=='12month') ? 'checked' : '' %>> 1 Year
+                            </label>
+                            <label class="btn btn-primary <%= (period=='6month') ? 'active' : '' %>">
+                                <input type="radio" name="period" value="6month" autocomplete="off" <%= (period=='6month') ? 'checked' : '' %>> 6 Months
+                            </label>
+                            <label class="btn btn-primary <%= (period=='3month') ? 'active' : '' %>">
+                                <input type="radio" name="period" value="3month" autocomplete="off" <%= (period=='3month') ? 'checked' : '' %>> 3 Months
+                            </label>
+                            <label class="btn btn-primary <%= (period=='1month') ? 'active' : '' %>">
+                                <input type="radio" name="period" value="1month" autocomplete="off" <%= (period=='1month') ? 'checked' : '' %>> 1 Month
+                            </label>
+                            <label class="btn btn-primary <%= (period=='7day') ? 'active' : '' %>">
+                                <input type="radio" name="period" value="7day" autocomplete="off" <%= (period=='7day') ? 'checked' : '' %>> 1 Week
+                            </label>
+                        </div>
+
+                        <br><br>
+                        <input type="hidden" name="type" value="most">
+            <% } else{ %>  
+                    <h5>How long should your playlist be*?</h5>
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-primary <%= length==50 ? 'active' : '' %>">
+                            <input type="radio" name="length" value="50" autocomplete="off" <%= (length==50) ? 'active' : '' %>> 50 Songs
+                        </label>
+                        <label class="btn btn-primary <%= (length==25) ? 'active' : '' %>">
+                            <input type="radio" name="length" value="25" autocomplete="off" <%= (length==25) ? 'checked' : '' %>> 25 Songs
+                        </label>
+                        <label class="btn btn-primary <%= (length==10) ? 'active' : '' %>">
+                            <input type="radio" name="length" value="10" autocomplete="off" <%= (length==10) ? 'active' : '' %>> 10 Songs
+                        </label>
+                    </div>
+                    <br><br>
+                    <input type="hidden" name="type" value="recent">
+                   
+            <% } %>  
+             <input type="submit" value="Save">
+            </form>
+            <h6>*Playlists cannot include local files, only those on spotify</h6>
+        </div>
+        </div>
+    </main>
+
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+    
+</body>
+</html>
+<% include ../partials/css %> 
+<% include ../partials/scripts %>

@@ -20,9 +20,13 @@
   "homepage": "https://github.com/ChrisW-B/spotifyPlaylists#readme",
   "dependencies": {
     "body-parser": "^1.15.2",
+    "cookie-parser": "^1.4.3",
     "ejs": "^2.5.2",
     "express": "^4.14.0",
+    "express-session": "^1.14.1",
     "lastfm-njs": "^0.2.4",
+    "passport": "^0.3.2",
+    "passport-spotify": "^0.3.0",
     "redisng": "^2.0.0",
     "scribe-js": "^2.0.4",
     "sleep-promise": "^2.0.0",

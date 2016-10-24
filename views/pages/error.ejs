@@ -14,8 +14,11 @@
 
     <main>
         <div class="jumbotron">
-            <h1>Error</h1>
-            <p>Oops! Something went wrong! <a href="/"> Try again?</a></p>
+        <div class="container">
+            <h1><%= title %></h1>
+            <p> <%= errMsg %></p> 
+            <p> <a href="/"> Try again?</a></p>
+        </div>
         </div>
     </main>
 
@@ -26,3 +29,4 @@
 </body>
 </html>
 <% include ../partials/css %> 
+<% include ../partials/scripts %>
