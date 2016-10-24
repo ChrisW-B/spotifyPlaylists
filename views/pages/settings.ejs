@@ -27,13 +27,13 @@
                         <h5>How long should your playlist be*?</h5>
 
                         <div class="btn-group" data-toggle="buttons">
-                            <label class="btn btn-primary" <%= length==50 ? 'active' : '' %>>
+                            <label class="btn btn-primary <%= length==50 ? 'active' : '' %>">
                                 <input type="radio" name="length" value="50" autocomplete="off" <%= (length==50) ? 'active' : '' %>> 50 Songs
                             </label>
-                            <label class="btn btn-primary active" <%= (length==25) ? 'active' : '' %>>
+                            <label class="btn btn-primary <%= (length==25) ? 'active' : '' %>">
                                 <input type="radio" name="length" value="25" autocomplete="off" <%= (length==25) ? 'checked' : '' %>> 25 Songs
                             </label>
-                            <label class="btn btn-primary" <%= (length==10) ? 'active' : '' %>>
+                            <label class="btn btn-primary <%= (length==10) ? 'active' : '' %>">
                                 <input type="radio" name="length" value="10" autocomplete="off" <%= (length==10) ? 'active' : '' %>> 10 Songs
                             </label>
                         </div>
