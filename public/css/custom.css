@@ -3,6 +3,10 @@
 body {
     padding-top: 50px;
 }
+.btn-danger{
+	border-width: .5px;
+}
+
 .list-group-button {
 	float: right;
 	padding: 13px 10px;
