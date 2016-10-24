@@ -30,7 +30,6 @@ config.spotify = {
     clientId: 'XXXX',
     clientSecret: 'YYYY',
     redirectUri: 'http://localhost:5621/setup/',
-    cancelUri: 'http://localhost:5621/stop/callback'
 };
 
 config.lastfm = {
