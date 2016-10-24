@@ -4,6 +4,8 @@ body {
     padding-top: 50px;
 }
 .btn-danger{
+	border-color: var(--oc-red-9);
+	background-color: var(--oc-red-7);
 	border-width: .5px;
 }
 
