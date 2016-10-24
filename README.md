@@ -21,33 +21,26 @@ Your config file should look similar to the following
 ```javascript
 'use strict';
 
-const config = {};
-config.mostPlayed = {};
-config.recentlyAdded = {};
+var config = {};
+config.spotify = {};
 config.lastfm = {};
 
-config.mostPlayed = {
-    scopes: ['playlist-read-private', 'playlist-modify-private', 'playlist-modify-public'],
-    clientId: 'XXX',
-    clientSecret: 'YYY',
-    redirectUri: 'http://localhost:5621/setup/mostplayed',
-    cancelUri: 'http://localhost:5621/stop/mostplayed/callback'
-};
-
-config.recentlyAdded = {
+config.spotify = {
     scopes: ['user-read-private', 'playlist-read-private', 'playlist-modify-private', 'playlist-modify-public', 'user-library-read'],
-    clientId: 'ZZZ',
-    clientSecret: 'AAA',
-    redirectUri: 'http://localhost:5621/setup/recentlyadded',
-    cancelUri: 'http://localhost:5621/stop/recentlyadded/callback'
+    clientId: 'XXXX',
+    clientSecret: 'YYYY',
+    redirectUri: 'http://localhost:5621/setup/',
+    cancelUri: 'http://localhost:5621/stop/callback'
 };
 
 config.lastfm = {
-    token: 'BBB',
-    secret: 'ZZZ',
-    username: 'name',
-    password: 'pass'
+    token: 'AAAA',
+    secret: 'BBBBB',
+    username: 'User',
+    password: 'Pass1'
 };
+
+config.secret = 'ZZZZ';
 
 module.exports = config;
 
