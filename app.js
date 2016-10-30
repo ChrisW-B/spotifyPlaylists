@@ -48,7 +48,7 @@ passport.use(new SpotifyStrategy({
 logger.addLogger('backend', 'cyan');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 app.use(session({
 	secret: config.secret,
 	resave: false,
