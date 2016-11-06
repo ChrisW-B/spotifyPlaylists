@@ -40,6 +40,7 @@ config.lastfm = {
 };
 
 config.secret = 'ZZZZ';
+config.admin = 'YOUR_SPOTIFY_ID';
 
 module.exports = config;
 

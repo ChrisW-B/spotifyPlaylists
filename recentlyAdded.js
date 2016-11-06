@@ -174,6 +174,7 @@ const RecentlyAdded = function() {
 				redis.close();
 			}).catch((err) => {
 				logger.time().tag('Recently Added').file().error('error', err, err.stack);
+				redis.close();
 			});
 	};
 };

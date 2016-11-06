@@ -1,0 +1,30 @@
+<!-- views/pages/loggedin.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+    <title>Autoplaylists for Spotify</title>
+</head>
+<body>
+
+    <header>
+        <% include ../partials/loggedin_header %>
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <div class="container">
+                <button type="button" onclick="window.location='/forcemost';return false;" class="btn btn-danger">Force Most Played Reload</button>
+                <button type="button" onclick="window.location='/forcerecent';return false;" class="btn btn-danger">Force Recently Added Reload</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+</body>
+</html>
+<% include ../partials/css %>
+<% include ../partials/scripts %>

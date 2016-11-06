@@ -31,6 +31,9 @@
 
     <footer>
         <% include ../partials/footer %>
+        <% if(isAdmin){ %>
+            <p class="text-center cancel"><a class='admin' href="/admin">Admin</a></p>
+        <% } %>
     </footer>
 </body>
 </html>

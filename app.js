@@ -76,11 +76,19 @@ const ensureAuthenticated = (req, res, next) => {
 	res.redirect('/');
 };
 
+const ensureAdmin = (req, res, next) => {
+	if (req.user.id === config.admin) {
+		return next();
+	}
+	res.redirect('/');
+};
+
 app.get('/', (req, res) => {
 	if (req.isAuthenticated()) {
 		res.render('pages/loggedin', {
-			user: req.user.displayName,
-			userId: req.user.id
+			user: req.user.username,
+			userId: req.user.id,
+			isAdmin: (req.user.id === config.admin)
 		});
 	} else {
 		res.render('pages/loggedout');
@@ -94,13 +102,25 @@ app.get('/login',
 	})
 );
 
-app.get('/setup',
-	passport.authenticate('spotify', {
-		failureRedirect: '/error'
-	}),
-	(req, res) => {
-		res.redirect('/');
-	});
+app.get('/setup', passport.authenticate('spotify', {
+	failureRedirect: '/error'
+}), (req, res) => {
+	res.redirect('/');
+});
+
+app.get('/admin', ensureAuthenticated, ensureAdmin, (req, res) => {
+	res.render('pages/admin');
+});
+
+app.get('/forceRecent', ensureAuthenticated, ensureAdmin, (req, res) => {
+	recentlyAdded.start();
+	res.redirect('/');
+});
+
+app.get('/forceMost', ensureAuthenticated, ensureAdmin, (req, res) => {
+	mostPlayed.start();
+	res.redirect('/');
+});
 
 app.get('/logout', ensureAuthenticated, (req, res) => {
 	req.logout();
@@ -287,10 +307,10 @@ const saveToRedis = data => {
 		});
 };
 
-//run periodically
-setInterval(recentlyAdded.start, 5 * ONE_HOUR);
-setTimeout(() => setInterval(mostPlayed.start, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset start
+// //run periodically
+// setInterval(recentlyAdded.start, 5 * ONE_HOUR);
+// setTimeout(() => setInterval(mostPlayed.start, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset start
 
-//run after start
-recentlyAdded.start();
-setTimeout(mostPlayed.start, 3 * ONE_MIN);
+// //run after start
+// recentlyAdded.start();
+// setTimeout(mostPlayed.start, 3 * ONE_MIN);

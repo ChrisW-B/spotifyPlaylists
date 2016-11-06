@@ -279,6 +279,7 @@ const MostPlayed = function() {
 			})
 			.catch((err) => {
 				logger.time().tag('Most Played').file().error('error', err, err.stack);
+				redis.close();
 			});
 	};
 };
