@@ -93,14 +93,12 @@ const RecentlyAdded = function() {
 		const newTokens = {},
 			ele = {};
 		logger.time().tag('Recently Added').file().backend('Getting database items');
-		return sleep(5 * delayInc * ONE_MIN).then(() => {
-			return Promise.all([
-				redis.hget(userId, 'recent:length'),
-				redis.hget(userId, 'refresh'),
-				redis.hget(userId, 'access'),
-				redis.hget(userId, 'recent:playlist')
-			]);
-		}).then(data => {
+		return sleep(delayInc * ONE_MIN * 5).then(() => redis.connect()).then(() => Promise.all([
+			redis.hget(userId, 'recent:length'),
+			redis.hget(userId, 'refresh'),
+			redis.hget(userId, 'access'),
+			redis.hget(userId, 'recent:playlist')
+		])).then(data => {
 			ele.numTracks = data[0];
 			ele.refresh = data[1];
 			ele.token = data[2];
@@ -145,7 +143,7 @@ const RecentlyAdded = function() {
 				redis.hset(userId, 'refresh', newTokens.refresh),
 				redis.hset(userId, 'recent:playlist', newPlaylistId)
 			]);
-		}).catch(err => {
+		}).then(() => redis.close()).catch(err => {
 			logger.time().tag('Recently Added').file().warning(err);
 			logger.time().tag('Recently Added').file().warning(err.stack);
 			//try again in a few minutes
@@ -159,7 +157,8 @@ const RecentlyAdded = function() {
 		logger.time().tag('Recently Added').file().info('Starting');
 		redis.connect()
 			.then(() => redis.smembers('users'))
-			.then(users => Promise.all(users.map(user => Promise.all([redis.hget(user, 'recent'), new Promise(resolve => resolve(user))]))))
+			.then(users => Promise.all(users.map(user => Promise.all(
+				[redis.hget(user, 'recent'), new Promise(resolve => resolve(user)), redis.close()]))))
 			.then((userData) => {
 				let delayInc = 0;
 				return Promise.all(userData.map(user => {
@@ -171,10 +170,8 @@ const RecentlyAdded = function() {
 				}));
 			}).then(() => {
 				logger.time().tag('Recently Added').file().backend('Done!');
-				redis.close();
 			}).catch((err) => {
 				logger.time().tag('Recently Added').file().error('error', err, err.stack);
-				redis.close();
 			});
 	};
 };
