@@ -1,23 +1,30 @@
 'use strict';
 
-const express = require('express'),
+const
+	express = require('express'),
 	session = require('express-session'),
 	bodyParser = require('body-parser'),
 	cookieParser = require('cookie-parser'),
 	config = require('./config'),
 	scribe = require('scribe-js')(),
-	Redis = require('redisng'),
 	passport = require('passport'),
-	SpotifyStrategy = require('passport-spotify').Strategy,
-	redis = new Redis(),
+	RedisStore = require('connect-redis')(session),
+	Redis = require('promise-redis')(),
+	SpotifyStrategy = require('passport-spotify').Strategy;
+
+const
+	redis = Redis.createClient(),
 	logger = process.console,
-	Recent = require('./recentlyAdded'),
-	Most = require('./mostPlayed'),
-	mostPlayed = new Most(),
-	recentlyAdded = new Recent(),
 	app = express();
 
-const ONE_SEC = 1000,
+const
+	Recent = require('./recentlyAdded'),
+	Most = require('./mostPlayed'),
+	mostPlayed = new Most(redis),
+	recentlyAdded = new Recent(redis);
+
+const
+	ONE_SEC = 1000,
 	ONE_MIN = 60 * ONE_SEC,
 	ONE_HOUR = 60 * ONE_MIN;
 
@@ -50,6 +57,11 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 app.use(session({
+	store: new RedisStore({
+		host: 'localhost',
+		port: 6379,
+		client: redis
+	}),
 	secret: config.secret,
 	resave: false,
 	saveUninitialized: true,
@@ -134,13 +146,8 @@ app.get('/userplaylists', ensureAuthenticated, (req, res) => {
 	});
 	else {
 		const userId = req.user.id;
-		redis.connect()
-			.then(() => {
-				return Promise.all([
-					redis.hget(userId, 'most'),
-					redis.hget(userId, 'recent')
-				]);
-			})
+		Promise.all(
+				[redis.hget(userId, 'most'), redis.hget(userId, 'recent')])
 			.then((playlists) => {
 				const mostPlayed = String(playlists[0]).toLowerCase() === 'true',
 					recentlyAdded = String(playlists[1]).toLowerCase() === 'true'; //convert to boolean
@@ -149,14 +156,12 @@ app.get('/userplaylists', ensureAuthenticated, (req, res) => {
 					mostPlayed: mostPlayed,
 					recentlyAdded: recentlyAdded
 				});
-				redis.close();
 			})
 			.catch((err) => {
 				res.send({
 					error: true,
 					errMsg: err.message
 				});
-				redis.close();
 				logger.time().file().warning(err.message, err.stack);
 			});
 	}
@@ -165,34 +170,21 @@ app.get('/userplaylists', ensureAuthenticated, (req, res) => {
 app.get('/settings', ensureAuthenticated, (req, res) => {
 	const userId = req.user.id,
 		type = req.query.type;
-	redis.connect().then(() => {
-		if (type === 'most') {
-			return Promise.all([new Promise(resolve => resolve(type)),
-				redis.hget(userId, `${type}:length`),
-				redis.hget(userId, `${type}:lastfm`),
-				redis.hget(userId, `${type}:period`)
-			]);
-		} else {
-			return Promise.all([new Promise(resolve => resolve(type)),
-				redis.hget(userId, `${type}:length`)
-			]);
-		}
-	}).then((results) => {
-		res.render('pages/settings', {
-			type: results[0],
-			length: results[1] || 25,
-			lastfm: results[2] || '',
-			period: results[3] || 'overall'
+	getSettings(userId, type, type === 'most')
+		.then((results) => {
+			res.render('pages/settings', {
+				type: results[0],
+				length: results[1] || 25,
+				lastfm: results[2] || '',
+				period: results[3] || 'overall'
+			});
 		});
-		redis.close();
-	});
 });
 
 app.get('/toggle', ensureAuthenticated, (req, res) => {
 	const userId = req.user.id,
 		type = req.query.type;
-	redis.connect()
-		.then(() => redis.hget(userId, type))
+	redis.hget(userId, type)
 		.then(enabled => {
 			enabled = String(enabled).toLowerCase() === 'true';
 			if (enabled) {
@@ -201,7 +193,6 @@ app.get('/toggle', ensureAuthenticated, (req, res) => {
 				return enablePlaylist(userId, type, res);
 			}
 		})
-		.then(() => redis.close())
 		.catch((err) => logger.file().time().warning(err.message, err.stack));
 });
 
@@ -211,23 +202,8 @@ app.post('/save', ensureAuthenticated, (req, res) => {
 		period = req.body.period || '',
 		type = req.body.type,
 		userId = req.user.id;
-	redis.connect().then(() => {
-		if (type === 'recent') {
-			return redis.hmset(userId,
-				'recent', true,
-				'recent:length', numTracks,
-				'recent:playlist', 'null');
-		} else {
-			return redis.hmset(userId,
-				'most', true,
-				'most:length', numTracks,
-				'most:playlist', 'null',
-				'most:lastfm', lastfm,
-				'most:period', period);
-		}
-	}).then(() => {
+	saveSettings(userId, numTracks, lastfm, period, type === 'most').then(() => {
 		res.redirect('/');
-		redis.close();
 	}).catch((err) => logger.file().time().warning(err.message, err.stack));
 });
 
@@ -237,17 +213,14 @@ app.get('/goodbye', (req, res) => {
 
 app.get('/delete', ensureAuthenticated, (req, res) => {
 	const userId = req.user.id;
-	redis.connect().then(() => {
-		return Promise.all([redis.del(userId), redis.srem('users', userId)]);
-	}).then(() => {
-		req.logout();
-		res.redirect('/goodbye');
-		redis.close();
-	}).catch((err) => {
-		res.redirect('/error');
-		redis.close();
-		logger.err(err.message, err.stack);
-	});
+	Promise.all([redis.del(userId), redis.srem('users', userId)])
+		.then(() => {
+			req.logout();
+			res.redirect('/goodbye');
+		}).catch((err) => {
+			res.redirect('/error');
+			logger.err(err.message, err.stack);
+		});
 });
 
 app.get('*', (req, res) => {
@@ -260,6 +233,36 @@ app.get('*', (req, res) => {
 app.listen(5621, () => {
 	logger.time().file().info('SpotifyApps listening on port 5621!');
 });
+
+const saveSettings = (userId, numTracks, lastfm, period, isMost) => {
+	if (isMost) {
+		return redis.hmset(userId,
+			'most', true,
+			'most:length', numTracks,
+			'most:playlist', 'null',
+			'most:lastfm', lastfm,
+			'most:period', period);
+	} else {
+		return redis.hmset(userId,
+			'recent', true,
+			'recent:length', numTracks,
+			'recent:playlist', 'null');
+	}
+};
+
+const getSettings = (userId, type, isMost) => {
+	if (isMost) {
+		return Promise.all([new Promise(resolve => resolve(type)),
+			redis.hget(userId, `${type}:length`),
+			redis.hget(userId, `${type}:lastfm`),
+			redis.hget(userId, `${type}:period`)
+		]);
+	} else {
+		return Promise.all([new Promise(resolve => resolve(type)),
+			redis.hget(userId, `${type}:length`)
+		]);
+	}
+};
 
 const disablePlaylist = (userId, type, res) => {
 	res.send({
@@ -285,8 +288,7 @@ const enablePlaylist = (userId, type, res) => {
 };
 
 const saveToRedis = data => {
-	return redis.connect()
-		.then(() => redis.exists(data.userId))
+	return redis.exists(data.userId)
 		.then(exists => {
 			if (!exists) return redis.sadd('users', data.userId);
 			else return new Promise((_, rej) => {
@@ -298,11 +300,7 @@ const saveToRedis = data => {
 			'refresh', data.refresh,
 			'most', 'false',
 			'recent', 'false'))
-		.then(() => {
-			return redis.close();
-		})
 		.catch((err) => {
-			redis.close();
 			logger.time().file().warning(`${err} \n ${err.stack}`);
 		});
 };

@@ -1,10 +1,8 @@
 'use strict';
 
 const SpotifyWebApi = require('spotify-web-api-node'),
-	Redis = require('redisng'),
 	sleep = require('sleep-promise'),
 	config = require('./config'),
-	redis = new Redis(),
 	logger = process.console,
 	spotifyApi = new SpotifyWebApi({
 		clientId: config.spotify.clientId,
@@ -12,9 +10,10 @@ const SpotifyWebApi = require('spotify-web-api-node'),
 		redirectUri: config.spotify.redirectUri
 	});
 
-const RecentlyAdded = function() {
+const RecentlyAdded = function(redis) {
 	const ONE_MIN = 60 * 1000,
 		self = this;
+
 	self.createTrackListArray = (recentlyAdded) => {
 		// picks out the relevent data from the Recently Added songs list
 		let tracks = [];
@@ -93,7 +92,7 @@ const RecentlyAdded = function() {
 		const newTokens = {},
 			ele = {};
 		logger.time().tag('Recently Added').file().backend('Getting database items');
-		return sleep(delayInc * ONE_MIN * 5).then(() => redis.connect()).then(() => Promise.all([
+		return sleep(delayInc * ONE_MIN * 5).then(() => Promise.all([
 			redis.hget(userId, 'recent:length'),
 			redis.hget(userId, 'refresh'),
 			redis.hget(userId, 'access'),
@@ -143,7 +142,7 @@ const RecentlyAdded = function() {
 				redis.hset(userId, 'refresh', newTokens.refresh),
 				redis.hset(userId, 'recent:playlist', newPlaylistId)
 			]);
-		}).then(() => redis.close()).catch(err => {
+		}).catch(err => {
 			logger.time().tag('Recently Added').file().warning(err);
 			logger.time().tag('Recently Added').file().warning(err.stack);
 			//try again in a few minutes
@@ -155,10 +154,9 @@ const RecentlyAdded = function() {
 
 	self.start = () => {
 		logger.time().tag('Recently Added').file().info('Starting');
-		redis.connect()
-			.then(() => redis.smembers('users'))
+		redis.smembers('users')
 			.then(users => Promise.all(users.map(user => Promise.all(
-				[redis.hget(user, 'recent'), new Promise(resolve => resolve(user)), redis.close()]))))
+				[redis.hget(user, 'recent'), new Promise(resolve => resolve(user))]))))
 			.then((userData) => {
 				let delayInc = 0;
 				return Promise.all(userData.map(user => {

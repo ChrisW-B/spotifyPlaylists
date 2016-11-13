@@ -4,8 +4,6 @@ const Lastfm = require('lastfm-njs'),
 	SpotifyWebApi = require('spotify-web-api-node'),
 	sleep = require('sleep-promise'),
 	config = require('./config'),
-	Redis = require('redisng'),
-	redis = new Redis(),
 	logger = process.console,
 	lastfm = new Lastfm({
 		apiKey: config.lastfm.token,
@@ -19,7 +17,7 @@ const Lastfm = require('lastfm-njs'),
 		redirectUri: config.spotify.redirectUri
 	});
 
-const MostPlayed = function() {
+const MostPlayed = function(redis) {
 	const ONE_SEC = 1000,
 		ONE_MIN = 60 * ONE_SEC,
 		self = this;
@@ -182,7 +180,7 @@ const MostPlayed = function() {
 		const newTokens = {},
 			ele = {};
 		logger.time().tag('Most Played').file().backend('Getting database items');
-		return sleep(delayInc * ONE_MIN * 5).then(() => redis.connect()).then(() => Promise.all([
+		return sleep(delayInc * ONE_MIN * 5).then(() => Promise.all([
 			redis.hget(userId, 'most:length'),
 			redis.hget(userId, 'refresh'),
 			redis.hget(userId, 'token'),
@@ -249,9 +247,8 @@ const MostPlayed = function() {
 				redis.hset(userId, 'refresh', newTokens.refresh),
 				redis.hset(userId, 'most:playlist', newPlaylistId)
 			]);
-		}).then(() => redis.close()).catch(err => {
+		}).catch(err => {
 			logger.time().tag('Most Played').file().warning(err, err.stack);
-			redis.close();
 			//try again in a few minutes
 			setTimeout(() => {
 				self.updatePlaylist(ele, delayInc);
@@ -261,10 +258,9 @@ const MostPlayed = function() {
 
 	self.start = () => {
 		logger.time().tag('Most Played').file().info('Starting');
-		redis.connect()
-			.then(() => redis.smembers('users'))
+		redis.smembers('users')
 			.then(users => Promise.all(users.map(user => Promise.all(
-				[redis.hget(user, 'most'), new Promise(resolve => resolve(user)), redis.close()]))))
+				[redis.hget(user, 'most'), new Promise(resolve => resolve(user))]))))
 			.then((userData) => {
 				let delayInc = 0;
 				return Promise.all(userData.map(user => {
