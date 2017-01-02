@@ -5,7 +5,6 @@ const
 	session = require('express-session'),
 	bodyParser = require('body-parser'),
 	cookieParser = require('cookie-parser'),
-	config = require('./config'),
 	scribe = require('scribe-js')(),
 	passport = require('passport'),
 	RedisStore = require('connect-redis')(session),
@@ -18,6 +17,7 @@ const
 	app = express();
 
 const
+	config = require('./config'),
 	Recent = require('./recentlyAdded'),
 	Most = require('./mostPlayed'),
 	mostPlayed = new Most(redis),
@@ -34,23 +34,26 @@ passport.serializeUser(function(user, done) {
 passport.deserializeUser(function(obj, done) {
 	done(null, obj);
 });
-passport.use(new SpotifyStrategy({
-		clientID: config.spotify.clientId,
-		clientSecret: config.spotify.clientSecret,
-		callbackURL: config.spotify.redirectUri
-	},
-	function(accessToken, refreshToken, profile, done) {
-		saveToRedis({
-			access: accessToken,
-			refresh: refreshToken,
-			userId: profile.id
-		}).then(() => {
-			profile.access = accessToken;
-			profile.refresh = refreshToken;
-			return done(null, profile);
-		});
-	}
-));
+
+passport.use(
+	new SpotifyStrategy({
+			clientID: config.spotify.clientId,
+			clientSecret: config.spotify.clientSecret,
+			callbackURL: config.spotify.redirectUri
+		},
+		function(accessToken, refreshToken, profile, done) {
+			saveToRedis({
+				access: accessToken,
+				refresh: refreshToken,
+				userId: profile.id
+			}).then(() => {
+				profile.access = accessToken;
+				profile.refresh = refreshToken;
+				return done(null, profile);
+			});
+		}
+	)
+);
 
 logger.addLogger('backend', 'cyan');
 app.set('views', __dirname + '/views');
@@ -69,7 +72,6 @@ app.use(session({
 		secure: 'auto'
 	}
 }));
-
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.json());

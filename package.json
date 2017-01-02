@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/ChrisW-B/spotifyPlaylists#readme",
   "dependencies": {
-    "bluebird": "^3.4.6",
     "body-parser": "^1.15.2",
     "connect-redis": "^3.1.0",
     "cookie-parser": "^1.4.3",
