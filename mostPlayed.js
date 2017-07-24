@@ -179,7 +179,8 @@ const MostPlayed = function(redis) {
 	self.updatePlaylist = (userId, delayInc = 0) => {
 		const newTokens = {},
 			ele = {};
-		logger.time().tag('Most Played').file().backend('Getting database items');
+    logger.time().tag('Most Played').file().backend('Getting database items');
+    console.log(JSON.stringify(userId, null, 2))
 		return sleep(delayInc * ONE_MIN * 5).then(() => Promise.all([
 			redis.hget(userId, 'most:length'),
 			redis.hget(userId, 'refresh'),
@@ -193,7 +194,8 @@ const MostPlayed = function(redis) {
 			ele.token = data[2];
 			ele.oldPlaylist = data[3];
 			ele.lastFmId = data[4];
-			ele.timespan = data[5];
+      ele.timespan = data[5];
+      console.log(JSON.stringify(data, null, 2))
 			logger.time().tag('Most Played').file().backend('Logging in to spotify');
 			return self.refreshToken(ele.token, ele.refresh);
 		}).then(data => {
@@ -257,7 +259,9 @@ const MostPlayed = function(redis) {
 	};
 
 	self.start = () => {
-		logger.time().tag('Most Played').file().info('Starting');
+    logger.time().tag('Most Played').file().info('Starting');
+
+
 		redis.smembers('users')
 			.then(users => Promise.all(users.map(user => Promise.all(
 				[redis.hget(user, 'most'), new Promise(resolve => resolve(user))]))))
@@ -265,8 +269,10 @@ const MostPlayed = function(redis) {
 				let delayInc = 0;
 				return Promise.all(userData.map(user => {
 					const enabled = String(user[0]).toLowerCase() === 'true',
-						userName = user[1];
+            userName = user[1];
+
 					if (enabled) {
+            console.log(JSON.stringify({userName, user}))
 						return self.updatePlaylist(userName, delayInc++);
 					}
 				}));
