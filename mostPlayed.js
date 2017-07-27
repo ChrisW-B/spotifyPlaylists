@@ -65,8 +65,9 @@ const MostPlayed = function (redis) {
       console.log(JSON.stringify(playlist, null, 2))
       if (playlist.tracks.total > 0) {
         const numsToDelete = [...Array(playlist.tracks.total).keys()];
-        console.log(JSON.stringify({userId, id: playlist.id, numsToDelete, snap: playlist.snapshot_id}, null, 2))
-        return spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id)
+
+        const res = spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id)
+        console.log(JSON.stringify({res}, null, 2));
       }
       resolve(playlist.id)
     });
