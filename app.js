@@ -312,5 +312,5 @@ setInterval(recentlyAdded.start, 5 * ONE_HOUR);
 setTimeout(() => setInterval(mostPlayed.start, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset start
 
 //run after start
-recentlyAdded.start();
-setTimeout(mostPlayed.start, 3 * ONE_MIN);
+// recentlyAdded.start();
+// setTimeout(mostPlayed.start, 3 * ONE_MIN);
