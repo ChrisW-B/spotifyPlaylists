@@ -169,6 +169,7 @@ const MostPlayed = function(redis) {
 
 	self.sortSpotifyTracks = tracks => {
 		return new Promise(resolve => {
+      console.log('sorting\n'+ JSON.stringify(tracks, null, 2))
 			tracks.sort(function(a, b) {
 				return a.rank - b.rank;
 			});
