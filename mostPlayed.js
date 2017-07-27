@@ -62,14 +62,8 @@ const MostPlayed = function (redis) {
   self.clearExistingPlaylist = (userId, playlist) => {
     // create an empty playlist
     return new Promise((resolve, reject) => {
-      console.log(JSON.stringify(playlist, null, 2))
-      if (playlist.tracks.total > 0) {
-        const numsToDelete = [...Array(playlist.tracks.total).keys()];
-
-        const res = spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id)
-        console.log(JSON.stringify({res}, null, 2));
-      }
-      resolve(playlist.id)
+      if (playlist.tracks.total > 0) spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, [...Array(playlist.tracks.total).keys()], playlist.snapshot_id).then(() => resolve(playlist.id))
+      else resolve(playlist.id)
     });
   };
 
@@ -101,9 +95,6 @@ const MostPlayed = function (redis) {
       offset: offset
     }).then(playlists => {
       const playlistLoc = self.foundOldPlaylist(playlists.body.items, oldPlaylistId);
-      console.log({
-        playlistLoc
-      })
       if (playlistLoc > -1) {
         resolve(self.clearExistingPlaylist(userId, playlists.body.items[playlistLoc]));
       } else if (playlists.body.next == null) {
@@ -176,7 +167,6 @@ const MostPlayed = function (redis) {
     const newTokens = {},
       ele = {};
     logger.time().tag('Most Played').file().backend('Getting database items');
-    console.log(JSON.stringify(userId, null, 2))
     return sleep(delayInc * ONE_MIN * 5).then(() => Promise.all([
       redis.hget(userId, 'most:length'),
       redis.hget(userId, 'refresh'),
