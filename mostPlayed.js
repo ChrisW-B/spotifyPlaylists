@@ -103,8 +103,9 @@ const MostPlayed = function (redis) {
       limit: 20,
       offset: offset
     }).then(playlists => {
-      console.log('preparing' + JSON.stringify(playlists, null, 2))
+      console.log('looking for' + JSON.stringify({oldPlaylistId}, null, 2) + ' preparing' + JSON.stringify({playlists}, null, 2))
       const playlistLoc = self.foundOldPlaylist(playlists.body.items, oldPlaylistId);
+      console.log({playlistLoc})
       if (playlistLoc > -1) {
         resolve(self.clearExistingPlaylist(userId, playlists.body.items[playlistLoc]));
       } else if (playlists.body.next == null) {
