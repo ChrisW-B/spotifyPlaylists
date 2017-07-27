@@ -195,7 +195,7 @@ const MostPlayed = function(redis) {
 			ele.oldPlaylist = data[3];
 			ele.lastFmId = data[4];
       ele.timespan = data[5];
-      console.log(JSON.stringify(data, null, 2))
+      console.log(JSON.stringify({ele}, null, 2))
 			logger.time().tag('Most Played').file().backend('Logging in to spotify');
 			return self.refreshToken(ele.token, ele.refresh);
 		}).then(data => {
