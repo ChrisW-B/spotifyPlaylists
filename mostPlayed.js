@@ -62,16 +62,11 @@ const MostPlayed = function (redis) {
   self.clearExistingPlaylist = (userId, playlist) => {
     // create an empty playlist
     return new Promise((resolve, reject) => {
+      console.log(JSON.stringify(playlist, null, 2))
       if (playlist.tracks.total > 0) {
-        const numsToDelete = [];
-        for (let j = 0; j < playlist.tracks.total; j++) {
-          numsToDelete.push(j);
-        }
-        spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id).then(() =>
-          resolve(playlist.id)
-        ).catch((err) => {
-          reject(err);
-        });
+        const numsToDelete = playlist.tracks.total.map((_,i)=>i);
+        console.log(JSON.stringify({userId, id: playlist.id, numsToDelete, snap: playlist.snapshot_id}, null, 2))
+        return spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id)
       }
     });
   };
@@ -103,9 +98,10 @@ const MostPlayed = function (redis) {
       limit: 20,
       offset: offset
     }).then(playlists => {
-      console.log('looking for' + JSON.stringify({oldPlaylistId}, null, 2) + ' preparing' + JSON.stringify({playlists}, null, 2))
       const playlistLoc = self.foundOldPlaylist(playlists.body.items, oldPlaylistId);
-      console.log({playlistLoc})
+      console.log({
+        playlistLoc
+      })
       if (playlistLoc > -1) {
         resolve(self.clearExistingPlaylist(userId, playlists.body.items[playlistLoc]));
       } else if (playlists.body.next == null) {
