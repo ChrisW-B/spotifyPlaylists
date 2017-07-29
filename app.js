@@ -293,8 +293,8 @@ const saveToRedis = data => {
   return redis.exists(data.userId)
     .then(exists => {
       if (!exists) return redis.sadd('users', data.userId);
-      else return new Promise((_, rej) => {
-        rej('user already added');
+      else return new Promise((resolve, reject) => {
+        reject('user already added');
       });
     })
     .then(() => redis.hmset(data.userId,
