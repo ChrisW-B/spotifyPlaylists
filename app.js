@@ -18,10 +18,10 @@ const
 
 const
   config = require('./config'),
-  Recent = require('./recentlyAdded'),
-  Most = require('./mostPlayed'),
-  mostPlayed = new Most(redis),
-  recentlyAdded = new Recent(redis);
+  RecentlyAdded = require('./recentlyAdded'),
+  MostPlayed = require('./mostPlayed'),
+  mostPlayed = new MostPlayed(redis),
+  recentlyAdded = new RecentlyAdded(redis);
 
 const
   ONE_SEC = 1000,

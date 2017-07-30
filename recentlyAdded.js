@@ -1,175 +1,60 @@
 'use strict';
 
-const SpotifyWebApi = require('spotify-web-api-node'),
-    sleep = require('sleep-promise'),
-    config = require('./config'),
-    logger = process.console,
-    spotifyApi = new SpotifyWebApi({
-        clientId: config.spotify.clientId,
-        clientSecret: config.spotify.clientSecret,
-        redirectUri: config.spotify.redirectUri
-    });
+const sleep = require('sleep-promise'),
+  Playlist = require('./Playlist'),
+  logger = process.console,
+  ONE_MIN = 60 * 1000;
 
-const RecentlyAdded = function(redis) {
-    const ONE_MIN = 60 * 1000,
-        self = this;
-    self.createTrackListArray = (recentlyAdded) => {
-        // picks out the relevent data from the Recently Added songs list
-        let tracks = [];
-        recentlyAdded.forEach(ele => {
-            tracks.push(ele.track.uri);
-        });
-        return tracks;
-    };
+module.exports = class RecentlyAdded extends Playlist {
 
-    self.clearExistingPlaylist = (userId, playlist) => {
-        // create an empty playlist
-        return new Promise((resolve, reject) => {
-            if (playlist.tracks.total > 0) {
-                let numsToDelete = [];
-                for (let j = 0; j < playlist.tracks.total; j++) {
-                    numsToDelete.push(j);
-                }
-                spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, numsToDelete, playlist.snapshot_id).then(() => {
-                    resolve(playlist.id);
-                }).catch((err) => {
-                    reject(err);
-                });
-            }
-        });
+  constructor(redis) {
+    super(redis, 'recent');
+    this.redis = redis;
+  }
+
+  createTrackListArray(recentlyAdded) {
+    // picks out the rmemberInfovent data from the Recently Added songs list
+    return recentlyAdded.map(t => t.track.uri);
+  }
+
+  async updatePlaylist(userId, delayInc = 0) {
+    await sleep(delayInc * ONE_MIN * 5);
+    logger.time().tag(this.playListName).file().backend('Getting database items');
+    const memberInfo = {
+      numTracks: await this.redis.hget(userId, `${this.type}:length`),
+      refresh: await this.redis.hget(userId, 'refresh'),
+      token: await this.redis.hget(userId, 'token'),
+      oldPlaylist: await this.redis.hget(userId, `${this.type}:playlist`)
     };
 
-    self.foundOldPlaylist = (playlists, oldPlaylist) => {
-        //try to find old playlist, return index if you do
-        for (let i = 0; i < playlists.length; i++) {
-            if (playlists[i].id === oldPlaylist) {
-                return i;
-            }
-        }
-        return -1;
+    logger.time().tag(this.playListName).file().backend('Logging in to spotify');
+    const token = (await this.refreshToken(memberInfo.token, memberInfo.refresh));
+    const newTokens = {
+      token: token.access_token,
+      refresh: token.refresh_token ? token.refresh_token : memberInfo.refresh
     };
+    this.spotifyApi.setAccessToken(newTokens.token);
+    this.spotifyApi.setRefreshToken(newTokens.refresh);
 
-    self.createNewPlaylist = userId => {
-        return new Promise((resolve, reject) => {
-            return spotifyApi.createPlaylist(userId, 'Recently Added', {
-                'public': false
-            }).then(playlist => {
-                resolve(playlist.body.id);
-            }).catch(err => {
-                reject(err);
-            });
-        });
-    };
+    logger.time().tag(this.playListName).file().time().backend('Getting user info');
+    const userInfo = await this.spotifyApi.getMe();
 
-    self.preparePlaylist = (userId, oldPlaylistId, offset = 0) => {
-        return new Promise(resolve => {
-            spotifyApi.getUserPlaylists(userId, {
-                limit: 20,
-                offset: offset
-            }).then(playlists => {
-                let playlistLoc = self.foundOldPlaylist(playlists.body.items, oldPlaylistId);
-                if (playlistLoc > -1) {
-                    resolve(self.clearExistingPlaylist(userId, playlists.body.items[playlistLoc]));
-                } else if (playlists.body.next == null) {
-                    resolve(self.createNewPlaylist(userId));
-                } else {
-                    resolve(self.preparePlaylist(userId, oldPlaylistId, offset + 20));
-                }
-            });
-        });
-    };
+    logger.time().tag(this.playListName).file().backend('preparing playlist and getting saved tracks');
+    const newPlaylistId = await this.preparePlaylist(userInfo.body.id, memberInfo.oldPlaylist),
+      savedTracks = (await this.spotifyApi.getMySavedTracks({
+        limit: memberInfo.numTracks
+      })).body,
+      spotifyId = userInfo.body.id;
 
-    self.refreshToken = (access, refresh) => {
-        //gets refresh token
-        spotifyApi.setAccessToken(access);
-        spotifyApi.setRefreshToken(refresh);
-        return spotifyApi.refreshAccessToken();
-    };
-    
-    self.updatePlaylist = (userId, delayInc = 0) => {
-        const newTokens = {},
-            ele = {};
-        logger.time().tag('Recently Added').file().backend('Getting database items');
-        return sleep(delayInc * ONE_MIN * 5).then(() => Promise.all([
-            redis.hget(userId, 'recent:length'),
-            redis.hget(userId, 'refresh'),
-            redis.hget(userId, 'access'),
-            redis.hget(userId, 'recent:playlist')
-        ])).then(data => {
-            ele.numTracks = data[0];
-            ele.refresh = data[1];
-            ele.token = data[2];
-            ele.oldPlaylist = data[3];
-            logger.time().tag('Recently Added').file().backend('Logging in to spotify');
-            return self.refreshToken(ele.token, ele.refresh);
-        }).then(data => {
-            newTokens.token = data.body.access_token;
-            newTokens.refresh = data.body.refresh_token ? data.body.refresh_token : ele.refresh;
-            spotifyApi.setAccessToken(newTokens.token);
-            spotifyApi.setRefreshToken(newTokens.refresh);
-            logger.time().tag('Recently Added').file().time().backend('Getting user info');
-            return spotifyApi.getMe();
-        }).then(userInfo => {
-            logger.time().tag('Recently Added').file().backend('preparing playlist and getting saved tracks');
-            return Promise.all([
-                self.preparePlaylist(userInfo.body.id, ele.oldPlaylist),
-                spotifyApi.getMySavedTracks({
-                    limit: ele.numTracks
-                }), new Promise(resolve => {
-                    resolve(userInfo.body.id);
-                })
-            ]);
-        }).then(values => {
-            logger.time().tag('Recently Added').file().backend('filling playlist');
-            const newPlaylistId = values[0],
-                savedTracks = values[1],
-                spotifyId = values[2];
-            return Promise.all([
-                spotifyApi.addTracksToPlaylist(spotifyId,
-                    newPlaylistId,
-                    self.createTrackListArray(savedTracks.body.items)),
-                new Promise(resolve => {
-                    resolve(newPlaylistId);
-                })
-            ]);
-        }).then((values) => {
-            const newPlaylistId = values[1];
-            logger.time().tag('Recently Added').file().backend('Updating database');
-            return Promise.all([
-                redis.hset(userId, 'access', newTokens.token),
-                redis.hset(userId, 'refresh', newTokens.refresh),
-                redis.hset(userId, 'recent:playlist', newPlaylistId)
-            ]);
-        }).catch(err => {
-            logger.time().tag('Recently Added').file().warning(err);
-            logger.time().tag('Recently Added').file().warning(err.stack);
-            //try again in a few minutes
-            setTimeout(() => {
-                self.updatePlaylist(ele, delayInc);
-            }, 5 * ONE_MIN);
-        });
-    };
+    logger.time().tag(this.playListName).file().backend('filling playlist');
+    const spotifyUris = this.createTrackListArray(savedTracks.items);
+    await this.spotifyApi.addTracksToPlaylist(spotifyId, newPlaylistId, spotifyUris);
 
-    self.start = () => {
-        logger.time().tag('Recently Added').file().info('Starting');
-        redis.smembers('users')
-            .then(users => Promise.all(users.map(user => Promise.all(
-                [redis.hget(user, 'recent'), new Promise(resolve => resolve(user))]))))
-            .then((userData) => {
-                let delayInc = 0;
-                return Promise.all(userData.map(user => {
-                    const enabled = String(user[0]).toLowerCase() === 'true',
-                        userName = user[1];
-                    if (enabled) {
-                        return self.updatePlaylist(userName, delayInc++);
-                    }
-                }));
-            }).then(() => {
-                logger.time().tag('Recently Added').file().backend('Done!');
-            }).catch((err) => {
-                logger.time().tag('Recently Added').file().error('error', err, err.stack);
-            });
-    };
+    logger.time().tag(this.playListName).file().backend('Updating database');
+    await Promise.all([
+      this.redis.hset(userId, 'access', newTokens.token),
+      this.redis.hset(userId, 'refresh', newTokens.refresh),
+      this.redis.hset(userId, `${this.type}:playlist`, newPlaylistId)
+    ]);
+  }
 };
-
-module.exports = RecentlyAdded;
