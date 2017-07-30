@@ -27,7 +27,7 @@ module.exports = class MostPlayed {
   // takes list of last.fm tracks and tries to find them in spotify
   convertToSpotify(topTracks) {
     return Promise.all(topTracks.map((ele, i) =>
-      new Promise(async resolve => {
+      new Promise(async(resolve, reject) => {
         await sleep(ONE_SEC / 2 * i);
         logger.time().tag('Most Played').file().backend(`Searching for \n${ele.name} by ${ele.artist.name}`);
         const results = (await spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`))
@@ -50,26 +50,23 @@ module.exports = class MostPlayed {
     return spotifyApi.addTracksToPlaylist(userId, playlistId, tracklist.map(i => i.id));
   }
 
-
   async clearExistingPlaylist(userId, playlist) {
     // create an empty playlist
     if (playlist.tracks.total > 0) {
       await spotifyApi.removeTracksFromPlaylistByPosition(userId, playlist.id, [...Array(playlist.tracks.total).keys()], playlist.snapshot_id);
     }
     return playlist.id;
-  };
+  }
 
   foundOldPlaylist(playlists, oldPlaylist) {
     return playlists.findIndex(p => p.id === oldPlaylist);
   }
-
 
   async createNewPlaylist(userId) {
     return (await spotifyApi.createPlaylist(userId, 'Most Played', {
       'public': false
     })).body.id;
   }
-
 
   async preparePlaylist(userId, oldPlaylistId, offset = 0) {
     const userPlaylists = (await spotifyApi.getUserPlaylists(userId, {
@@ -84,7 +81,7 @@ module.exports = class MostPlayed {
     } else {
       return this.preparePlaylist(userId, oldPlaylistId, offset + 20);
     }
-  };
+  }
 
   insertMissingTracks(trackList, lastFmId, period) {
     let nextTrackSet;
@@ -100,7 +97,7 @@ module.exports = class MostPlayed {
             limit: trackList.length,
             period: period,
             page: 2
-          }))
+          }));
           const converted = this.convertToSpotify(topTracks);
           nextTrackSet = converted;
           for (let i = 0; i < nextTrackSet.length; i++) {
@@ -126,15 +123,14 @@ module.exports = class MostPlayed {
         }
       }
     }));
-  };
+  }
 
   async refreshToken(access, refresh) {
     //gets refresh token
     spotifyApi.setAccessToken(access);
     spotifyApi.setRefreshToken(refresh);
     return (await spotifyApi.refreshAccessToken()).body;
-  };
-
+  }
 
   async updatePlaylist(userId, delayInc = 0) {
     await sleep(delayInc * ONE_MIN * 5);
@@ -184,7 +180,7 @@ module.exports = class MostPlayed {
     await this.redis.hset(userId, 'access', newTokens.token);
     await this.redis.hset(userId, 'refresh', newTokens.refresh);
     await this.redis.hset(userId, 'most:playlist', newPlaylistId);
-  };
+  }
 
   async start() {
     logger.time().tag('Most Played').file().info('Starting');
@@ -195,5 +191,5 @@ module.exports = class MostPlayed {
       return enabled ? this.updatePlaylist(member, delayInc++) : null;
     }));
     logger.time().tag('Most Played').file().backend('Done!');
-  };
+  }
 };
