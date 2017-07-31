@@ -19,7 +19,7 @@ module.exports = class Playlist {
     this.logger = logger;
     this.ONE_MIN = ONE_MIN;
     this.ONE_SEC = ONE_SEC;
-    console.log(`Set ${JSON.stringify({redis: this.redis, type: this.type, playListName: this.playListName, spotifyApi: this.spotifyApi, ONE_MIN: this.ONE_MIN, ONE_SEC: this.ONE_SEC},null, 2)}`)
+    console.log(`Set ${{redis: this.redis, type: this.type, playListName: this.playListName, spotifyApi: this.spotifyApi, ONE_MIN: this.ONE_MIN, ONE_SEC: this.ONE_SEC}}`);
   }
   //add list of spotify tracks to a playlist
   fillPlaylist(userId, playlistId, tracklist) {
