@@ -62,7 +62,7 @@ module.exports = class Playlist {
 
   async update() {
     logger.time().tag(this.playListName).file().info('Starting');
-    console.log({ redis: this.redis, playlist: this.playListName })
+    console.log({ redis: this.redis, playlist: this.playListName, type: this.type })
     const members = await this.redis.smembers('users');
     await Promise.all(members.map(async member => {
       const enabled = String(await this.redis.hget(member, this.type)).toLowerCase() === 'true';
