@@ -121,12 +121,12 @@ app.get('/userplaylists', ensureAuthenticated, async(req, res) => {
   if (!req.isAuthenticated()) res.send({ error: true, errMsg: 'Not authenticated' });
   else {
     const userId = req.user.id,
-      mostPlayed = String(await redis.hget(userId, 'most')).toLowerCase() === 'true',
-      recentlyAdded = String(await redis.hget(userId, 'recent')).toLowerCase() === 'true';
+      mostPlayedEnabled = String(await redis.hget(userId, 'most')).toLowerCase() === 'true',
+      recentlyAddedEnabled = String(await redis.hget(userId, 'recent')).toLowerCase() === 'true';
     res.send({
       error: false,
-      mostPlayed,
-      recentlyAdded
+      mostPlayed: mostPlayedEnabled,
+      recentlyAdded: recentlyAddedEnabled
     });
   }
 });

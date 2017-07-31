@@ -6,14 +6,20 @@ const SpotifyWebApi = require('spotify-web-api-node'),
     clientSecret: config.spotify.clientSecret,
     redirectUri: config.spotify.redirectUri
   }),
-  ONE_MIN = 60 * 1000;
+  ONE_MIN = 60 * 1000,
+  ONE_SEC = 1000;
 
 module.exports = class Playlist {
   constructor(redis, type) {
+    console.log(`Constructing for ${type}`)
     this.redis = redis;
     this.type = type;
     this.playListName = type === 'most' ? 'Most Played' : 'Recently Added';
     this.spotifyApi = spotifyApi;
+    this.logger = logger;
+    this.ONE_MIN = ONE_MIN;
+    this.ONE_SEC = ONE_SEC;
+    console.log(`Set ${JSON.stringify({redis: this.redis, type: this.type, playListName: this.playListName, spotifyApi: this.spotifyApi, ONE_MIN: this.ONE_MIN, ONE_SEC: this.ONE_SEC},null, 2)}`)
   }
   //add list of spotify tracks to a playlist
   fillPlaylist(userId, playlistId, tracklist) {
