@@ -233,9 +233,9 @@ const saveToRedis = async data => {
 };
 
 //run periodically
-setInterval(recentlyAdded.update, 5 * ONE_HOUR);
-setTimeout(() => setInterval(mostPlayed.update, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset update
+setInterval(() => recentlyAdded.update(), 5 * ONE_HOUR);
+setTimeout(() => setInterval(() => mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); //offset update
 
 //run after starting
 mostPlayed.update();
-setTimeout(recentlyAdded.update, 3 * ONE_MIN);
+setTimeout(() => recentlyAdded.update(), ONE_MIN * 2);

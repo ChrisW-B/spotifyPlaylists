@@ -11,7 +11,6 @@ const SpotifyWebApi = require('spotify-web-api-node'),
 
 module.exports = class Playlist {
   constructor(redis, type) {
-    console.log(`Constructing for ${type}`)
     this.redis = redis;
     this.type = type;
     this.playListName = type === 'most' ? 'Most Played' : 'Recently Added';
@@ -19,7 +18,6 @@ module.exports = class Playlist {
     this.logger = logger;
     this.ONE_MIN = ONE_MIN;
     this.ONE_SEC = ONE_SEC;
-    console.log({ redis: this.redis, type: this.type, playListName: this.playListName, ONE_MIN: this.ONE_MIN, ONE_SEC: this.ONE_SEC });
   }
   //add list of spotify tracks to a playlist
   fillPlaylist(userId, playlistId, tracklist) {
@@ -68,7 +66,6 @@ module.exports = class Playlist {
 
   async update() {
     logger.time().tag(this.playListName).file().info('Starting');
-    console.log({ redis: this.redis, playlist: this.playListName, type: this.type })
     const members = await this.redis.smembers('users');
     await Promise.all(members.map(async member => {
       const enabled = String(await this.redis.hget(member, this.type)).toLowerCase() === 'true';
@@ -77,7 +74,7 @@ module.exports = class Playlist {
         return enabled ? this.updatePlaylist(member, delayInc++) : null;
       } catch (e) {
         logger.time().tag(this.playListName).file().error(`Error!\n${JSON.stringify(e, null, 2)}`);
-        setTimeout(this.update, 5 * ONE_MIN);
+        setTimeout(() => this.update(), 5 * ONE_MIN);
       }
     }));
     logger.time().tag(this.playListName).file().backend('Done!');
