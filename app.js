@@ -103,12 +103,12 @@ app.get('/admin', ensureAuthenticated, ensureAdmin, (req, res) =>
   res.render('pages/admin'));
 
 app.get('/forceRecent', ensureAuthenticated, ensureAdmin, (req, res) => {
-  recentlyAdded.start();
+  recentlyAdded.update();
   res.redirect('/');
 });
 
 app.get('/forceMost', ensureAuthenticated, ensureAdmin, (req, res) => {
-  mostPlayed.start();
+  mostPlayed.update();
   res.redirect('/');
 });
 
@@ -233,9 +233,9 @@ const saveToRedis = async data => {
 };
 
 //run periodically
-setInterval(recentlyAdded.start, 5 * ONE_HOUR);
-setTimeout(() => setInterval(mostPlayed.start, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset start
+setInterval(recentlyAdded.update, 5 * ONE_HOUR);
+setTimeout(() => setInterval(mostPlayed.update, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset update
 
-//run after start
-recentlyAdded.start();
-setTimeout(mostPlayed.start, 3 * ONE_MIN);
+//run after starting
+recentlyAdded.update();
+setTimeout(mostPlayed.update, 3 * ONE_MIN);

@@ -5,10 +5,12 @@ const SpotifyWebApi = require('spotify-web-api-node'),
     clientId: config.spotify.clientId,
     clientSecret: config.spotify.clientSecret,
     redirectUri: config.spotify.redirectUri
-  });
+  }),
+  ONE_MIN = 60 * 1000;
 
 module.exports = class Playlist {
   constructor(redis, type) {
+    console.log({ construct: 'constructing', redis, type })
     this.redis = redis;
     this.type = type;
     this.playListName = type === 'most' ? 'Most Played' : 'Recently Added';
@@ -59,14 +61,18 @@ module.exports = class Playlist {
     return (await spotifyApi.refreshAccessToken()).body;
   }
 
-  async start() {
+  async update() {
     logger.time().tag(this.playListName).file().info('Starting');
     const members = await this.redis.smembers('users');
     await Promise.all(members.map(async member => {
-      console.log(this.type)
       const enabled = String(await this.redis.hget(member, this.type)).toLowerCase() === 'true';
       let delayInc = 0;
-      return enabled ? this.updatePlaylist(member, delayInc++) : null;
+      try {
+        return enabled ? this.updatePlaylist(member, delayInc++) : null;
+      } catch (e) {
+        logger.time().tag(this.playListName).file().error(`Error!\n${JSON.stringify(e, null, 2)}`);
+        setTimeout(this.update, 5 * ONE_MIN);
+      }
     }));
     logger.time().tag(this.playListName).file().backend('Done!');
   }

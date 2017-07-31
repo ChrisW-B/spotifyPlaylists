@@ -18,7 +18,6 @@ module.exports = class MostPlayed extends Playlist {
   constructor(redis) {
     super(redis, 'most');
     this.redis = redis;
-
   }
 
   // takes list of last.fm tracks and tries to find them in spotify
