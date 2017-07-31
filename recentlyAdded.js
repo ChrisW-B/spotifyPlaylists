@@ -16,6 +16,7 @@ module.exports = class RecentlyAdded extends Playlist {
 
   async updatePlaylist(userId, delayInc = 0) {
     await sleep(delayInc * this.ONE_MIN * 5);
+
     this.logger.time().tag(this.playListName).file().backend('Getting database items');
     const memberInfo = {
       numTracks: await this.redis.hget(userId, `${this.type}:length`),

@@ -237,5 +237,5 @@ setInterval(recentlyAdded.update, 5 * ONE_HOUR);
 setTimeout(() => setInterval(mostPlayed.update, 5 * ONE_HOUR), 2 * ONE_HOUR); //offset update
 
 //run after starting
-recentlyAdded.update();
-setTimeout(mostPlayed.update, 3 * ONE_MIN);
+mostPlayed.update();
+setTimeout(recentlyAdded.update, 3 * ONE_MIN);
