@@ -10,7 +10,6 @@ const SpotifyWebApi = require('spotify-web-api-node'),
 
 module.exports = class Playlist {
   constructor(redis, type) {
-    console.log({ construct: 'constructing', redis, type })
     this.redis = redis;
     this.type = type;
     this.playListName = type === 'most' ? 'Most Played' : 'Recently Added';
@@ -63,6 +62,7 @@ module.exports = class Playlist {
 
   async update() {
     logger.time().tag(this.playListName).file().info('Starting');
+    console.log({ redis: this.redis, playlist: this.playListName })
     const members = await this.redis.smembers('users');
     await Promise.all(members.map(async member => {
       const enabled = String(await this.redis.hget(member, this.type)).toLowerCase() === 'true';
