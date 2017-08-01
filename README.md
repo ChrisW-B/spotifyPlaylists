@@ -14,6 +14,9 @@ Updates a Spotify playlist based on the most played Last.FM tracks
 ## recentlyAdded.js
 Updates a Spotify playlist based on recently added Spotify tracks
 
+## Playlist.js
+The playlist parent class, contains everything the app needs for making/editing/clearing/updating spotify playlists
+
 ## Config File
 Your config file should look similar to the following
 
