@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ChrisW-B/spotifyPlaylists#readme",
   "dependencies": {
+    "babili-webpack-plugin": "^0.1.2",
     "body-parser": "^1.17.2",
     "colors": "^1.1.2",
     "compression": "^1.7.0",
