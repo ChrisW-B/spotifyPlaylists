@@ -4,8 +4,8 @@ const sleep = require('sleep-promise'),
   Playlist = require('./Playlist');
 
 module.exports = class RecentlyAdded extends Playlist {
-  constructor(redis) {
-    super(redis, 'recent');
+  constructor(logger, redis, spotifyData) {
+    super(logger, redis, spotifyData, 'recent');
     this.redis = redis;
   }
 
@@ -17,7 +17,7 @@ module.exports = class RecentlyAdded extends Playlist {
   async updatePlaylist(userId, delayInc = 0) {
     await sleep(delayInc * this.ONE_MIN * 5);
 
-    this.logger.time().tag(this.playListName).file().backend('Getting database items');
+    this.logger.recentlyAdded('Getting database items');
     const memberInfo = {
       numTracks: await this.redis.hget(userId, `${this.type}:length`),
       refresh: await this.redis.hget(userId, 'refresh'),
@@ -25,7 +25,7 @@ module.exports = class RecentlyAdded extends Playlist {
       oldPlaylist: await this.redis.hget(userId, `${this.type}:playlist`)
     };
 
-    this.logger.time().tag(this.playListName).file().backend('Logging in to spotify');
+    this.logger.recentlyAdded('Logging in to spotify');
     const token = (await this.refreshToken(memberInfo.token, memberInfo.refresh));
     const newTokens = {
       token: token.access_token,
@@ -34,21 +34,21 @@ module.exports = class RecentlyAdded extends Playlist {
     this.spotifyApi.setAccessToken(newTokens.token);
     this.spotifyApi.setRefreshToken(newTokens.refresh);
 
-    this.logger.time().tag(this.playListName).file().time().backend('Getting user info');
+    this.logger.recentlyAdded('Getting user info');
     const userInfo = await this.spotifyApi.getMe();
 
-    this.logger.time().tag(this.playListName).file().backend('preparing playlist and getting saved tracks');
+    this.logger.recentlyAdded('preparing playlist and getting saved tracks');
     const newPlaylistId = await this.preparePlaylist(userInfo.body.id, memberInfo.oldPlaylist),
       savedTracks = (await this.spotifyApi.getMySavedTracks({
         limit: memberInfo.numTracks
       })).body,
       spotifyId = userInfo.body.id;
 
-    this.logger.time().tag(this.playListName).file().backend('filling playlist');
+    this.logger.recentlyAdded('filling playlist');
     const spotifyUris = this.createTrackListArray(savedTracks.items);
     await this.spotifyApi.addTracksToPlaylist(spotifyId, newPlaylistId, spotifyUris);
 
-    this.logger.time().tag(this.playListName).file().backend('Updating database');
+    this.logger.recentlyAdded('Updating database');
     await Promise.all([
       this.redis.hset(userId, 'access', newTokens.token),
       this.redis.hset(userId, 'refresh', newTokens.refresh),

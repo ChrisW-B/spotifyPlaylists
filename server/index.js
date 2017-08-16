@@ -1,32 +1,62 @@
 'use strict';
 
-const
-  express = require('express'),
+const express = require('express'),
   session = require('express-session'),
   bodyParser = require('body-parser'),
   cookieParser = require('cookie-parser'),
-  scribe = require('scribe-js')(),
+  winston = require('winston'),
+  expressWinston = require('express-winston'),
+  path = require('path'),
   passport = require('passport'),
   RedisStore = require('connect-redis')(session),
   Redis = require('promise-redis')(),
-  SpotifyStrategy = require('passport-spotify').Strategy;
+  SpotifyStrategy = require('passport-spotify').Strategy,
+  colors = require('colors'),
 
-const
   redis = Redis.createClient(),
-  logger = process.console,
-  app = express();
+  app = express(),
+  logger = new(winston.Logger)({
+    level: 'recentlyAdded',
+    levels: { server: 0, playlist: 0, mostPlayed: 0, recentlyAdded: 0 },
+    colors: { server: 'green', playlist: 'blue', mostPlayed: 'magenta', recentlyAdded: 'yellow' },
+    colorize: true,
+    transports: [
+      new(winston.transports.Console)({ 'timestamp': true, 'prettyPrint': true, colorize: true })
+    ]
+  }),
 
-const
   config = require('./config'),
-  RecentlyAdded = require('./recentlyAdded'),
-  MostPlayed = require('./mostPlayed'),
-  mostPlayed = new MostPlayed(redis),
-  recentlyAdded = new RecentlyAdded(redis);
+  RecentlyAdded = require('./Playlists').recentlyAdded,
+  MostPlayed = require('./Playlists').mostPlayed,
+  mostPlayed = new MostPlayed(logger,
+    redis, {
+      clientId: config.spotify.clientId,
+      clientSecret: config.spotify.clientSecret,
+      redirectUri: config.spotify.redirectUri
+    }, {
+      apiKey: config.lastfm.token,
+      apiSecret: config.lastfm.secret,
+      username: config.lastfm.username,
+      password: config.lastfm.password
+    }),
+  recentlyAdded = new RecentlyAdded(
+    logger,
+    redis, {
+      clientId: config.spotify.clientId,
+      clientSecret: config.spotify.clientSecret,
+      redirectUri: config.spotify.redirectUri
+    }),
 
-const
   ONE_SEC = 1000,
   ONE_MIN = 60 * ONE_SEC,
   ONE_HOUR = 60 * ONE_MIN;
+
+colors.setTheme({
+  server: 'green',
+  playlist: 'blue',
+  mostPlayed: 'red',
+  recentlyAdded: 'yellow'
+})
 
 passport.serializeUser(function (user, done) {
   done(null, user);
@@ -54,10 +84,9 @@ passport.use(
   )
 );
 
-logger.addLogger('backend', 'cyan');
-app.set('views', __dirname + '/views');
+app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
   store: new RedisStore({ host: 'localhost', port: 6379, client: redis }),
   secret: config.secret,
@@ -69,8 +98,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(scribe.express.logger(logger)); //Log each request
-app.use('/logs', scribe.webPanel());
+app.use(expressWinston.logger({
+  transports: [new winston.transports.Console({ colorize: true })],
+  expressFormat: true,
+  meta: false,
+  colorize: true
+}));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const ensureAuthenticated = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/');
@@ -179,7 +212,7 @@ app.get('*', (req, res) => {
 });
 
 app.listen(5621, () => {
-  logger.time().file().info('SpotifyApps listening on port 5621!');
+  logger.server('SpotifyApps listening on port 5621!\n'.rainbow + 'http://localhost:5621/');
 });
 
 const saveSettings = async(userId, numTracks, lastfm, period, isMost) => (isMost)
@@ -229,7 +262,7 @@ const saveToRedis = async data => {
       'refresh', data.refresh,
       'most', 'false',
       'recent', 'false');
-  } else logger.time().file().info(`${data.userId} already added!`);
+  } else logger.server(`${data.userId} already added!`);
 };
 
 //run periodically
@@ -237,5 +270,5 @@ setInterval(() => recentlyAdded.update(), 5 * ONE_HOUR);
 setTimeout(() => setInterval(() => mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); //offset update
 
 //run after starting
-mostPlayed.update();
-setTimeout(() => recentlyAdded.update(), ONE_MIN * 2);
+// mostPlayed.update();
+// setTimeout(() => recentlyAdded.update(), ONE_MIN * 2);
