@@ -15,8 +15,8 @@ import { AppContainer } from './containers';
 if (module.hot && ENV !== 'production') {
   module.hot.accept();
 }
-
-let middleware = [thunkMiddleware, routerMiddleware(createHistory())];
+const history = createHistory()
+let middleware = [thunkMiddleware, routerMiddleware(history)];
 
 if (ENV !== 'production') {
   const { createLogger } = require('redux-logger');
@@ -39,7 +39,7 @@ if (ENV !== 'production') {
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
-// store.dispatch(getMemberInfo());
+store.dispatch(getMemberInfo());
 
 ReactDOM.render(
   <Provider store={store}>

@@ -2,7 +2,7 @@ const express = require('express'),
   app = express.Router(),
   utils = require('../utils');
 
-app.get('/playlists', utils.ensureAuthenticated, async(req, res) => {
+app.get('', utils.ensureAuthenticated, async(req, res) => {
   if (!req.isAuthenticated()) res.send({ error: true, errMsg: 'Not authenticated' });
   else {
     const userId = req.user.id,
@@ -15,14 +15,14 @@ app.get('/playlists', utils.ensureAuthenticated, async(req, res) => {
     });
   }
 });
-app.get('/playlist/:type/toggle/', utils.ensureAuthenticated, async(req, res) => {
+app.get('/:type/toggle/', utils.ensureAuthenticated, async(req, res) => {
   const userId = req.user.id,
     type = req.params.type;
   const enabled = String(await utils.redis.hget(userId, type)).toLocaleLowerCase() === 'true';
   return enabled
     ? await disablePlaylist(userId, type, res) : await enablePlaylist(userId, type, res);
 });
-app.post('/playlist/:type/save', utils.ensureAuthenticated, async(req, res) => {
+app.post('/:type/save', utils.ensureAuthenticated, async(req, res) => {
   const userId = req.params.id,
     { length: numTracks, lastfmId: lastfm = '', period = '', type } = req.body;
   await saveSettings(userId, numTracks, lastfm, period, type === 'most');

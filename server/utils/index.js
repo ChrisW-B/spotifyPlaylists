@@ -42,19 +42,7 @@ module.exports = {
   recentlyAdded,
   mostPlayed,
 
-  ensureAuthenticated: (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(404),
-  ensureAdmin: (req, res, next) => req.user.id === config.admin ? next() : res.sendStatus(404),
-
-
-  getSettings: async(userId, type) => (type === 'most')
-    ? ({
-      length: await redis.hget(userId, `${type}:length`),
-      lastfm: await redis.hget(userId, `${type}:lastfm`),
-      period: await redis.hget(userId, `${type}:period`)
-    })
-    : ({
-      length: await redis.hget(userId, `${type}:length`)
-    })
-
+  ensureAuthenticated: (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(401),
+  ensureAdmin: (req, res, next) => req.user.id === config.admin ? next() : res.sendStatus(403)
 
 };

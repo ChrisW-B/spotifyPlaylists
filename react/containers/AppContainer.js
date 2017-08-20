@@ -2,14 +2,15 @@
 
 import { connect } from 'react-redux';
 import { App } from '../components';
-import { logout } from '../actions';
+import { logout, deleteAccount } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
-  member: state.member
+  name: state.member.username
 });
 
 const mapDispatchToProps = dispatch => ({
-  logout: () => dispatch(logout())
+  logout: () => dispatch(logout()),
+  deleteAccount: () => dispatch(deleteAccount())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

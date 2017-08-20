@@ -9,8 +9,7 @@ export const get = (url, type, cb) => {
       const response = await fetch(url, {
         credentials: 'same-origin'
       });
-
-      return dispatch(cb(type, await response.json()));
+      return response.status === 200 ? dispatch(cb(type, await response.json())) : dispatch(cb(type));
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
@@ -33,7 +32,7 @@ export const post = (url, type, item, cb) => {
         credentials: 'same-origin',
         'body': JSON.stringify(item)
       });
-      return dispatch(cb(type, await response.json()));
+      return response.status === 200 ? dispatch(cb(type, await response.json())) : dispatch(cb(type));
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
@@ -56,7 +55,7 @@ export const put = (url, type, item, cb) => {
         credentials: 'same-origin',
         'body': JSON.stringify(item)
       });
-      return dispatch(cb(type, await response.json()));
+      return response.status === 200 ? dispatch(cb(type, await response.json())) : dispatch(cb(type));
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
