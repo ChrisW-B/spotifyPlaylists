@@ -1,5 +1,5 @@
 'use strict';
-
+require('colors');
 const express = require('express'),
   session = require('express-session'),
   bodyParser = require('body-parser'),
@@ -9,87 +9,21 @@ const express = require('express'),
   path = require('path'),
   passport = require('passport'),
   RedisStore = require('connect-redis')(session),
-  Redis = require('promise-redis')(),
-  SpotifyStrategy = require('passport-spotify').Strategy,
-  colors = require('colors'),
-
-  redis = Redis.createClient(),
   app = express(),
-  logger = new(winston.Logger)({
-    level: 'recentlyAdded',
-    levels: { server: 0, playlist: 0, mostPlayed: 0, recentlyAdded: 0 },
-    colors: { server: 'green', playlist: 'blue', mostPlayed: 'magenta', recentlyAdded: 'yellow' },
-    colorize: true,
-    transports: [
-      new(winston.transports.Console)({ 'timestamp': true, 'prettyPrint': true, colorize: true })
-    ]
-  }),
 
-  config = require('./config'),
-  RecentlyAdded = require('./Playlists').recentlyAdded,
-  MostPlayed = require('./Playlists').mostPlayed,
-  mostPlayed = new MostPlayed(logger,
-    redis, {
-      clientId: config.spotify.clientId,
-      clientSecret: config.spotify.clientSecret,
-      redirectUri: config.spotify.redirectUri
-    }, {
-      apiKey: config.lastfm.token,
-      apiSecret: config.lastfm.secret,
-      username: config.lastfm.username,
-      password: config.lastfm.password
-    }),
-  recentlyAdded = new RecentlyAdded(
-    logger,
-    redis, {
-      clientId: config.spotify.clientId,
-      clientSecret: config.spotify.clientSecret,
-      redirectUri: config.spotify.redirectUri
-    }),
+  utils = require('./utils'),
+
 
   ONE_SEC = 1000,
   ONE_MIN = 60 * ONE_SEC,
   ONE_HOUR = 60 * ONE_MIN;
 
-colors.setTheme({
-  server: 'green',
-  playlist: 'blue',
-  mostPlayed: 'red',
-  recentlyAdded: 'yellow'
-})
-
-passport.serializeUser(function (user, done) {
-  done(null, user);
-});
-passport.deserializeUser(function (obj, done) {
-  done(null, obj);
-});
-
-passport.use(
-  new SpotifyStrategy({
-      clientID: config.spotify.clientId,
-      clientSecret: config.spotify.clientSecret,
-      callbackURL: config.spotify.redirectUri
-    },
-    async(accessToken, refreshToken, profile, done) => {
-      await saveToRedis({
-        access: accessToken,
-        refresh: refreshToken,
-        userId: profile.id
-      });
-      profile.access = accessToken;
-      profile.refresh = refreshToken;
-      return done(null, profile);
-    }
-  )
-);
-
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
-  store: new RedisStore({ host: 'localhost', port: 6379, client: redis }),
-  secret: config.secret,
+  store: new RedisStore({ host: 'localhost', port: 6379, client: utils.redis }),
+  secret: utils.config.secret,
   resave: false,
   saveUninitialized: true,
   cookie: { secure: 'auto' }
@@ -106,169 +40,48 @@ app.use(expressWinston.logger({
 }));
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const ensureAuthenticated = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/');
-const ensureAdmin = (req, res, next) => req.user.id === config.admin ? next() : res.redirect('/');
-
-app.get('/', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.render('pages/loggedin', {
-      user: req.user.username,
-      userId: req.user.id,
-      isAdmin: (req.user.id === config.admin)
-    });
-  } else {
-    res.render('pages/loggedout');
-  }
-});
-
-app.get('/login',
-  passport.authenticate('spotify', {
-    scope: config.spotify.scopes,
-    showDialog: true
-  })
-);
-
-app.get('/setup',
-  passport.authenticate('spotify', { failureRedirect: '/error' }),
-  (req, res) => res.redirect('/'));
-
-app.get('/admin', ensureAuthenticated, ensureAdmin, (req, res) =>
-  res.render('pages/admin'));
-
-app.get('/forceRecent', ensureAuthenticated, ensureAdmin, (req, res) => {
-  recentlyAdded.update();
-  res.redirect('/');
-});
-
-app.get('/forceMost', ensureAuthenticated, ensureAdmin, (req, res) => {
-  mostPlayed.update();
-  res.redirect('/');
-});
-
-app.get('/logout', ensureAuthenticated, (req, res) => {
-  req.logout();
-  res.redirect('/');
-});
-
-app.get('/userplaylists', ensureAuthenticated, async(req, res) => {
-  if (!req.isAuthenticated()) res.send({ error: true, errMsg: 'Not authenticated' });
-  else {
-    const userId = req.user.id,
-      mostPlayedEnabled = String(await redis.hget(userId, 'most')).toLowerCase() === 'true',
-      recentlyAddedEnabled = String(await redis.hget(userId, 'recent')).toLowerCase() === 'true';
-    res.send({
-      error: false,
-      mostPlayed: mostPlayedEnabled,
-      recentlyAdded: recentlyAddedEnabled
-    });
-  }
-});
-
-app.get('/settings', ensureAuthenticated, async(req, res) => {
-  const userId = req.user.id,
-    type = req.query.type;
-  const { length, lastfm, period } = await getSettings(userId, type);
-  res.render('pages/settings', {
-    type,
-    length: length || 25,
-    lastfm: lastfm || '',
-    period: period || '3month'
+if (process.env.BUILD_MODE !== 'prebuilt') {
+  const webpackConfig = require('../webpack.dev.config.js');
+  const compiler = require('webpack')(webpackConfig);
+  app.use(require('webpack-dev-middleware')(compiler, {
+    hot: true,
+    publicPath: webpackConfig.output.publicPath,
+    stats: {
+      colors: true
+    },
+    historyApiFallback: true
+  }));
+  app.use(require('webpack-hot-middleware')(compiler, {
+    reload: true,
+    path: '/__webpack_hmr',
+    heartbeat: 10 * ONE_SEC
+  }));
+} else {
+  app.get('*.js', (req, res, next) => {
+    req.url = req.url + '.gz';
+    res.set('Content-Encoding', 'gzip');
+    res.set('Content-Type', 'text/javascript');
+    next();
   });
-});
 
-app.get('/toggle', ensureAuthenticated, async(req, res) => {
-  const userId = req.user.id,
-    type = req.query.type;
-  const enabled = String(await redis.hget(userId, type)).toLocaleLowerCase() === 'true';
-  return enabled
-    ? await disablePlaylist(userId, type, res) : await enablePlaylist(userId, type, res);
-});
-
-app.post('/save', ensureAuthenticated, async(req, res) => {
-  const userId = req.user.id,
-    { length: numTracks, lastfmId: lastfm = '', period = '', type } = req.body;
-  await saveSettings(userId, numTracks, lastfm, period, type === 'most');
-  res.redirect('/');
-});
-
-app.get('/goodbye', (req, res) => {
-  res.render('pages/goodbye');
-});
-
-app.get('/delete', ensureAuthenticated, async(req, res) => {
-  const userId = req.user.id;
-  await redis.del(userId);
-  await redis.srem('users', userId);
-  req.logout();
-  res.redirect('/goodbye');
-
-});
-
-app.get('*', (req, res) => {
-  res.render('pages/error', {
-    title: '404',
-    errMsg: 'Whoops! Looks like that page got a little lost on its way to you'
+  app.get('/build/app.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/build', 'app.js'));
   });
-});
+}
+
+app.use('/member', require('./routes/member'));
+app.use('/admin', utils.ensureAdmin, require('./routes/admin'));
+app.use('/playlists', require('./routes/playlists'));
+app.get('*', (req, res) => res.render('pages/index'));
 
 app.listen(5621, () => {
-  logger.server('SpotifyApps listening on port 5621!\n'.rainbow + 'http://localhost:5621/');
+  utils.logger.server('SpotifyApps listening on port 5621!\n'.rainbow + 'http://localhost:5621/');
 });
 
-const saveSettings = async(userId, numTracks, lastfm, period, isMost) => (isMost)
-  ? redis.hmset(userId,
-    'most', true,
-    'most:length', numTracks,
-    'most:playlist', 'null',
-    'most:lastfm', lastfm,
-    'most:period', period)
-  : redis.hmset(userId,
-    'recent', true,
-    'recent:length', numTracks,
-    'recent:playlist', 'null');
-
-const getSettings = async(userId, type) => (type === 'most')
-  ? ({
-    length: await redis.hget(userId, `${type}:length`),
-    lastfm: await redis.hget(userId, `${type}:lastfm`),
-    period: await redis.hget(userId, `${type}:period`)
-  })
-  : ({
-    length: await redis.hget(userId, `${type}:length`)
-  });
-
-const disablePlaylist = async(userId, type, res) => {
-  res.send({ isSetup: true });
-  return await redis.hset(userId, type, false);
-};
-
-const enablePlaylist = async(userId, type, res) => {
-  const exists = await redis.hexists(userId, `${type}:playlist`);
-  if (exists) {
-    await redis.hset(userId, type, true);
-    res.send({ isSetup: true });
-  } else {
-    await redis.hexists(userId, `${type}:playlist`);
-    res.send({ isSetup: false });
-  }
-};
-
-const saveToRedis = async data => {
-  const exists = await redis.exists(data.userId);
-  if (!exists) {
-    await redis.sadd('users', data.userId);
-    await redis.hmset(data.userId,
-      'access', data.access,
-      'refresh', data.refresh,
-      'most', 'false',
-      'recent', 'false');
-  } else logger.server(`${data.userId} already added!`);
-};
-
 //run periodically
-setInterval(() => recentlyAdded.update(), 5 * ONE_HOUR);
-setTimeout(() => setInterval(() => mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); //offset update
+setInterval(() => utils.recentlyAdded.update(), 5 * ONE_HOUR);
+setTimeout(() => setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); //offset update
 
 //run after starting
-// mostPlayed.update();
-// setTimeout(() => recentlyAdded.update(), ONE_MIN * 2);
+// utils.mostPlayed.update();
+// setTimeout(() => utils.recentlyAdded.update(), ONE_MIN * 2);

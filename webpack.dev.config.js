@@ -2,6 +2,7 @@ const path = require('path'),
   webpack = require('webpack'),
   CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
+  config = require('./server/config'),
   APP_DIR = path.resolve(__dirname, 'react');
 
 module.exports = {

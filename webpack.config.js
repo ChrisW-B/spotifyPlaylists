@@ -2,6 +2,7 @@ const path = require('path'),
   CompressionPlugin = require('compression-webpack-plugin'),
   BabiliPlugin = require('babili-webpack-plugin'),
   webpack = require('webpack'),
+  config = require('./server/config'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   APP_DIR = path.resolve(__dirname, 'react');
 
@@ -15,7 +16,7 @@ module.exports = {
     publicPath: '/build/'
   },
   plugins: [
-    new webpack.DefinePlugin({ ENV: JSON.stringify('production') }),
+    new webpack.DefinePlugin({ ENV: JSON.stringify('production')}),
     new BabiliPlugin({ removeConsole: true, removeDebugger: true }, { comments: false, sourceMap: false }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.LoaderOptionsPlugin({
@@ -84,9 +85,9 @@ module.exports = {
         loader: 'postcss-loader',
         options: {
           plugins: [
-            require('postcss-smart-import')({ /* ...options */ }),
-            require('precss')({ /* ...options */ }),
-            require('autoprefixer')({ /* ...options */ })
+            require('postcss-smart-import')(),
+            require('precss')(),
+            require('autoprefixer')()
           ]
         }
       }, {
