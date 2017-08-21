@@ -2,7 +2,6 @@ const path = require('path'),
   CompressionPlugin = require('compression-webpack-plugin'),
   BabiliPlugin = require('babili-webpack-plugin'),
   webpack = require('webpack'),
-  config = require('./server/config'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   APP_DIR = path.resolve(__dirname, 'react');
 
@@ -16,7 +15,7 @@ module.exports = {
     publicPath: '/build/'
   },
   plugins: [
-    new webpack.DefinePlugin({ ENV: JSON.stringify('production')}),
+    new webpack.DefinePlugin({ ENV: JSON.stringify('production') }),
     new BabiliPlugin({ removeConsole: true, removeDebugger: true }, { comments: false, sourceMap: false }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.LoaderOptionsPlugin({
@@ -28,8 +27,8 @@ module.exports = {
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new CompressionPlugin({
-      asset: "[path].gz[query]",
-      algorithm: "gzip",
+      asset: '[path].gz[query]',
+      algorithm: 'gzip',
       test: /\.js$|\.css$|\.html$/,
       threshold: 10240,
       minRatio: 0

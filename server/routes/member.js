@@ -41,6 +41,7 @@ app.get('/setup', passport.authenticate('spotify', {
   successRedirect: '/',
   failureRedirect: '/'
 }));
+
 app.get('', utils.ensureAuthenticated, (req, res) => {
   delete req.user.access;
   delete req.user.refresh;
@@ -48,6 +49,7 @@ app.get('', utils.ensureAuthenticated, (req, res) => {
   delete req.user['_raw'];
   res.json({ ...req.user, isAdmin: req.user.id === utils.config.admin });
 });
+
 app.delete('', utils.ensureAuthenticated, async(req, res) => {
   await deleteMember(req.user.id);
   req.logout();

@@ -15,7 +15,7 @@ import { AppContainer } from './containers';
 if (module.hot && ENV !== 'production') {
   module.hot.accept();
 }
-const history = createHistory()
+const history = createHistory();
 let middleware = [thunkMiddleware, routerMiddleware(history)];
 
 if (ENV !== 'production') {

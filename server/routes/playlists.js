@@ -3,47 +3,55 @@ const express = require('express'),
   utils = require('../utils');
 
 app.get('', utils.ensureAuthenticated, async(req, res) => {
-  if (!req.isAuthenticated()) res.send({ error: true, errMsg: 'Not authenticated' });
-  else {
-    const userId = req.user.id,
-      mostPlayedEnabled = String(await utils.redis.hget(userId, 'most')).toLowerCase() === 'true',
-      recentlyAddedEnabled = String(await utils.redis.hget(userId, 'recent')).toLowerCase() === 'true';
-    res.send({
-      error: false,
-      mostPlayed: mostPlayedEnabled,
-      recentlyAdded: recentlyAddedEnabled
-    });
-  }
-});
-app.get('/:type/toggle/', utils.ensureAuthenticated, async(req, res) => {
   const userId = req.user.id,
-    type = req.params.type;
-  const enabled = String(await utils.redis.hget(userId, type)).toLocaleLowerCase() === 'true';
-  return enabled
-    ? await disablePlaylist(userId, type, res) : await enablePlaylist(userId, type, res);
+    mostPlayed = {
+      enabled: String(await utils.redis.hget(userId, 'most')).toLowerCase() === 'true',
+      length: await utils.redis.hget(userId, 'most:length'),
+      lastfm: await utils.redis.hget(userId, 'most:lastfm'),
+      period: await utils.redis.hget(userId, 'most:period')
+    },
+    recentlyAdded = {
+      enabled: String(await utils.redis.hget(userId, 'recent')).toLowerCase() === 'true',
+      length: await utils.redis.hget(userId, 'recent:length')
+    };
+  res.send({
+    error: false,
+    mostPlayed,
+    recentlyAdded
+  });
 });
+
+app.post('/:type/toggle/', utils.ensureAuthenticated, async(req, res) => {
+  const userId = req.user.id,
+    type = req.params.type,
+    enable = req.body.enable;
+  if (type !== 'most' && type !== 'recent') { res.sendStatus(401); }
+  if (enable) await enablePlaylist(userId, type);
+  else await disablePlaylist(userId, type);
+  const response = type === 'most'
+    ? {
+      enabled: String(await utils.redis.hget(userId, 'most')).toLowerCase() === 'true',
+      length: await utils.redis.hget(userId, 'most:length'),
+      lastfm: await utils.redis.hget(userId, 'most:lastfm'),
+      period: await utils.redis.hget(userId, 'most:period')
+    } : {
+      enabled: String(await utils.redis.hget(userId, 'recent')).toLowerCase() === 'true',
+      length: await utils.redis.hget(userId, 'recent:length')
+    };
+  res.send(response);
+});
+
 app.post('/:type/save', utils.ensureAuthenticated, async(req, res) => {
   const userId = req.params.id,
     { length: numTracks, lastfmId: lastfm = '', period = '', type } = req.body;
+  if (type !== 'most' && type !== 'recent') { res.sendStatus(401); return; }
   await saveSettings(userId, numTracks, lastfm, period, type === 'most');
 });
 
-const disablePlaylist = async(userId, type, res) => {
-    res.send({ isSetup: true });
-    return await utils.redis.hset(userId, type, false);
-  },
-  enablePlaylist = async(userId, type, res) => {
-    const exists = await utils.redis.hexists(userId, `${type}:playlist`);
-    if (exists) {
-      await utils.redis.hset(userId, type, true);
-      res.send({ isSetup: true });
-    } else {
-      await utils.redis.hexists(userId, `${type}:playlist`);
-      res.send({ isSetup: false });
-    }
-  };
+const disablePlaylist = async(userId, type) => await utils.redis.hset(userId, type, false),
+  enablePlaylist = async(userId, type) => await utils.redis.hset(userId, type, true),
 
-const saveSettings = async(userId, numTracks, lastfm, period, isMost) => (isMost)
+  saveSettings = async(userId, numTracks, lastfm, period, isMost) => (isMost)
   ? utils.redis.hmset(userId,
     'most', true,
     'most:length', numTracks,

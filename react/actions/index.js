@@ -3,4 +3,4 @@
 export { get, post, del, put } from './async';
 export { loading } from './loading';
 export { getMemberInfo, logout, deleteAccount } from './member';
-export {} from './playlists';
+export { updatePlaylistStatus, togglePlaylist } from './playlists';

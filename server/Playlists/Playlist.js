@@ -60,7 +60,6 @@ module.exports = class Playlist {
   async update() {
     this.logger.playlist('Starting');
     const members = await this.redis.smembers('users');
-    this.logger.playlist({ members })
     await Promise.all(members.map(async member => {
       const enabled = String(await this.redis.hget(member, this.type)).toLowerCase() === 'true';
       let delayInc = 0;

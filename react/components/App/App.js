@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { PlaylistsContainer } from '../../containers';
 
 export default class App extends Component {
   static propTypes = {
@@ -15,6 +16,7 @@ export default class App extends Component {
         <a href='/member/login'>Login</a>
         <button onClick={logout}>Log Out</button>
         <button onClick={deleteAccount}>Delete Account</button>
+        <PlaylistsContainer/>
       </div>
     );
   }
