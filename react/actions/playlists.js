@@ -1,33 +1,44 @@
 // react/actions/playlists.js
 
 import { get, post } from './';
+
+const recieveData = (type, info) => ({
+  type: `${type}_SUCCESS`,
+  info,
+  receivedAt: Date.now()
+});
 export const updatePlaylistStatus = () => get(
   `/playlists`,
   'UPDATE_PLAYLISTS',
-  (type, info) => ({
-    type: `${type}_SUCCESS`,
-    info,
-    receivedAt: Date.now()
-  })
+  recieveData
 );
 
-export const togglePlaylist = (type, enable) => post(
-  `/playlists/${type}/toggle`,
-  type === 'most' ? 'TOGGLE_MOST' : 'TOGGLE_RECENT', { enable },
-  (type, info) => ({
-    type: `${type}_SUCCESS`,
-    info,
-    receivedAt: Date.now()
-  })
-);
+export const toggleMostPlayed = (enable) =>
+  post(
+    `/playlists/most/toggle`,
+    'TOGGLE_MOST', { enable },
+    recieveData
+  );
 
-export const updatePlaylistSettings = (type, settings) => post(
-  `/playlists/${type}/save`,
-  type === 'most' ? 'UPDATE_MOST' : 'UPDATE_RECENT',
-  settings,
-  (type, info) => ({
-    type: `${type}_SUCCESS`,
-    info,
-    receivedAt: Date.now()
-  })
-);
+export const toggleRecentlyAdded = (enable) =>
+  post(
+    `/playlists/recent/toggle`,
+    'TOGGLE_RECENT', { enable },
+    recieveData
+  );
+
+export const updateMostPlayed = (settings) =>
+  post(
+    `/playlists/most/save`,
+    'UPDATE_MOST',
+    settings,
+    recieveData
+  );
+
+export const updateRecentlyAdded = (settings) =>
+  post(
+    `/playlists/recent/save`,
+    'UPDATE_RECENT',
+    settings,
+    recieveData
+  );

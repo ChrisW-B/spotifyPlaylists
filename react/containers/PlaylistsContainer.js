@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Playlists } from '../components';
-import { updatePlaylistStatus, togglePlaylist, updatePlaylistSettings } from '../actions';
+import { updatePlaylistStatus, toggleMostPlayed, toggleRecentlyAdded, updateMostPlayed, updateRecentlyAdded } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
   mostPlayed: state.playlists.mostPlayed,
@@ -11,10 +11,10 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   updatePlaylistStatus: () => dispatch(updatePlaylistStatus()),
-  updateMostPlayedSettings: (settings) => dispatch(updatePlaylistSettings('most', settings)),
-  updateRecentlyAddedSettings: (settings) => dispatch(updatePlaylistSettings('recent', settings)),
-  toggleMostPlayed: (enable) => dispatch(togglePlaylist('most', enable)),
-  toggleRecentlyAdded: (enable) => dispatch(togglePlaylist('recent', enable))
+  updateMostPlayed: (settings) => dispatch(updateMostPlayed(settings)),
+  updateRecentlyAdded: (settings) => dispatch(updateRecentlyAdded(settings)),
+  toggleMostPlayed: (enable) => dispatch(toggleMostPlayed(enable)),
+  toggleRecentlyAdded: (enable) => dispatch(toggleRecentlyAdded(enable))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Playlists);
