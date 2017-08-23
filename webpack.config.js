@@ -54,13 +54,7 @@ module.exports = {
             'stage-0'
           ],
           'plugins': [
-            'transform-decorators-legacy', [
-              'transform-react-remove-prop-types',
-              {
-                mode: 'remove',
-                removeImport: true
-              }
-            ],
+            'transform-decorators-legacy', ['transform-react-remove-prop-types', { mode: 'remove', removeImport: true }],
             [
               'transform-runtime', {
                 helpers: false,

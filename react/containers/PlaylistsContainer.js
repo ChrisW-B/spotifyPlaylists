@@ -1,7 +1,7 @@
 // react/containers/PlaylistsContainer.js
 
 import { connect } from 'react-redux';
-import Playlists from '../components/Playlists';
+import { Playlists } from '../components';
 import { updatePlaylistStatus, togglePlaylist, updatePlaylistSettings } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({

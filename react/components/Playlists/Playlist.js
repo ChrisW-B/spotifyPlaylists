@@ -9,7 +9,7 @@ class Playlist extends Component {
     title: PropTypes.string.isRequired,
     toggle: PropTypes.func.isRequired,
     saveSettings: PropTypes.func.isRequired,
-    length: PropTypes.number,
+    length: PropTypes.string,
     lastfm: PropTypes.string,
     period: PropTypes.string
   }

@@ -1,7 +1,7 @@
 // react/containers/HeaderContainer.js
 
 import { connect } from 'react-redux';
-import  Header  from '../components/Header';
+import { Header } from '../components';
 import { logout, deleteAccount } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({

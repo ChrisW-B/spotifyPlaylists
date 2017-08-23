@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 export default class Length extends Component {
   static propTypes = {
-    length: PropTypes.number.isRequired,
+    length: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired
   }
   render() {

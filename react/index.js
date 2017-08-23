@@ -11,7 +11,7 @@ import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
 import Reducers from './reducers';
 import { getMemberInfo } from './actions';
-import { App } from './components';
+import { AppContainer } from './containers';
 
 if (module.hot && ENV !== 'production') {
   module.hot.accept();
@@ -46,7 +46,7 @@ store.dispatch(getMemberInfo());
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-     <Route path="*" component={App} />
+     <Route path="*" component={AppContainer} />
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

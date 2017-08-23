@@ -8,7 +8,7 @@ const path = require('path'),
 
 module.exports = {
   entry: {
-    app: ['babel-polyfill', 'webpack-hot-middleware/client?name=app', APP_DIR + '/index']
+    app: ['babel-polyfill', 'webpack-hot-middleware/client?name=app', APP_DIR]
   },
   output: {
     path: BUILD_DIR,
@@ -35,14 +35,7 @@ module.exports = {
         loader: 'babel-loader',
         options: {
           cacheDirectory: true,
-          presets: ['es2015', 'stage-0', 'react'],
-          'plugins': [
-            'transform-decorators-legacy', [
-              'transform-react-remove-prop-types',
-              { mode: 'remove', removeImport: true }
-            ]
-
-          ]
+          presets: ['es2015', 'stage-0', 'react']
         }
       }
     }, {

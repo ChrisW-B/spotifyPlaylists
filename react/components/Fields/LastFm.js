@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 export default class LastFm extends Component {
   static propTypes = {
-    lastfm: PropTypes.number.isRequired,
+    lastfm: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired
   }
   render() {

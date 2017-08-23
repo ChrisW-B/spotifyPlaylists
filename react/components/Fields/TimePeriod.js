@@ -5,16 +5,17 @@ import PropTypes from 'prop-types';
 
 export default class TimePeriod extends Component {
   static propTypes = {
-    period: PropTypes.number.isRequired,
+    period: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired
   }
 
-  options = [{ value: 'overall', title: 'All Time' },
+  options = [
+    { value: 'overall', title: 'All Time' },
     { value: '12month', title: '1 Year' },
     { value: '6month', title: '6 Months' },
     { value: '3month', title: '3 Months' },
     { value: '1month', title: '1 Month' },
-    { value: '7day', title: '1 Week' },
+    { value: '7day', title: '1 Week' }
   ]
   render = () => {
     const { period, onChange } = this.props;

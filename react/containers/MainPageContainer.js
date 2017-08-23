@@ -1,7 +1,7 @@
 // react/containers/PlaylistsContainer.js
 
 import { connect } from 'react-redux';
-import MainPage from '../components/MainPage';
+import { MainPage } from '../components';
 
 const mapStateToProps = (state, ownProps) => ({
   member: state.member,

@@ -29,7 +29,7 @@
     "express": "^4.15.4",
     "express-session": "^1.15.5",
     "express-winston": "^2.4.0",
-    "history": "^4.6.3",
+    "history": "^4.7.2",
     "lastfm-njs": "^0.2.4",
     "node-fetch": "^1.7.2",
     "passport": "^0.4.0",
