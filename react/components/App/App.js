@@ -1,23 +1,16 @@
+// react/components/App/App.js
+
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { PlaylistsContainer } from '../../containers';
+import { HeaderContainer, MainPageContainer } from '../../containers';
+import { Route, Switch } from 'react-router';
 
 export default class App extends Component {
-  static propTypes = {
-    logout: PropTypes.func.isRequired,
-    deleteAccount: PropTypes.func.isRequired,
-    name: PropTypes.string
-  }
-  render() {
-    const { logout, deleteAccount, name = '' } = this.props;
-    return (
-      <div>
-        {name? <h1>Hi {name}!</h1> : ''}
-        <a href='/member/login'>Login</a>
-        <button onClick={logout}>Log Out</button>
-        <button onClick={deleteAccount}>Delete Account</button>
-        <PlaylistsContainer/>
-      </div>
-    );
-  }
+  render = () =>
+    <div>
+      <HeaderContainer />
+      <Switch>
+        <Route path={'/'} exact component={MainPageContainer} />
+        {/*<Route path={'/settings'} exact component={SettingsContainer} />*/}
+      </Switch>
+    </div>
 }

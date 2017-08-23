@@ -1,4 +1,5 @@
 // react/index.js
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore, applyMiddleware, compose } from 'redux';
@@ -10,7 +11,7 @@ import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
 import Reducers from './reducers';
 import { getMemberInfo } from './actions';
-import { AppContainer } from './containers';
+import { App } from './components';
 
 if (module.hot && ENV !== 'production') {
   module.hot.accept();
@@ -22,7 +23,8 @@ if (ENV !== 'production') {
   const { createLogger } = require('redux-logger');
   const loggerMiddleware = createLogger({
     timestamp: false,
-    level: { // redux dev tools can do all of this without cluttering the console
+    level: {
+      // redux dev tools can do all of this without cluttering the console
       // download! http://extension.remotedev.io/
       prevState: false,
       action: 'error',
@@ -44,7 +46,7 @@ store.dispatch(getMemberInfo());
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <Route path="*" component={AppContainer} />
+     <Route path="*" component={App} />
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

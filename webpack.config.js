@@ -1,3 +1,5 @@
+// ./webpack.config.js
+
 const path = require('path'),
   CompressionPlugin = require('compression-webpack-plugin'),
   BabiliPlugin = require('babili-webpack-plugin'),

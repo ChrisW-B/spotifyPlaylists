@@ -19,4 +19,15 @@ export const togglePlaylist = (type, enable) => post(
     info,
     receivedAt: Date.now()
   })
-)
+);
+
+export const updatePlaylistSettings = (type, settings) => post(
+  `/playlists/${type}/save`,
+  type === 'most' ? 'UPDATE_MOST' : 'UPDATE_RECENT',
+  settings,
+  (type, info) => ({
+    type: `${type}_SUCCESS`,
+    info,
+    receivedAt: Date.now()
+  })
+);

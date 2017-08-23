@@ -7,3 +7,4 @@ logs
 yarn.lock
 *.rdb
 .eslintrc.json
+**/build

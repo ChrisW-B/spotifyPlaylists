@@ -1,3 +1,5 @@
+// ./webpack.dev.config.js
+
 const path = require('path'),
   webpack = require('webpack'),
   CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin'),

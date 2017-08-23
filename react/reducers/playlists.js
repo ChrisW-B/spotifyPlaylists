@@ -1,3 +1,5 @@
+// react/reducers/playlists.js
+
 const initialState = {
   mostPlayed: { enabled: false },
   recentlyAdded: { enabled: false }
@@ -12,7 +14,7 @@ export default (state = initialState, action = {}) => {
     return { ...state, mostPlayed: { ...state.mostPlayed, ...action.info } };
   case 'UPDATE_RECENT_SUCCESS':
   case 'TOGGLE_RECENT_SUCCESS':
-    return { ...state, recentlyAdded: { ...state.recentlyAdded, ...action.info } }
+    return { ...state, recentlyAdded: { ...state.recentlyAdded, ...action.info } };
   case 'LOGOUT_SUCCESS':
   case 'DELETE_ACCOUNT_SUCCESS':
     return { ...initialState };

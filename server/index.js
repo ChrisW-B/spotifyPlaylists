@@ -1,3 +1,5 @@
+// server/index.js
+
 'use strict';
 require('colors');
 const express = require('express'),
@@ -12,7 +14,6 @@ const express = require('express'),
   app = express(),
 
   utils = require('./utils'),
-
 
   ONE_SEC = 1000,
   ONE_MIN = 60 * ONE_SEC,

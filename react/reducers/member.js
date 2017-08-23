@@ -1,3 +1,5 @@
+// react/reducers/member.js
+
 const initialState = {
   id: '',
   username: '',

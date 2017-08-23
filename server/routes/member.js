@@ -1,3 +1,5 @@
+// server/routes/member.js
+
 const express = require('express'),
   app = express.Router(),
   passport = require('passport'),

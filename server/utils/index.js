@@ -1,3 +1,5 @@
+// server/utils/index.js
+
 const Redis = require('promise-redis')(),
   redis = Redis.createClient(),
   winston = require('winston'),

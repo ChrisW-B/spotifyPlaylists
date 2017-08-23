@@ -1,11 +1,13 @@
-// react/containers/AppContainer.js
+// react/containers/HeaderContainer.js
 
 import { connect } from 'react-redux';
-import { App } from '../components';
+import  Header  from '../components/Header';
 import { logout, deleteAccount } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
-  name: state.member.username
+  member: state.member,
+  mostPlayed: state.playlists.mostPlayed,
+  recentlyAdded: state.playlists.recentlyAdded
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -13,4 +15,4 @@ const mapDispatchToProps = dispatch => ({
   deleteAccount: () => dispatch(deleteAccount())
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
