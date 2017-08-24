@@ -29,16 +29,21 @@ module.exports = {
   ],
   module: {
     rules: [{
+      enforce: 'pre',
+      test: /\.js$/,
+      exclude: /node_modules/,
+      loader: 'eslint-loader'
+    }, {
       test: /\.jsx?$|\.js?$/,
       exclude: /node_modules/,
-      use: {
+      use: [{
         loader: 'babel-loader',
         options: {
           cacheDirectory: true,
           presets: ['es2015', 'stage-0', 'react'],
           plugins: ['styled-components']
         }
-      }
+      }, 'stylelint-custom-processor-loader']
     }, {
       test: /\.json?$/,
       loader: 'json-loader'

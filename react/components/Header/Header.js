@@ -4,9 +4,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const Wrapper = styled.div `
-background: var(--oc-indigo-7);
-width: 100%;
+const Wrapper = styled.div`
+  background: var(--oc-indigo-7);
+  width: 100%;
 `;
 
 export default class Header extends Component {

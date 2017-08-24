@@ -41,9 +41,14 @@ module.exports = {
   },
   module: {
     rules: [{
+      enforce: 'pre',
+      test: /\.js$/,
+      exclude: /node_modules/,
+      loader: 'eslint-loader'
+    }, {
       test: /\.jsx?$|\.js?$/,
       exclude: /(node_modules|bower_components)/,
-      use: {
+      use: [{
         loader: 'babel-loader',
         options: {
           cacheDirectory: './webpack-cache',
@@ -54,7 +59,7 @@ module.exports = {
             'stage-0'
           ],
           'plugins': [
-            ['styled-components', {displayName: false}],
+            ['styled-components', { displayName: false }],
             'transform-decorators-legacy', ['transform-react-remove-prop-types', { mode: 'remove', removeImport: true }],
             [
               'transform-runtime', {
@@ -66,7 +71,7 @@ module.exports = {
             ]
           ]
         }
-      }
+      }, 'stylelint-custom-processor-loader', 'eslint-loader']
     }, {
       test: /\.scss$/,
       exclude: /node_modules/,
