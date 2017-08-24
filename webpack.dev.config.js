@@ -35,36 +35,13 @@ module.exports = {
         loader: 'babel-loader',
         options: {
           cacheDirectory: true,
-          presets: ['es2015', 'stage-0', 'react']
+          presets: ['es2015', 'stage-0', 'react'],
+          plugins: ['styled-components']
         }
       }
     }, {
       test: /\.json?$/,
       loader: 'json-loader'
-    }, {
-      test: /\.css$/,
-      exclude: /node_modules/,
-      use: [{
-        loader: 'style-loader'
-      }, {
-        loader: 'css-loader',
-        options: {
-          importLoaders: 1
-        }
-      }]
-    }, {
-      test: /\.scss$|\.sass$/,
-      exclude: /node_modules/,
-      use: [{
-        loader: 'style-loader'
-      }, {
-        loader: 'css-loader',
-        options: {
-          importLoaders: 1
-        }
-      }, {
-        loader: 'sass-loader'
-      }]
     }, {
       test: /\.svg$/,
       loader: 'url-loader?limit=10000&mimetype=image/svg+xml'

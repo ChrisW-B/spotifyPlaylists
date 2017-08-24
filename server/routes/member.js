@@ -40,7 +40,7 @@ app.get('/login', passport.authenticate('spotify', {
 app.get('/setup', passport.authenticate('spotify', {
   scope: utils.config.spotify.scopes,
   showDialog: true,
-  successRedirect: '/',
+  successRedirect: '/loggedin',
   failureRedirect: '/'
 }));
 

@@ -8,6 +8,7 @@ import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
+import { injectGlobal } from 'styled-components';
 
 import Reducers from './reducers';
 import { getMemberInfo } from './actions';

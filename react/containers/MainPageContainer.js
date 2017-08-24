@@ -2,6 +2,7 @@
 
 import { connect } from 'react-redux';
 import { MainPage } from '../components';
+import { getMemberInfo } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
   member: state.member,
@@ -9,4 +10,8 @@ const mapStateToProps = (state, ownProps) => ({
   recentlyAdded: state.playlists.recentlyAdded
 });
 
-export default connect(mapStateToProps)(MainPage);
+const mapDispatchToProps = dispatch => ({
+  getMemberInfo: () => dispatch(getMemberInfo())
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(MainPage);
