@@ -8,6 +8,7 @@ import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
+import { injectGlobal } from 'styled-components';
 
 import Reducers from './reducers';
 import { getMemberInfo } from './actions';
@@ -42,6 +43,27 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
 store.dispatch(getMemberInfo());
+
+injectGlobal `
+  body,
+  html,
+  #root {
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p {
+    font-family: Lato, sans-serif;
+  }
+
+  @import url('https://fonts.googleapis.com/css?family=Lato:400,700');
+
+  @import url('/styles/opencolor.css');
+`;
 
 ReactDOM.render(
   <Provider store={store}>

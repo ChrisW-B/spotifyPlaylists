@@ -34,6 +34,11 @@ module.exports = {
       exclude: /node_modules/,
       loader: 'eslint-loader'
     }, {
+      enforce: 'pre',
+      test: /\.js$/,
+      exclude: /node_modules/,
+      loader: 'stylelint-custom-processor-loader'
+    }, {
       test: /\.jsx?$|\.js?$/,
       exclude: /node_modules/,
       use: [{
@@ -41,9 +46,14 @@ module.exports = {
         options: {
           cacheDirectory: true,
           presets: ['es2015', 'stage-0', 'react'],
-          plugins: ['styled-components']
+          plugins: [
+            ['styled-components', {
+              'minify': false,
+              'displayName': false
+            }]
+          ]
         }
-      }, 'stylelint-custom-processor-loader']
+      }]
     }, {
       test: /\.json?$/,
       loader: 'json-loader'

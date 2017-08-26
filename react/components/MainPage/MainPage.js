@@ -3,6 +3,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { HeaderContainer, PlaylistsContainer } from '../../containers';
+import { LoginScreen } from '../';
+
 export default class MainPage extends Component {
   static propTypes = {
     member: PropTypes.object,
@@ -13,6 +15,7 @@ export default class MainPage extends Component {
     localStorage.clear();
     this.props.getMemberInfo();
   }
+
   login = () => {
     window.open('/member/login', '_blank', 'height=600,width=400');
     window.addEventListener('storage',
@@ -20,15 +23,10 @@ export default class MainPage extends Component {
       ? this.reloadMember()
       : null
     );
-
   }
-  render = () =>
-    <div>
-      <HeaderContainer />
-      {
-        this.props.member.id
-        ? <div><p>congrat</p> <PlaylistsContainer/> </div>
-        : <button onClick={this.login}>log in</button>
-      }
-    </div>
+
+  render = () => this.props.member.id
+    ? <div><HeaderContainer/><PlaylistsContainer /> </div>
+    : <LoginScreen login={this.login} />
+
 }
