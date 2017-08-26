@@ -1,37 +1,51 @@
-import style, { keyframes } from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
 
 const AnimateBG = keyframes `
   0% {
     background-position: 0 0;
   }
   100% {
-    background-position: 500em 0;
+    background-position: -500em 0;
   }
 `;
 
-export const LoginBackground = style.div `
+const MoveOutLeft = keyframes `
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+`;
+
+
+export const LoginBackground = styled.div `
   align-items: left;
-  animation: 100s ${AnimateBG} linear infinite;
+  animation: ${props => props.state !== 'exiting' ? `100s ${AnimateBG} linear infinite` : `500ms ${MoveOutLeft} ease`};
   background: repeating-linear-gradient(140deg, #FA8BFF 0%, #2BFF88 35%, #2BD2FF 65%, #FA8BFF 81%);
   background-color: #00dbde;
   background-position: 50em 0;
   background-size: 500em 100em;
+  bottom: 0;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
 `;
 
-export const SpotifyButton = style.button `
+export const SpotifyButton = styled.button `
   background: transparent;
   border: none;
   cursor: pointer;
   justify-self: center;
 `;
 
-export const TextWrapper = style.h1 `
+export const TextWrapper = styled.h1 `
   line-height: 1.7;
-  max-width: ${props=> props.primary ? '600px': '420px'};
+  max-width: ${props=> props.title ? '600px': '420px'};
   & > * {
     background-color: white;
     -webkit-box-decoration-break: clone;
@@ -43,14 +57,14 @@ export const TextWrapper = style.h1 `
   }
 `;
 
-export const WelcomeText = style.span `
+export const WelcomeText = styled.span `
   font-size: 45px;
   font-weight: 700;
   padding-left: 20px;
   padding-right: 10px;
 `;
 
-export const Description = style.span `
+export const Description = styled.span `
   font-size: 18px;
   font-weight: 400;
   padding: 10px;

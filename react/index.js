@@ -60,6 +60,15 @@ injectGlobal `
     font-family: Lato, sans-serif;
   }
 
+  @keyframes moveOutLeft {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(200px, 0, 0);
+    }
+  }
+
   @import url('https://fonts.googleapis.com/css?family=Lato:400,700');
 
   @import url('/styles/opencolor.css');

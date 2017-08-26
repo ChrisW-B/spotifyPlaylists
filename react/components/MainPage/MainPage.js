@@ -2,6 +2,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Transition from 'react-transition-group/Transition'
 import { HeaderContainer, PlaylistsContainer } from '../../containers';
 import { LoginScreen } from '../';
 
@@ -25,8 +26,17 @@ export default class MainPage extends Component {
     );
   }
 
-  render = () => this.props.member.id
-    ? <div><HeaderContainer/><PlaylistsContainer /> </div>
-    : <LoginScreen login={this.login} />
+  render = () =>
+    <div>
+      <Transition timeout={500} in={!!this.props.member.id} unmountOnExit mountOnEnter>
+        <div>
+          <HeaderContainer/>
+          <PlaylistsContainer />
+        </div>
+      </Transition>
+      <Transition timeout={500} in={!this.props.member.id} unmountOnExit mountOnEnter>
+        { status => <LoginScreen login={this.login} status={status} /> }
+      </Transition>
+    </div>
 
 }

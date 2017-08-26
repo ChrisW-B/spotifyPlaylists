@@ -6,12 +6,12 @@ import { LoginBackground, TextWrapper, WelcomeText, Description, SpotifyButton }
 
 export default class MainPage extends Component {
   static propTypes = {
-    login: PropTypes.func
+    login: PropTypes.func,
+    status: PropTypes.string
   }
-
   render = () =>
-    <LoginBackground>
-      <TextWrapper primary>
+    <LoginBackground state={this.props.status}>
+      <TextWrapper title>
         <WelcomeText>Welcome to Autoplaylists for Spotify!</WelcomeText>
       </TextWrapper>
       <TextWrapper>
