@@ -1,6 +1,5 @@
 import styled, { keyframes } from 'styled-components';
 
-
 const AnimateBG = keyframes `
   0% {
     background-position: 0 0;
@@ -19,10 +18,18 @@ const MoveOutLeft = keyframes `
   }
 `;
 
+const MoveInLeft = keyframes `
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+`;
 
 export const LoginBackground = styled.div `
   align-items: left;
-  animation: ${props => props.state !== 'exiting' ? `100s ${AnimateBG} linear infinite` : `500ms ${MoveOutLeft} ease`};
+  animation: 100s ${AnimateBG} linear infinite ${props => props.status === 'exiting' ?  `, 300ms ${MoveOutLeft} cubic-bezier(0.4, 0, 0.2, 1)` : props.status === 'entering' ? `, 300ms ${MoveInLeft} cubic-bezier(0.4, 0, 0.2, 1)` : ''};
   background: repeating-linear-gradient(140deg, #FA8BFF 0%, #2BFF88 35%, #2BD2FF 65%, #FA8BFF 81%);
   background-color: #00dbde;
   background-position: 50em 0;
@@ -45,32 +52,37 @@ export const SpotifyButton = styled.button `
 
 export const TextWrapper = styled.h1 `
   line-height: 1.7;
-  max-width: ${props=> props.title ? '600px': '420px'};
-  & > * {
-    background-color: white;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
-    box-shadow: 0 0 7px -3px #444;
-    color: black;
-    display: inline;
-    padding: 5px;
-  }
+  max-width: 420px;
 `;
 
-export const WelcomeText = styled.span `
+export const TitleWrapper = styled(TextWrapper) `
+  max-width: 600px;
+`;
+
+const TextWithBg = styled.span `
+  background-color: white;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  box-shadow: 0 0 7px -3px #444;
+  color: black;
+  display: inline;
+  padding: 5px;
+  padding-left: 20px;
+`;
+
+export const WelcomeText = styled(TextWithBg) `
   font-size: 45px;
   font-weight: 700;
-  padding-left: 20px;
   padding-right: 10px;
 `;
 
-export const Description = styled.span `
+export const Description = styled(TextWithBg) `
   font-size: 18px;
   font-weight: 400;
-  padding: 10px;
-  padding-left: 20px;
-  & i {
-    color: #666;
-    font-style: normal;
-  }
+  padding: 10px 10px 10px 20px;
+`;
+
+export const PlaylistTitle = styled.i`
+  color: #666;
+  font-style: normal;
 `;

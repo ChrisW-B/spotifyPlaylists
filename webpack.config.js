@@ -59,7 +59,7 @@ module.exports = {
             'stage-0'
           ],
           'plugins': [
-            ['styled-components', { displayName: false }],
+            ['styled-components', { displayName: false, preprocess: true }],
             'transform-decorators-legacy', ['transform-react-remove-prop-types', { mode: 'remove', removeImport: true }],
             [
               'transform-runtime', {
@@ -73,35 +73,9 @@ module.exports = {
         }
       }, 'stylelint-custom-processor-loader', 'eslint-loader']
     }, {
-      test: /\.scss$/,
-      exclude: /node_modules/,
-      use: [{
-        loader: 'style-loader'
-      }, {
-        loader: 'css-loader',
-        options: {
-          importLoaders: 1
-        }
-      }, {
-        loader: 'postcss-loader',
-        options: {
-          plugins: [
-            require('postcss-smart-import')(),
-            require('precss')(),
-            require('autoprefixer')()
-          ]
-        }
-      }, {
-        loader: 'sass-loader'
-      }]
-    }, {
       test: /\.json?$/,
       loader: 'json-loader',
       exclude: /node_modules/
-    }, {
-      test: /\.css$/,
-      exclude: /node_modules/,
-      loader: 'style-loader!css-loader!autoprefixer?browsers=last 2 versions'
     }, {
       test: /\.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
       exclude: /node_modules/,

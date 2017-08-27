@@ -48,8 +48,7 @@ module.exports = {
           presets: ['es2015', 'stage-0', 'react'],
           plugins: [
             ['styled-components', {
-              'minify': false,
-              'displayName': false
+              preprocess: true
             }]
           ]
         }

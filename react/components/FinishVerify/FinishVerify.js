@@ -1,8 +1,8 @@
-// react/components/LoggedIn/LoggedIn.js
+// react/components/FinishVerify/FinishVerify.js
 
 import React, { Component } from 'react';
 
-export default class LoggedIn extends Component {
+export default class FinishVerify extends Component {
   componentDidMount() {
     localStorage.setItem('loggedInSuccess', true);
     window.close();
