@@ -1,4 +1,4 @@
-// react/components/Playlists/Fields/LastFm.js
+// react/components/Fields/LastFm.js
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 

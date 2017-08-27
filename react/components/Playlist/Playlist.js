@@ -21,10 +21,10 @@ class Playlist extends Component {
     period: null
   }
 
-  componentDidMount = () => this.createState(this.props)
-  componentWillReceiveProps = (nextProps) => this.createState(nextProps)
+  componentDidMount = () => this.updateState(this.props)
+  componentWillReceiveProps = (nextProps) => this.updateState(nextProps)
 
-  createState = (n) => {
+  updateState = (n) => {
     const { length, lastfm, period } = n;
     const safeVals = {
       length: length || 10,
@@ -55,10 +55,18 @@ class Playlist extends Component {
     } = this;
     return (
       <div>
-        <p>{title}: {enabled ? 'On': 'Off'}
+        <p>
+          {title}: {enabled ? 'On': 'Off'}
           <button onClick={toggle}>
             Turn {enabled ? 'Off': 'On'}
           </button>
+          {
+            showMore
+            ? null
+            : <button onClick={toggleSettings}>
+                Settings
+              </button>
+          }
         </p>
 
         {
@@ -71,7 +79,7 @@ class Playlist extends Component {
             </form>
           : null
         }
-        {showMore ? null : <button onClick={toggleSettings}>Settings</button> }
+
       </div>
     );
   }

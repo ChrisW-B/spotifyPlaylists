@@ -1,4 +1,4 @@
-// react/components/Playlists/Fields/Length.js
+// react/components/Fields/Length.js
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 

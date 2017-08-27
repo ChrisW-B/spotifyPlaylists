@@ -1,4 +1,4 @@
-// react/components/Playlists/Fields/TimePeriod.js
+// react/components/Fields/TimePeriod.js
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';

@@ -1,4 +1,4 @@
-// react/containers/PlaylistsContainer.js
+// react/containers/MainPageContainer.js
 
 import { connect } from 'react-redux';
 import { MainPage } from '../components';

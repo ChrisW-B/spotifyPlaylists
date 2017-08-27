@@ -1,10 +1,10 @@
-// react/components/Playlists/Playlists.js
+// react/components/PlaylistList/PlaylistList.js
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Playlist from './Playlist';
+import { Playlist } from '..';
 
-export default class Playlists extends Component {
+export default class PlaylistList extends Component {
   static propTypes = {
     updatePlaylistStatus: PropTypes.func.isRequired,
     updateMostPlayed: PropTypes.func.isRequired,
@@ -23,6 +23,7 @@ export default class Playlists extends Component {
       <div>
         <Playlist
           title='Most Played'
+          description='A play'
           toggle={()=>toggleMostPlayed(!mostPlayed.enabled)}
           saveSettings={updateMostPlayed}
           {...mostPlayed}
@@ -33,6 +34,7 @@ export default class Playlists extends Component {
           saveSettings={updateRecentlyAdded}
           {...recentlyAdded}
         />
+        <h5>Playlists will update roughly every 5 hours</h5>
       </div>
     );
   }
