@@ -37,6 +37,7 @@
     "promise-redis": "^0.0.5",
     "react": "next",
     "react-dom": "next",
+    "react-fontawesome": "^1.6.1",
     "react-redux": "^5.0.6",
     "react-router-redux": "next",
     "react-transition-group": "^2.2.0",

@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Playlist } from '..';
+import { ListWrapper, List } from './Styles';
 
 export default class PlaylistList extends Component {
   static propTypes = {
@@ -20,22 +21,25 @@ export default class PlaylistList extends Component {
   render = () => {
     const { mostPlayed, recentlyAdded, toggleMostPlayed, toggleRecentlyAdded, updateMostPlayed, updateRecentlyAdded } = this.props;
     return (
-      <div>
-        <Playlist
-          title='Most Played'
-          description='A play'
-          toggle={()=>toggleMostPlayed(!mostPlayed.enabled)}
-          saveSettings={updateMostPlayed}
-          {...mostPlayed}
-           />
-        <Playlist
-          title='Recently Added'
-          toggle={()=>toggleRecentlyAdded(!recentlyAdded.enabled)}
-          saveSettings={updateRecentlyAdded}
-          {...recentlyAdded}
-        />
+      <ListWrapper>
+        <List>
+          <Playlist
+            title='Most Played'
+            description='A playlist full of your most played songs from Last.fm'
+            toggle={()=>toggleMostPlayed(!mostPlayed.enabled)}
+            saveSettings={updateMostPlayed}
+            {...mostPlayed}
+            />
+          <Playlist
+            title='Recently Added'
+            description='All the songs you just added to spotify'
+            toggle={()=>toggleRecentlyAdded(!recentlyAdded.enabled)}
+            saveSettings={updateRecentlyAdded}
+            {...recentlyAdded}
+          />
+        </List>
         <h5>Playlists will update roughly every 5 hours</h5>
-      </div>
+      </ListWrapper>
     );
   }
 }

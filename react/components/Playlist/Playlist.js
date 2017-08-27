@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import FontAwesome from 'react-fontawesome';
 import { LastFm, Length, TimePeriod } from '../';
+import { PlaylistWrapper, PlaylistInfo, PlaylistTitle, Button, Toggle } from './Styles';
 
 class Playlist extends Component {
 
@@ -54,21 +56,24 @@ class Playlist extends Component {
       toggleSettings
     } = this;
     return (
-      <div>
-        <p>
-          {title}: {enabled ? 'On': 'Off'}
-          <button onClick={toggle}>
-            Turn {enabled ? 'Off': 'On'}
-          </button>
+      <PlaylistWrapper>
+        <PlaylistInfo on={enabled}>
+          <PlaylistTitle>{title}</PlaylistTitle>
+          <Button onClick={toggle} on={enabled}>
+            {
+              enabled
+              ? <Toggle><FontAwesome name='toggle-on' size='2x' />On</Toggle>
+              : <Toggle><FontAwesome name='toggle-off' size='2x' />Off</Toggle>
+            }
+          </Button>
           {
             showMore
             ? null
-            : <button onClick={toggleSettings}>
-                Settings
-              </button>
+            : <Button onClick={toggleSettings} settings>
+                <FontAwesome name='cog' size='2x' />
+              </Button>
           }
-        </p>
-
+        </PlaylistInfo>
         {
           showMore
           ? <form onSubmit={(e)=>{e.preventDefault(); toggleSettings();}}>
@@ -80,7 +85,7 @@ class Playlist extends Component {
           : null
         }
 
-      </div>
+      </PlaylistWrapper>
     );
   }
 }

@@ -22,5 +22,7 @@ const MoveOutRight = keyframes `
 
 export const PlaylistsPageWrapper = styled.div`
   animation: ${props => props.status === 'entering' ?  `300ms ${MoveInRight} cubic-bezier(0.4, 0, 0.2, 1)` : props.status === 'exiting' ? `300ms ${MoveOutRight} cubic-bezier(0.4, 0, 0.2, 1)` : ''};
-  background-color: var(--oc-violet-2);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 `;

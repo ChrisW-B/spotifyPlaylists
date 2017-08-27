@@ -48,17 +48,17 @@ injectGlobal `
   body,
   html,
   #root {
+    color: #0d2659;
+    font-family: Lato, sans-serif;
     margin: 0;
     overflow-x: hidden;
-  }
-
-  * {
-    font-family: Lato, sans-serif;
   }
 
   @import url('https://fonts.googleapis.com/css?family=Lato:400,700');
 
   @import url('/styles/opencolor.css');
+
+  @import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 `;
 
 ReactDOM.render(
