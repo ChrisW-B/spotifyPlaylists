@@ -10,7 +10,47 @@
   </head>
 
   <body>
-    <div id="root">This pages uses React, which requires JavaScript to be enabled</div>
+    <div id="root">
+      <!-- so this style doesn't get imported into react -->
+      <style>
+      @import url('/styles/opencolor.css');
+
+      @keyframes rotate {
+        to {transform: rotate(360deg)}
+      }
+
+      html,
+      body {
+        margin: 0
+      }
+
+      .loading {
+        height: 100vh;
+        width: 100vw;
+        background-color: var(--oc-blue-5);
+        display: flex;
+        place-content: center;
+        place-items: center;
+        flex-direction: column;
+      }
+
+      .loading-img {
+        animation: rotate 3s linear infinite;
+        height: 100px;
+        width: 100px;
+      }
+
+      .loading p {
+        font-family: sans-serif;
+        color: white;
+      }
+
+      </style>
+      <div class="loading">
+        <img class="loading-img" src='/images/loading.png'>
+        <p>Loading...</p>
+      </div>
+    </div>
     <script type="text/javascript" src="/build/app.js"></script>
   </body>
 
