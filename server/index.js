@@ -11,8 +11,9 @@ const express = require('express'),
   path = require('path'),
   passport = require('passport'),
   RedisStore = require('connect-redis')(session),
-  app = express(),
+  exec = require('child_process').exec,
 
+  app = express(),
   utils = require('./utils'),
 
   ONE_SEC = 1000,

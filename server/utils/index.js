@@ -3,6 +3,7 @@ require('dotenv').config();
 const Redis = require('promise-redis')(),
   redis = Redis.createClient(),
   winston = require('winston'),
+  crypto = require('crypto'),
 
   RecentlyAdded = require('../Playlists').recentlyAdded,
   MostPlayed = require('../Playlists').mostPlayed,
@@ -47,9 +48,7 @@ module.exports = {
   ensureGithub: (req, res, next) => {
     if (!req.headers['user-agent'].includes('GitHub-Hookshot')) res.redirect(301, '/');
     const hmac = crypto.createHmac('sha1', process.env.GITHUB_SECRET);
-    const ourSignature = `sha1=${hmac.update(JSON.stringify(req.body)).digest('hex')}`;
-    const theirSignature = req.get('X-Hub-Signature');
-    if (crypto.timingSafeEqual(Buffer.from(ourSignature, 'utf8'), Buffer.from(theirSignature, 'utf8'))) return next();
+    if (crypto.timingSafeEqual(Buffer.from(`sha1=${hmac.update(JSON.stringify(req.body)).digest('hex')}`, 'utf8'), Buffer.from(req.get('X-Hub-Signature'), 'utf8'))) return next();
     else res.redirect(301, '/');
   }
 
