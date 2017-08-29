@@ -1,0 +1,16 @@
+branches:
+  only:
+    - "master"
+language: node_js
+node_js:
+  - "node"
+cache: yarn
+script:
+  - bash ./scripts/travis-ci.sh
+notifications:
+  email: false
+  slack:
+    rooms:
+      - secure: TIVQo/jlOun+SJxylRreEhLDSXzU2vUNisMvq4xrQwAgrA0JmGdgt94cBovd1ZtOj9x34f/hnc4sEHEOlE+HBLnvL/ymWXWWgOhP9C7sllMLrrW7QizzQwc+GLQfTeVu0tLRS6FOjtxcBlSgcmQOGK3Gkc3Lc9z69CXOCnEn3ZzaPsKtUtGkEmHp79NIX4B828j5ZeuAoIQlETSMUFNjzdTRC00O3vU97gI1asZKUpv61H/P9xYfAeHm/nBWR2y22AzuNa9F86/bpVClllAaZ2vi+RJnce58FjyzEf4I8FHQPJa7jL+uzFxyqHQh4CwKMtSB9TSA2qAJhQLc8XV078sLiqRsLVJtBcQ34ynMkdvwtRC3PYRmr5G8roLFDkM9MXa8mpeZS1jKf1oL50pHwcdA2cnVjOLumPBkUzVVONLR8HO/BsHT/2dfjPzSF3emaVhbdCXGzZAAzNVYvpC3Tiz6Xc3dSshCLiDVz3QYxTcGKTfX0PejszAaScOljIBl7b13P3vMEAHen5EmOqE/5kMGbKsvedu3tRA0gSQiGXCIsGVK857GA7zpaMPQItGiTIJ8gx6QIQepXZhH8DbWV3Oawvz0yWrEKG6dpxxoWRW2lHnZhDly4+dM16JAgSjyerFLo9r2/TsG78Ai+vypB0CvS+JV/CtohE0UfI8aviI=
+    on_success: always
+    on_failure: always
