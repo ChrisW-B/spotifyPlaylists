@@ -1,5 +1,4 @@
 // server/routes/member.js
-
 const express = require('express'),
   app = express.Router(),
   passport = require('passport'),
@@ -14,9 +13,9 @@ passport.deserializeUser(function (obj, done) {
 });
 passport.use(
   new SpotifyStrategy({
-      clientID: utils.config.spotify.clientId,
-      clientSecret: utils.config.spotify.clientSecret,
-      callbackURL: utils.config.spotify.redirectUri
+      clientID: process.env.SPOTIFY_ID,
+      clientSecret: process.env.SPOTIFY_SECRET,
+      callbackURL: process.env.SPOTIFY_REDIRECT
     },
     async(accessToken, refreshToken, profile, done) => {
       await saveToRedis({
@@ -32,13 +31,13 @@ passport.use(
 );
 
 app.get('/login', passport.authenticate('spotify', {
-  scope: utils.config.spotify.scopes,
+  scope: process.env.SPOTIFY_SCOPES,
   showDialog: true,
   successRedirect: '/',
   failureRedirect: '/'
 }));
 app.get('/setup', passport.authenticate('spotify', {
-  scope: utils.config.spotify.scopes,
+  scope: process.env.SPOTIFY_SCOPES,
   showDialog: true,
   successRedirect: '/loggedin',
   failureRedirect: '/'
@@ -49,7 +48,7 @@ app.get('', utils.ensureAuthenticated, (req, res) => {
   delete req.user.refresh;
   delete req.user['_json'];
   delete req.user['_raw'];
-  res.json({ ...req.user, isAdmin: req.user.id === utils.config.admin });
+  res.json({ ...req.user, isAdmin: req.user.id === process.env.ADMIN });
 });
 
 app.delete('', utils.ensureAuthenticated, async(req, res) => {

@@ -1,6 +1,6 @@
 *.sh
 *.DS_Store
-config.js
+.env
 data
 node_modules
 logs

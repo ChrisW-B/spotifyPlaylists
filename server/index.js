@@ -1,7 +1,7 @@
 // server/index.js
 
 'use strict';
-require('colors');
+require('dotenv').config();
 const express = require('express'),
   session = require('express-session'),
   bodyParser = require('body-parser'),
@@ -24,7 +24,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
   store: new RedisStore({ host: 'localhost', port: 6379, client: utils.redis }),
-  secret: utils.config.secret,
+  secret: process.env.SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: { secure: 'auto' }
@@ -73,10 +73,18 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
 app.use('/member', require('./routes/member'));
 app.use('/admin', utils.ensureAdmin, require('./routes/admin'));
 app.use('/playlists', require('./routes/playlists'));
+
+app.post('/postrecieve', utils.ensureGithub, (req, res) => {
+  const update = exec(`cd ${path.join(__dirname, '..')}; git pull; yarn; yarn cleanup; yarn build`);
+  update.stdout.pipe(process.stdout);
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Thanks GitHub <3');
+});
+
 app.get('*', (req, res) => res.render('pages/index'));
 
 app.listen(5621, () => {
-  utils.logger.server('SpotifyApps listening on port 5621!\n'.rainbow + 'http://localhost:5621/');
+  utils.logger.server('SpotifyApps listening on port 5621!\n' + 'http://localhost:5621/');
 });
 
 //run periodically
