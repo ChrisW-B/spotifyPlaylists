@@ -1,4 +1,10 @@
 # Spotify AutoPlaylists by Chris Barry
+[![Build Status](https://travis-ci.org/ChrisW-B/spotifyPlaylists.svg?branch=react)](https://travis-ci.org/ChrisW-B/spotifyPlaylists)
+
+_remind me to update that icon when this goes to master..._
+
+_also the rest of this readme_
+
 A nodejs/express based web app that contains a website and 2 backend services
 
 Available [here](http://spotifyapps.chriswbarry.com/ "SpotifyApps")
