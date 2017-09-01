@@ -4,7 +4,6 @@ import IoGearA from 'react-icons/lib/io/gear-a';
 import IoToggle from 'react-icons/lib/io/toggle';
 import IoToggleFilled from 'react-icons/lib/io/toggle-filled';
 import IoCheckmarkCircled from 'react-icons/lib/io/checkmark-circled';
-// import { IoGearA, IoToggle, IoToggleFilled, IoCheckmarkCircled } from 'react-icons/lib/io';
 import { LastFm, Length, TimePeriod } from '../';
 import { PlaylistWrapper, PlaylistInfo, PlaylistTitle, Button, Toggle } from './Styles';
 
