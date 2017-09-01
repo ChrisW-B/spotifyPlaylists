@@ -5,7 +5,7 @@ import IoToggle from 'react-icons/lib/io/toggle';
 import IoToggleFilled from 'react-icons/lib/io/toggle-filled';
 import IoCheckmarkCircled from 'react-icons/lib/io/checkmark-circled';
 import { LastFm, Length, TimePeriod } from '../';
-import { PlaylistWrapper, PlaylistInfo, PlaylistTitle, Button, Toggle } from './Styles';
+import { PlaylistWrapper, PlaylistInfo, PlaylistTitle, Button, Toggle, ButtonDescription } from './Styles';
 
 class Playlist extends Component {
 
@@ -62,18 +62,14 @@ class Playlist extends Component {
       <PlaylistWrapper>
         <PlaylistInfo on={enabled}>
           <PlaylistTitle>{title}</PlaylistTitle>
-          <Button onClick={toggle} on={enabled}>
-            {
-              enabled
-              ? <Toggle><IoToggleFilled/></Toggle>
-              : <Toggle><IoToggle/></Toggle>
-            }
+          <Button title={`Turn ${enabled ? 'Off' : 'On'}`} onClick={toggle} on={enabled}>
+            { enabled ? <Toggle><IoToggleFilled/></Toggle> : <Toggle><IoToggle/></Toggle>}
+            <ButtonDescription> {`Turn ${enabled ? 'Off' : 'On'}`} </ButtonDescription>
           </Button>
-          {
-            showMore
-            ? <Button onClick={toggleSettings} settings><IoCheckmarkCircled/></Button>
-            : <Button onClick={toggleSettings} settings><IoGearA/></Button>
-          }
+          <Button  onClick={toggleSettings} settings >
+            { showMore ? <IoCheckmarkCircled/> : <IoGearA/> }
+            <ButtonDescription>{showMore ? 'Save' : 'Edit'}</ButtonDescription>
+          </Button>
         </PlaylistInfo>
         {
           showMore

@@ -12,9 +12,9 @@ export const PlaylistWrapper = styled.div `
     }
   }
   &:last-child {
+    border-radius: 0 0 5px 5px;
     border-top: 0;
     & > span {
-      border-radius: 0 0 5px 5px;
       & > a:last-child {
         border-radius: 0 0 5px;
       }
@@ -40,13 +40,33 @@ export const Button = styled.a `
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  min-width: 45px;
   padding: 0 10px;
   place-content: center;
   place-items: center;
+  position: relative;
+  width: 50px;
 
   svg {
-    font-size: 30px;
+    font-size: 28px;
+    padding: 4px;
   }
+
+  &:hover > span {
+    opacity: 1;
+  }
+`;
+
+export const ButtonDescription = styled.span `
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  padding: 5px;
+  position: absolute;
+  text-align: center;
+  top: -2px;
+  transition: opacity 0.33s;
+  width: 60px;
 `;
 
 export const Toggle = styled.span `
