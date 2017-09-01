@@ -12,7 +12,6 @@ export const PlaylistWrapper = styled.div `
     }
   }
   &:last-child {
-    border-radius: 0 0 5px 5px;
     border-top: 0;
     & > span {
       border-radius: 0 0 5px 5px;
@@ -44,6 +43,10 @@ export const Button = styled.a `
   padding: 0 10px;
   place-content: center;
   place-items: center;
+
+  svg {
+    font-size: 30px;
+  }
 `;
 
 export const Toggle = styled.span `

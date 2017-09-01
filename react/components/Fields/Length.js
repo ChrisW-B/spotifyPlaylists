@@ -21,6 +21,14 @@ export default class Length extends Component {
           value={length}
           onChange={onChange}
         />
+        <input
+          required={true}
+          type='number'
+          min='1'
+          max='50'
+          value={length}
+          onChange={onChange}
+        />
         {length} Song{length !== 1 ? 's':''}
       </p>
     );

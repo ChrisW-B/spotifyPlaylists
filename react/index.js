@@ -48,7 +48,6 @@ injectGlobal `
   body,
   html,
   #root {
-    color: #0d2659;
     font-family: Lato, sans-serif;
     margin: 0;
     overflow-x: hidden;

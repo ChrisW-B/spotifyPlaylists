@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import FontAwesome from 'react-fontawesome';
+import IoGearA from 'react-icons/lib/io/gear-a';
+import IoToggle from 'react-icons/lib/io/toggle';
+import IoToggleFilled from 'react-icons/lib/io/toggle-filled';
+import IoCheckmarkCircled from 'react-icons/lib/io/checkmark-circled';
+// import { IoGearA, IoToggle, IoToggleFilled, IoCheckmarkCircled } from 'react-icons/lib/io';
 import { LastFm, Length, TimePeriod } from '../';
 import { PlaylistWrapper, PlaylistInfo, PlaylistTitle, Button, Toggle } from './Styles';
 
@@ -62,26 +66,23 @@ class Playlist extends Component {
           <Button onClick={toggle} on={enabled}>
             {
               enabled
-              ? <Toggle><FontAwesome name='toggle-on' size='2x' />On</Toggle>
-              : <Toggle><FontAwesome name='toggle-off' size='2x' />Off</Toggle>
+              ? <Toggle><IoToggleFilled/></Toggle>
+              : <Toggle><IoToggle/></Toggle>
             }
           </Button>
           {
             showMore
-            ? null
-            : <Button onClick={toggleSettings} settings>
-                <FontAwesome name='cog' size='2x' />
-              </Button>
+            ? <Button onClick={toggleSettings} settings><IoCheckmarkCircled/></Button>
+            : <Button onClick={toggleSettings} settings><IoGearA/></Button>
           }
         </PlaylistInfo>
         {
           showMore
-          ? <form onSubmit={(e)=>{e.preventDefault(); toggleSettings();}}>
+          ? <div>
               <Length length={length} onChange={updateLength} />
               { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm}/> : null}
               { period !== undefined ? <TimePeriod period={period || '3month' } onChange={updatePeriod} /> : null}
-              <button type='submit'>Save</button>
-            </form>
+            </div>
           : null
         }
 

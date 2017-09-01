@@ -31,13 +31,13 @@ passport.use(
 );
 
 app.get('/login', passport.authenticate('spotify', {
-  scope: process.env.SPOTIFY_SCOPES,
+  scope: process.env.SPOTIFY_SCOPES.split(','),
   showDialog: true,
   successRedirect: '/',
   failureRedirect: '/'
 }));
 app.get('/setup', passport.authenticate('spotify', {
-  scope: process.env.SPOTIFY_SCOPES,
+  scope: process.env.SPOTIFY_SCOPES.split(','),
   showDialog: true,
   successRedirect: '/loggedin',
   failureRedirect: '/'
