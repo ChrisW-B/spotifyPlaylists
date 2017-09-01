@@ -1,7 +1,7 @@
 branches:
   only:
     - "master"
-    - "react"
+    - "reactup"
 language: node_js
 node_js:
   - "node"
