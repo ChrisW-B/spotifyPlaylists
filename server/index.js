@@ -1,6 +1,5 @@
 // server/index.js
 
-'use strict';
 require('dotenv').config();
 const express = require('express'),
   session = require('express-session'),
@@ -43,8 +42,8 @@ app.use(expressWinston.logger({
 app.use(bodyParser.urlencoded({ extended: false }));
 
 if (process.env.BUILD_MODE !== 'prebuilt') {
-  const webpackConfig = require('../webpack.dev.config.js');
-  const compiler = require('webpack')(webpackConfig);
+  const webpackConfig = require('../webpack.dev.config.js'),
+    compiler = require('webpack')(webpackConfig);
   app.use(require('webpack-dev-middleware')(compiler, {
     hot: true,
     publicPath: webpackConfig.output.publicPath,
@@ -88,10 +87,10 @@ app.listen(5621, () => {
   utils.logger.server('SpotifyApps listening on port 5621!\n' + 'http://localhost:5621/');
 });
 
-//run periodically
+// run periodically
 setInterval(() => utils.recentlyAdded.update(), 5 * ONE_HOUR);
-setTimeout(() => setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); //offset update
+setTimeout(() => setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); // offset update
 
-//run after starting
+// run after starting
 // utils.mostPlayed.update();
 // setTimeout(() => utils.recentlyAdded.update(), ONE_MIN * 2);

@@ -7,7 +7,7 @@ export default class Length extends Component {
     length: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired
   }
-  render() {
+  render = () => {
     const { length, onChange } = this.props;
     return (
       <p>
@@ -29,7 +29,7 @@ export default class Length extends Component {
           value={length}
           onChange={onChange}
         />
-        {length} Song{length !== 1 ? 's':''}
+        {length} Song{length !== 1 ? 's' : ''}
       </p>
     );
   }

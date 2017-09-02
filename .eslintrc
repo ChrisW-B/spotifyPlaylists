@@ -1,7 +1,20 @@
 {
   "parser": "babel-eslint",
   "plugins": ["standard"],
+  "extends": ["eslint:recommended", "standard"],
   "parserOptions": {
     "ecmaVersion": 8
+  },
+  "rules": {
+    "semi": [1, "always"],
+    "quotes": [1, "single"],
+    "one-var": [0, "always"],
+    "eol-last": [1, "never"],
+    "space-before-function-paren": [1, {
+      "anonymous": "always",
+      "named": "never",
+      "asyncArrow": "always"
+    }],
+    "indent": [1, 2, { "flatTernaryExpressions": false }]
   }
 }

@@ -2,9 +2,36 @@
 
 const express = require('express'),
   app = express.Router(),
-  utils = require('../utils');
+  utils = require('../utils'),
 
-app.get('', utils.ensureAuthenticated, async(req, res) => {
+  disablePlaylist = async (id, type) => utils.redis.hset(id, type, false),
+  enablePlaylist = async (id, type) => utils.redis.hset(id, type, true),
+
+  saveSettings = async (id, numTracks, lastfm, period, isMost) =>
+    (isMost)
+      ? utils.redis.hmset(id,
+        'most', true,
+        'most:length', numTracks,
+        'most:playlist', 'null',
+        'most:lastfm', lastfm,
+        'most:period', period) : utils.redis.hmset(id,
+        'recent', true,
+        'recent:length', numTracks,
+        'recent:playlist', 'null'),
+
+  getCurrentSettings = async (id, isMost) =>
+    isMost
+      ? ({
+        enabled: String(await utils.redis.hget(id, 'most')).toLowerCase() === 'true',
+        length: await utils.redis.hget(id, 'most:length'),
+        lastfm: await utils.redis.hget(id, 'most:lastfm'),
+        period: await utils.redis.hget(id, 'most:period')
+      }) : ({
+        enabled: String(await utils.redis.hget(id, 'recent')).toLowerCase() === 'true',
+        length: await utils.redis.hget(id, 'recent:length')
+      });
+
+app.get('', utils.ensureAuthenticated, async (req, res) => {
   const { id } = req.user;
   res.send({
     error: false,
@@ -13,7 +40,7 @@ app.get('', utils.ensureAuthenticated, async(req, res) => {
   });
 });
 
-app.post('/:type/toggle/', utils.ensureAuthenticated, async(req, res) => {
+app.post('/:type/toggle/', utils.ensureAuthenticated, async (req, res) => {
   const {
     user: { id },
     params: { type },
@@ -26,7 +53,7 @@ app.post('/:type/toggle/', utils.ensureAuthenticated, async(req, res) => {
   res.send(await getCurrentSettings(id, type === 'most'));
 });
 
-app.post('/:type/save', utils.ensureAuthenticated, async(req, res) => {
+app.post('/:type/save', utils.ensureAuthenticated, async (req, res) => {
   const {
     user: { id },
     params: { type },
@@ -36,32 +63,5 @@ app.post('/:type/save', utils.ensureAuthenticated, async(req, res) => {
   await saveSettings(id, length, lastfm, period, type === 'most');
   res.send(await getCurrentSettings(id, type === 'most'));
 });
-
-const disablePlaylist = async(id, type) => await utils.redis.hset(id, type, false),
-  enablePlaylist = async(id, type) => await utils.redis.hset(id, type, true),
-
-  saveSettings = async(id, numTracks, lastfm, period, isMost) => (isMost)
-  ? utils.redis.hmset(id,
-    'most', true,
-    'most:length', numTracks,
-    'most:playlist', 'null',
-    'most:lastfm', lastfm,
-    'most:period', period)
-  : utils.redis.hmset(id,
-    'recent', true,
-    'recent:length', numTracks,
-    'recent:playlist', 'null'),
-
-  getCurrentSettings = async(id, isMost) =>
-  isMost
-  ? ({
-    enabled: String(await utils.redis.hget(id, 'most')).toLowerCase() === 'true',
-    length: await utils.redis.hget(id, 'most:length'),
-    lastfm: await utils.redis.hget(id, 'most:lastfm'),
-    period: await utils.redis.hget(id, 'most:period')
-  }) : ({
-    enabled: String(await utils.redis.hget(id, 'recent')).toLowerCase() === 'true',
-    length: await utils.redis.hget(id, 'recent:length')
-  });
 
 module.exports = app;

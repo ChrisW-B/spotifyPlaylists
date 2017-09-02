@@ -14,7 +14,7 @@ module.exports = class Playlist {
     this.ONE_MIN = ONE_MIN;
     this.ONE_SEC = ONE_SEC;
   }
-  //add list of spotify tracks to a playlist
+  // add list of spotify tracks to a playlist
   fillPlaylist(userId, playlistId, tracklist) {
     return this.spotifyApi.addTracksToPlaylist(userId, playlistId, tracklist.map(i => i.id));
   }
@@ -39,10 +39,10 @@ module.exports = class Playlist {
 
   async preparePlaylist(userId, oldPlaylistId, offset = 0) {
     const userPlaylists = (await this.spotifyApi.getUserPlaylists(userId, {
-      limit: 20,
-      offset: offset
-    })).body;
-    const playlistLoc = this.foundOldPlaylist(userPlaylists.items, oldPlaylistId);
+        limit: 20,
+        offset: offset
+      })).body,
+      playlistLoc = this.foundOldPlaylist(userPlaylists.items, oldPlaylistId);
     if (playlistLoc > -1) {
       return this.clearExistingPlaylist(userId, userPlaylists.items[playlistLoc]);
     } else if (userPlaylists.next == null) {
@@ -53,7 +53,7 @@ module.exports = class Playlist {
   }
 
   async refreshToken(access, refresh) {
-    //gets refresh token
+    // gets refresh token
     this.spotifyApi.setAccessToken(access);
     this.spotifyApi.setRefreshToken(refresh);
     return (await this.spotifyApi.refreshAccessToken()).body;

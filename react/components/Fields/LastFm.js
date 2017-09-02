@@ -7,7 +7,7 @@ export default class LastFm extends Component {
     lastfm: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired
   }
-  render() {
+  render = () => {
     const { lastfm, onChange } = this.props;
     return (
       <p>

@@ -4,7 +4,7 @@
     "react",
     "standard"
   ],
-  "extends": ["standard", "plugin:react/recommended", "eslint:recommended"],
+  "extends": ["eslint:recommended", "standard", "plugin:react/recommended"],
   "env": {
     "browser": true
   },

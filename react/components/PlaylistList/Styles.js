@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const ListWrapper = styled.div `
+export const ListWrapper = styled.div`
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -9,7 +9,7 @@ export const ListWrapper = styled.div `
   place-items: center;
 `;
 
-export const List = styled.ul `
+export const List = styled.ul`
   display: flex;
   flex-direction: column;
   max-width: 900px;

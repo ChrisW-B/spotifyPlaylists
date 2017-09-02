@@ -26,14 +26,14 @@ export default class PlaylistList extends Component {
           <Playlist
             title='Most Played'
             description='A playlist full of your most played songs from Last.fm'
-            toggle={()=>toggleMostPlayed(!mostPlayed.enabled)}
+            toggle={() => toggleMostPlayed(!mostPlayed.enabled)}
             saveSettings={updateMostPlayed}
             {...mostPlayed}
-            />
+          />
           <Playlist
             title='Recently Added'
             description='All the songs you just added to spotify'
-            toggle={()=>toggleRecentlyAdded(!recentlyAdded.enabled)}
+            toggle={() => toggleRecentlyAdded(!recentlyAdded.enabled)}
             saveSettings={updateRecentlyAdded}
             {...recentlyAdded}
           />

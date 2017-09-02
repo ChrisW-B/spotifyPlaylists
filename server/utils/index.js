@@ -8,13 +8,13 @@ const Redis = require('promise-redis')(),
   RecentlyAdded = require('../Playlists').recentlyAdded,
   MostPlayed = require('../Playlists').mostPlayed,
 
-  logger = new(winston.Logger)({
+  logger = new (winston.Logger)({
     level: 'recentlyAdded',
     levels: { server: 0, playlist: 0, mostPlayed: 0, recentlyAdded: 0 },
     colors: { server: 'green', playlist: 'blue', mostPlayed: 'magenta', recentlyAdded: 'yellow' },
     colorize: true,
     transports: [
-      new(winston.transports.Console)({ 'timestamp': true, 'prettyPrint': true, colorize: true })
+      new (winston.transports.Console)({ 'timestamp': true, 'prettyPrint': true, colorize: true })
     ]
   }),
 

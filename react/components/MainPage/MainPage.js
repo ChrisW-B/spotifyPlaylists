@@ -20,8 +20,8 @@ export default class MainPage extends Component {
     window.open('/member/login', '_blank', 'height=600,width=400');
     window.addEventListener('storage',
       (e) => e.key === 'loggedInSuccess'
-      ? this.reloadMember()
-      : null
+        ? this.reloadMember()
+        : null
     );
   }
 
@@ -34,5 +34,4 @@ export default class MainPage extends Component {
         { status => <LoginScreen login={this.login} status={status} /> }
       </Transition>
     </div>
-
 }

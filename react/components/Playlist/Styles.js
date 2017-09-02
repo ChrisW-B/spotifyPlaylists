@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const PlaylistWrapper = styled.div `
+export const PlaylistWrapper = styled.div`
   border: 1px solid black;
   &:first-child {
     border-radius: 5px 5px 0 0;
@@ -22,20 +22,20 @@ export const PlaylistWrapper = styled.div `
   }
 `;
 
-export const PlaylistInfo = styled.span `
+export const PlaylistInfo = styled.span`
   background-color: ${({on}) => on ? 'var(--oc-green-2)' : 'var(--oc-red-2)'};
   display: flex;
   place-items: stretch;
 `;
 
-export const PlaylistTitle = styled.p `
+export const PlaylistTitle = styled.p`
   flex: 1 1 auto;
   padding: 5px;
 `;
 
-export const Button = styled.a `
-  background: ${({settings, on}) => settings ? 'var(--oc-blue-0)' :'transparent'};
-  border-left: ${({settings})=> settings ? '1px solid var(--oc-blue-5)' : '0' };
+export const Button = styled.a`
+  background: ${({settings, on}) => settings ? 'var(--oc-blue-0)' : 'transparent'};
+  border-left: ${({settings}) => settings ? '1px solid var(--oc-blue-5)' : '0'};
   color: ${({settings, on}) => settings ? 'var(--oc-blue-4)' : on ? 'var(--oc-green-7)' : 'var(--oc-red-7)'};
   cursor: pointer;
   display: flex;
@@ -57,7 +57,7 @@ export const Button = styled.a `
   }
 `;
 
-export const ButtonDescription = styled.span `
+export const ButtonDescription = styled.span`
   border-radius: 4px;
   font-size: 12px;
   opacity: 0;
@@ -69,7 +69,7 @@ export const ButtonDescription = styled.span `
   width: 60px;
 `;
 
-export const Toggle = styled.span `
+export const Toggle = styled.span`
   display: flex;
   flex-direction: column;
   place-content: center;

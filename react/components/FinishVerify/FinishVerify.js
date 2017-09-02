@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 
 export default class FinishVerify extends Component {
-  componentDidMount() {
+  componentDidMount () {
     localStorage.setItem('loggedInSuccess', true);
     window.close();
   }

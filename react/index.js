@@ -44,7 +44,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
 store.dispatch(getMemberInfo());
 
-injectGlobal `
+injectGlobal`
   body,
   html,
   #root {
@@ -63,7 +63,7 @@ injectGlobal `
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-     <Route path="*" component={AppContainer} />
+      <Route path="*" component={AppContainer} />
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

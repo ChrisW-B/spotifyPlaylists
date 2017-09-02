@@ -16,7 +16,7 @@ module.exports = class MostPlayed extends Playlist {
   // takes list of last.fm tracks and tries to find them in spotify
   convertToSpotify(topTracks) {
     return Promise.all(topTracks.map((ele, i) =>
-      new Promise(async(resolve, reject) => {
+      new Promise(async (resolve, reject) => {
         await sleep(this.ONE_SEC / 2 * i);
         this.logger.mostPlayed(`Searching for \n${ele.name} by ${ele.artist.name}`);
         const results = (await this.spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`))
@@ -36,7 +36,7 @@ module.exports = class MostPlayed extends Playlist {
 
   insertMissingTracks(trackList, lastFmId, period) {
     let nextTrackSet;
-    return Promise.all(trackList.map(async(ele) => {
+    return Promise.all(trackList.map(async (ele) => {
       if (ele !== undefined) {
         return new Promise(resolve => {
           resolve(ele);
@@ -60,7 +60,6 @@ module.exports = class MostPlayed extends Playlist {
               });
             }
           }
-
         } else {
           for (let i = 0; i < nextTrackSet.length; i++) {
             const temp = nextTrackSet[i];
@@ -80,21 +79,20 @@ module.exports = class MostPlayed extends Playlist {
     await sleep(delayInc * this.ONE_MIN * 5);
 
     this.logger.mostPlayed('Getting database items');
-    const memberInfo = {
-      numTracks: await this.redis.hget(userId, `${this.type}:length`),
-      refresh: await this.redis.hget(userId, 'refresh'),
-      token: await this.redis.hget(userId, 'token'),
-      oldPlaylist: await this.redis.hget(userId, `${this.type}:playlist`),
-      lastFmId: await this.redis.hget(userId, `${this.type}:lastfm`),
-      timespan: await this.redis.hget(userId, `${this.type}:period`)
-    };
-
     this.logger.mostPlayed('Logging in to spotify');
-    const token = (await this.refreshToken(memberInfo.token, memberInfo.refresh));
-    const newTokens = {
-      token: token.access_token,
-      refresh: token.refresh_token ? token.refresh_token : memberInfo.refresh
-    };
+    const memberInfo = {
+        numTracks: await this.redis.hget(userId, `${this.type}:length`),
+        refresh: await this.redis.hget(userId, 'refresh'),
+        token: await this.redis.hget(userId, 'token'),
+        oldPlaylist: await this.redis.hget(userId, `${this.type}:playlist`),
+        lastFmId: await this.redis.hget(userId, `${this.type}:lastfm`),
+        timespan: await this.redis.hget(userId, `${this.type}:period`)
+      },
+      token = (await this.refreshToken(memberInfo.token, memberInfo.refresh)),
+      newTokens = {
+        token: token.access_token,
+        refresh: token.refresh_token ? token.refresh_token : memberInfo.refresh
+      };
 
     this.logger.mostPlayed('Setting new tokens');
     this.spotifyApi.setAccessToken(newTokens.token);
@@ -111,13 +109,13 @@ module.exports = class MostPlayed extends Playlist {
     });
 
     this.logger.mostPlayed('converting to spotify and getting userinfo');
-    const spotifyList = await this.convertToSpotify(lastFmTrackList.track, memberInfo.numTracks);
-    const spotifyId = (await this.spotifyApi.getMe()).body.id;
-    const trackList = await this.insertMissingTracks(spotifyList, memberInfo.lastFmId, memberInfo.timeSpan);
+    const spotifyList = await this.convertToSpotify(lastFmTrackList.track, memberInfo.numTracks),
+      spotifyId = (await this.spotifyApi.getMe()).body.id,
+      trackList = await this.insertMissingTracks(spotifyList, memberInfo.lastFmId, memberInfo.timeSpan);
 
     this.logger.mostPlayed('sorting tracks, getting user, and preparing playlist');
-    const newPlaylistId = await this.preparePlaylist(spotifyId, memberInfo.oldPlaylist);
-    const sortedTracks = trackList.sort((a, b) => a.rank - b.rank);
+    const newPlaylistId = await this.preparePlaylist(spotifyId, memberInfo.oldPlaylist),
+      sortedTracks = trackList.sort((a, b) => a.rank - b.rank);
 
     this.logger.mostPlayed('filling playlist');
     await this.fillPlaylist(spotifyId, newPlaylistId, sortedTracks);

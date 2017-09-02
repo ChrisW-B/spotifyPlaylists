@@ -24,7 +24,6 @@ module.exports = {
     new CaseSensitivePathsPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
     new webpack.ProgressPlugin()
   ],
   module: {

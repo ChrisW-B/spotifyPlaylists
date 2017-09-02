@@ -11,5 +11,4 @@ export default class PlaylistsPage extends Component {
       <HeaderContainer/>
       <PlaylistListContainer />
     </PlaylistsPageWrapper>
-
 }

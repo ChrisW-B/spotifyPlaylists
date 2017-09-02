@@ -8,7 +8,6 @@ import { LastFm, Length, TimePeriod } from '../';
 import { PlaylistWrapper, PlaylistInfo, PlaylistTitle, Button, Toggle, ButtonDescription } from './Styles';
 
 class Playlist extends Component {
-
   static propTypes = {
     enabled: PropTypes.bool.isRequired,
     title: PropTypes.string.isRequired,
@@ -33,13 +32,13 @@ class Playlist extends Component {
     const { length, lastfm, period } = n;
     const safeVals = {
       length: length || 10,
-      lastfm: lastfm === undefined ? undefined : lastfm ? lastfm : '',
-      period: period === undefined ? undefined : period ? period : '3month'
+      lastfm: lastfm === undefined ? undefined : lastfm || '',
+      period: period === undefined ? undefined : period || '3month'
     };
     this.setState({ ...safeVals });
   }
 
-  updateLength = (e) => this.setState({ length: e.target.value })
+  updateLength = (e) => this.setState({ length: e.target.value > 50 ? 50 : e.target.value < 1 ? 1 : e.target.value })
   updateLastfm = (e) => this.setState({ lastfm: e.target.value })
   updatePeriod = (e) => this.setState({ period: e.target.value })
 
@@ -66,19 +65,19 @@ class Playlist extends Component {
             { enabled ? <Toggle><IoToggleFilled/></Toggle> : <Toggle><IoToggle/></Toggle>}
             <ButtonDescription> {`Turn ${enabled ? 'Off' : 'On'}`} </ButtonDescription>
           </Button>
-          <Button  onClick={toggleSettings} settings >
+          <Button onClick={toggleSettings} settings >
             { showMore ? <IoCheckmarkCircled/> : <IoGearA/> }
             <ButtonDescription>{showMore ? 'Save' : 'Edit'}</ButtonDescription>
           </Button>
         </PlaylistInfo>
         {
           showMore
-          ? <div>
+            ? <div>
               <Length length={length} onChange={updateLength} />
               { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm}/> : null}
               { period !== undefined ? <TimePeriod period={period || '3month' } onChange={updatePeriod} /> : null}
             </div>
-          : null
+            : null
         }
 
       </PlaylistWrapper>

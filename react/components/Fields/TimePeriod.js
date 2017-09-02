@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const RadioLabel = styled.label `
+const RadioLabel = styled.label`
   background: ${props => props.checked ? 'var(--oc-violet-9)' : 'white'};
   border: 1px solid var(--oc-violet-9);
   border-left: 0;
@@ -20,7 +20,7 @@ const RadioLabel = styled.label `
   }
 `;
 
-const Radio = styled.input `
+const Radio = styled.input`
   display: none;
 `;
 
@@ -45,12 +45,12 @@ export default class TimePeriod extends Component {
         Time Period
         {
           this.options.map(o => (
-            <RadioLabel key={o.value} checked={period===o.value}>
+            <RadioLabel key={o.value} checked={period === o.value}>
               <Radio
                 type='radio'
                 name='period'
                 value={o.value}
-                checked={period===o.value}
+                checked={period === o.value}
                 onChange={onChange}
               />{o.title}
             </RadioLabel>

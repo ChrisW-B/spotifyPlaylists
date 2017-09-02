@@ -28,11 +28,11 @@ module.exports = class RecentlyAdded extends Playlist {
     };
 
     this.logger.recentlyAdded('Logging in to spotify');
-    const token = (await this.refreshToken(memberInfo.token, memberInfo.refresh));
-    const newTokens = {
-      token: token.access_token,
-      refresh: token.refresh_token ? token.refresh_token : memberInfo.refresh
-    };
+    const token = (await this.refreshToken(memberInfo.token, memberInfo.refresh)),
+      newTokens = {
+        token: token.access_token,
+        refresh: token.refresh_token ? token.refresh_token : memberInfo.refresh
+      };
     this.spotifyApi.setAccessToken(newTokens.token);
     this.spotifyApi.setRefreshToken(newTokens.refresh);
 
