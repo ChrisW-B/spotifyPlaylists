@@ -1,35 +1,34 @@
 // server/routes/playlists.js
 
-const express = require('express'),
-  app = express.Router(),
-  utils = require('../utils'),
+const express = require('express');
+const utils = require('../utils');
 
-  disablePlaylist = async (id, type) => utils.redis.hset(id, type, false),
-  enablePlaylist = async (id, type) => utils.redis.hset(id, type, true),
+const app = express.Router();
+const disablePlaylist = async (id, type) => utils.redis.hset(id, type, false);
+const enablePlaylist = async (id, type) => utils.redis.hset(id, type, true);
+const saveSettings = async (id, numTracks, lastfm, period, isMost) =>
+  ((isMost)
+    ? utils.redis.hmset(id,
+      'most', true,
+      'most:length', numTracks,
+      'most:playlist', 'null',
+      'most:lastfm', lastfm,
+      'most:period', period) : utils.redis.hmset(id,
+      'recent', true,
+      'recent:length', numTracks,
+      'recent:playlist', 'null'));
 
-  saveSettings = async (id, numTracks, lastfm, period, isMost) =>
-    (isMost)
-      ? utils.redis.hmset(id,
-        'most', true,
-        'most:length', numTracks,
-        'most:playlist', 'null',
-        'most:lastfm', lastfm,
-        'most:period', period) : utils.redis.hmset(id,
-        'recent', true,
-        'recent:length', numTracks,
-        'recent:playlist', 'null'),
-
-  getCurrentSettings = async (id, isMost) =>
-    isMost
-      ? ({
-        enabled: String(await utils.redis.hget(id, 'most')).toLowerCase() === 'true',
-        length: await utils.redis.hget(id, 'most:length'),
-        lastfm: await utils.redis.hget(id, 'most:lastfm'),
-        period: await utils.redis.hget(id, 'most:period')
-      }) : ({
-        enabled: String(await utils.redis.hget(id, 'recent')).toLowerCase() === 'true',
-        length: await utils.redis.hget(id, 'recent:length')
-      });
+const getCurrentSettings = async (id, isMost) =>
+  (isMost
+    ? ({
+      enabled: String(await utils.redis.hget(id, 'most')).toLowerCase() === 'true',
+      length: await utils.redis.hget(id, 'most:length'),
+      lastfm: await utils.redis.hget(id, 'most:lastfm'),
+      period: await utils.redis.hget(id, 'most:period')
+    }) : ({
+      enabled: String(await utils.redis.hget(id, 'recent')).toLowerCase() === 'true',
+      length: await utils.redis.hget(id, 'recent:length')
+    }));
 
 app.get('', utils.ensureAuthenticated, async (req, res) => {
   const { id } = req.user;

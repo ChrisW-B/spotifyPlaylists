@@ -1,8 +1,9 @@
 // server/routes/admin.js
 
-const express = require('express'),
-  app = express.Router(),
-  utils = require('../utils');
+const express = require('express');
+const utils = require('../utils');
+
+const app = express.Router();
 
 app.get('/forceRecent', utils.ensureAuthenticated, utils.ensureAdmin, (req, res) => {
   utils.recentlyAdded.update();

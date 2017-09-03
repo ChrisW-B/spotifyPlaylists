@@ -44,7 +44,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
 store.dispatch(getMemberInfo());
 
-injectGlobal`
+injectGlobal `
   body,
   html,
   #root {

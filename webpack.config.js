@@ -1,15 +1,16 @@
 // ./webpack.config.js
 
-const path = require('path'),
-  CompressionPlugin = require('compression-webpack-plugin'),
-  BabiliPlugin = require('babili-webpack-plugin'),
-  webpack = require('webpack'),
-  BUILD_DIR = path.resolve(__dirname, 'public/build'),
-  APP_DIR = path.resolve(__dirname, 'react');
+const path = require('path');
+const CompressionPlugin = require('compression-webpack-plugin');
+const BabiliPlugin = require('babili-webpack-plugin');
+const webpack = require('webpack');
+
+const BUILD_DIR = path.resolve(__dirname, 'public/build');
+const APP_DIR = path.resolve(__dirname, 'react');
 
 module.exports = {
   entry: {
-    app: ['babel-polyfill', APP_DIR + '/index']
+    app: ['babel-polyfill', `${APP_DIR}/index`]
   },
   output: {
     path: BUILD_DIR,
@@ -18,7 +19,10 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({ ENV: JSON.stringify('production') }),
-    new BabiliPlugin({ removeConsole: true, removeDebugger: true }, { comments: false, sourceMap: false }),
+    new BabiliPlugin({
+      removeConsole: true,
+      removeDebugger: true
+    }, { comments: false, sourceMap: false }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.LoaderOptionsPlugin({
       minimize: true,
@@ -58,12 +62,12 @@ module.exports = {
         options: {
           cacheDirectory: './webpack-cache',
           babelrc: false,
-          'presets': [
+          presets: [
             'es2015', ['minify', { removeConsole: true, removeDebugger: true }],
             'react',
             'stage-0'
           ],
-          'plugins': [
+          plugins: [
             ['styled-components', { displayName: false, preprocess: true }],
             'transform-decorators-legacy', ['transform-react-remove-prop-types', { mode: 'remove', removeImport: true }],
             [

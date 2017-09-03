@@ -13,7 +13,7 @@ export default class Length extends Component {
       <p>
         Playlist Length
         <input
-          required={true}
+          required
           type='range'
           min='1'
           max='50'
@@ -22,7 +22,7 @@ export default class Length extends Component {
           onChange={onChange}
         />
         <input
-          required={true}
+          required
           type='number'
           min='1'
           max='50'

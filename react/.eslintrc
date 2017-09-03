@@ -1,10 +1,7 @@
 {
   "parser": "babel-eslint",
-  "plugins": [
-    "react",
-    "standard"
-  ],
-  "extends": ["eslint:recommended", "standard", "plugin:react/recommended"],
+  "plugins": ["react"],
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
   "env": {
     "browser": true
   },
@@ -20,7 +17,7 @@
     "ENV": true
   },
   "rules": {
-    "strict": 0,
-    "semi": [1, "always"]
+    "react/prefer-stateless-function": [0],
+    "react/jsx-filename-extension": [0]
   }
 }

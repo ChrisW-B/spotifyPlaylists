@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { PlaylistList } from '../components';
 import { updatePlaylistStatus, toggleMostPlayed, toggleRecentlyAdded, updateMostPlayed, updateRecentlyAdded } from '../actions';
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   mostPlayed: state.playlists.mostPlayed,
   recentlyAdded: state.playlists.recentlyAdded
 });

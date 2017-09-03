@@ -1,6 +1,6 @@
 // react/actions/loading.js
 
-export const loading = (type, state = {}) => ({
+export default (type, state = {}) => ({
   ...state,
   type: `${type}_LOADING`
 });

@@ -7,7 +7,9 @@ import { LoginScreen, PlaylistsPage } from '../';
 
 export default class MainPage extends Component {
   static propTypes = {
-    member: PropTypes.object,
+    member: PropTypes.shape({
+      id: PropTypes.string.isRequired
+    }).isRequired,
     getMemberInfo: PropTypes.func.isRequired
   }
 
@@ -19,19 +21,19 @@ export default class MainPage extends Component {
   login = () => {
     window.open('/member/login', '_blank', 'height=600,width=400');
     window.addEventListener('storage',
-      (e) => e.key === 'loggedInSuccess'
-        ? this.reloadMember()
-        : null
+      e => e.key === 'loggedInSuccess'
+      ? this.reloadMember()
+      : null
     );
   }
 
   render = () =>
-    <div>
+    (<div>
       <Transition timeout={300} in={!!this.props.member.id} unmountOnExit mountOnEnter>
-        {status => <PlaylistsPage status={status}/> }
+        {status => <PlaylistsPage status={status} /> }
       </Transition>
       <Transition timeout={300} in={!this.props.member.id} unmountOnExit mountOnEnter>
         { status => <LoginScreen login={this.login} status={status} /> }
       </Transition>
-    </div>
+    </div>)
 }

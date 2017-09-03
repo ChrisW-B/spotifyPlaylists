@@ -18,6 +18,12 @@ class Playlist extends Component {
     period: PropTypes.string
   }
 
+  static defaultProps = {
+    length: '10',
+    lastfm: '',
+    period: '3month'
+  }
+
   state = {
     showMore: false,
     length: null,
@@ -28,8 +34,8 @@ class Playlist extends Component {
   componentDidMount = () => this.updateState(this.props)
   componentWillReceiveProps = (nextProps) => this.updateState(nextProps)
 
-  updateState = (n) => {
-    const { length, lastfm, period } = n;
+  updateState = (nextProps) => {
+    const { length, lastfm, period } = nextProps;
     const safeVals = {
       length: length || 10,
       lastfm: lastfm === undefined ? undefined : lastfm || '',
@@ -38,11 +44,11 @@ class Playlist extends Component {
     this.setState({ ...safeVals });
   }
 
-  updateLength = (e) => this.setState({ length: e.target.value > 50 ? 50 : e.target.value < 1 ? 1 : e.target.value })
-  updateLastfm = (e) => this.setState({ lastfm: e.target.value })
-  updatePeriod = (e) => this.setState({ period: e.target.value })
+  updateLength = e => this.setState({ length: e.target.value > 50 ? 50 : e.target.value < 1 ? 1 : e.target.value })
+  updateLastfm = e => this.setState({ lastfm: e.target.value })
+  updatePeriod = e => this.setState({ period: e.target.value })
 
-  toggleSettings = (e) => {
+  toggleSettings = () => {
     const { state: { showMore, length, lastfm, period }, props: { saveSettings } } = this;
     if (showMore) saveSettings({ length, lastfm, period });
     this.setState((prevState) => ({ showMore: !prevState.showMore }));
@@ -62,11 +68,11 @@ class Playlist extends Component {
         <PlaylistInfo on={enabled}>
           <PlaylistTitle>{title}</PlaylistTitle>
           <Button title={`Turn ${enabled ? 'Off' : 'On'}`} onClick={toggle} on={enabled}>
-            { enabled ? <Toggle><IoToggleFilled/></Toggle> : <Toggle><IoToggle/></Toggle>}
+            { enabled ? <Toggle><IoToggleFilled /></Toggle> : <Toggle><IoToggle /></Toggle>}
             <ButtonDescription> {`Turn ${enabled ? 'Off' : 'On'}`} </ButtonDescription>
           </Button>
           <Button onClick={toggleSettings} settings >
-            { showMore ? <IoCheckmarkCircled/> : <IoGearA/> }
+            { showMore ? <IoCheckmarkCircled /> : <IoGearA /> }
             <ButtonDescription>{showMore ? 'Save' : 'Edit'}</ButtonDescription>
           </Button>
         </PlaylistInfo>
@@ -74,8 +80,8 @@ class Playlist extends Component {
           showMore
             ? <div>
               <Length length={length} onChange={updateLength} />
-              { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm}/> : null}
-              { period !== undefined ? <TimePeriod period={period || '3month' } onChange={updatePeriod} /> : null}
+              { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
+              { period !== undefined ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
             </div>
             : null
         }

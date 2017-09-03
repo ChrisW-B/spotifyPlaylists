@@ -34,7 +34,7 @@ export const PlaylistTitle = styled.p`
 `;
 
 export const Button = styled.a`
-  background: ${({settings, on}) => settings ? 'var(--oc-blue-0)' : 'transparent'};
+  background: ${({settings}) => settings ? 'var(--oc-blue-0)' : 'transparent'};
   border-left: ${({settings}) => settings ? '1px solid var(--oc-blue-5)' : '0'};
   color: ${({settings, on}) => settings ? 'var(--oc-blue-4)' : on ? 'var(--oc-green-7)' : 'var(--oc-red-7)'};
   cursor: pointer;

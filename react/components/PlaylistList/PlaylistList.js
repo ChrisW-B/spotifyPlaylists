@@ -12,8 +12,16 @@ export default class PlaylistList extends Component {
     updateRecentlyAdded: PropTypes.func.isRequired,
     toggleMostPlayed: PropTypes.func.isRequired,
     toggleRecentlyAdded: PropTypes.func.isRequired,
-    mostPlayed: PropTypes.object.isRequired,
-    recentlyAdded: PropTypes.object.isRequired
+    mostPlayed: PropTypes.shape({
+      enabled: PropTypes.bool,
+      length: PropTypes.string,
+      lastfm: PropTypes.string,
+      period: PropTypes.string
+    }).isRequired,
+    recentlyAdded: PropTypes.shape({
+      enabled: PropTypes.bool,
+      length: PropTypes.string
+    }).isRequired,
   }
 
   componentDidMount = () => this.props.updatePlaylistStatus();

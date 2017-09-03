@@ -1,29 +1,29 @@
 // server/routes/member.js
-const express = require('express'),
-  app = express.Router(),
-  passport = require('passport'),
-  SpotifyStrategy = require('passport-spotify').Strategy,
-  utils = require('../utils'),
+const express = require('express');
+const passport = require('passport');
+const SpotifyStrategy = require('passport-spotify').Strategy;
+const utils = require('../utils');
 
-  deleteMember = async (memberId, logout) => {
-    await utils.redis.del(memberId);
-    await utils.redis.srem('users', memberId);
-  },
-  saveToRedis = async data => {
-    if (!(await utils.redis.exists(data.userId))) {
-      await utils.redis.sadd('users', data.userId);
-      await utils.redis.hmset(data.userId,
-        'access', data.access,
-        'refresh', data.refresh,
-        'most', 'false',
-        'recent', 'false');
-    } else utils.logger.server(`${data.userId} already added!`);
-  };
+const app = express.Router();
+const deleteMember = async (memberId) => {
+  await utils.redis.del(memberId);
+  await utils.redis.srem('users', memberId);
+};
+const saveToRedis = async (data) => {
+  if (!(await utils.redis.exists(data.userId))) {
+    await utils.redis.sadd('users', data.userId);
+    await utils.redis.hmset(data.userId,
+      'access', data.access,
+      'refresh', data.refresh,
+      'most', 'false',
+      'recent', 'false');
+  } else utils.logger.server(`${data.userId} already added!`);
+};
 
-passport.serializeUser(function (user, done) {
+passport.serializeUser((user, done) => {
   done(null, user);
 });
-passport.deserializeUser(function (obj, done) {
+passport.deserializeUser((obj, done) => {
   done(null, obj);
 });
 passport.use(
@@ -33,6 +33,7 @@ passport.use(
     callbackURL: process.env.SPOTIFY_REDIRECT
   },
   async (accessToken, refreshToken, profile, done) => {
+    /* eslint-disable no-param-reassign */
     await saveToRedis({
       access: accessToken,
       refresh: refreshToken,
@@ -41,8 +42,8 @@ passport.use(
     profile.access = accessToken;
     profile.refresh = refreshToken;
     return done(null, profile);
-  }
-  )
+    /* eslint-enable no-param-reassign */
+  })
 );
 
 app.get('/login', passport.authenticate('spotify', {
@@ -61,8 +62,10 @@ app.get('/setup', passport.authenticate('spotify', {
 app.get('', utils.ensureAuthenticated, (req, res) => {
   delete req.user.access;
   delete req.user.refresh;
-  delete req.user['_json'];
-  delete req.user['_raw'];
+  /* eslint-disable no-underscore-dangle */
+  delete req.user._json;
+  delete req.user._raw;
+  /* eslint-enable no-underscore-dangle */
   res.json({ ...req.user, isAdmin: req.user.id === process.env.ADMIN });
 });
 

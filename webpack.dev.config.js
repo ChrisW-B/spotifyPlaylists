@@ -1,10 +1,11 @@
 // ./webpack.dev.config.js
+/* eslint import/no-extraneous-dependencies: 0 */
+const path = require('path');
+const webpack = require('webpack');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 
-const path = require('path'),
-  webpack = require('webpack'),
-  CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin'),
-  BUILD_DIR = path.resolve(__dirname, 'public/build'),
-  APP_DIR = path.resolve(__dirname, 'react');
+const BUILD_DIR = path.resolve(__dirname, 'public/build');
+const APP_DIR = path.resolve(__dirname, 'react');
 
 module.exports = {
   entry: {

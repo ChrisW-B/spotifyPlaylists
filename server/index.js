@@ -1,23 +1,22 @@
 // server/index.js
 
 require('dotenv').config();
-const express = require('express'),
-  session = require('express-session'),
-  bodyParser = require('body-parser'),
-  cookieParser = require('cookie-parser'),
-  winston = require('winston'),
-  expressWinston = require('express-winston'),
-  path = require('path'),
-  passport = require('passport'),
-  RedisStore = require('connect-redis')(session),
-  exec = require('child_process').exec,
+const express = require('express');
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const winston = require('winston');
+const expressWinston = require('express-winston');
+const path = require('path');
+const passport = require('passport');
+const RedisStore = require('connect-redis')(session);
+const exec = require('child_process').exec;
+const utils = require('./utils');
 
-  app = express(),
-  utils = require('./utils'),
-
-  ONE_SEC = 1000,
-  ONE_MIN = 60 * ONE_SEC,
-  ONE_HOUR = 60 * ONE_MIN;
+const app = express();
+const ONE_SEC = 1000;
+const ONE_MIN = 60 * ONE_SEC;
+const ONE_HOUR = 60 * ONE_MIN;
 
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
@@ -42,8 +41,9 @@ app.use(expressWinston.logger({
 app.use(bodyParser.urlencoded({ extended: false }));
 
 if (process.env.BUILD_MODE !== 'prebuilt') {
-  const webpackConfig = require('../webpack.dev.config.js'),
-    compiler = require('webpack')(webpackConfig);
+  /* eslint-disable import/no-extraneous-dependencies, global-require */
+  const webpackConfig = require('../webpack.dev.config.js');
+  const compiler = require('webpack')(webpackConfig);
   app.use(require('webpack-dev-middleware')(compiler, {
     hot: true,
     publicPath: webpackConfig.output.publicPath,
@@ -57,9 +57,10 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
     path: '/__webpack_hmr',
     heartbeat: 10 * ONE_SEC
   }));
+  /* eslint-enable import/no-extraneous-dependencies, global-require */
 } else {
   app.get('*.js', (req, res, next) => {
-    req.url = req.url + '.gz';
+    req.url += '.gz';
     res.set('Content-Encoding', 'gzip');
     res.set('Content-Type', 'text/javascript');
     next();
@@ -84,12 +85,13 @@ app.post('/postrecieve', utils.ensureGithub, (req, res) => {
 app.get('*', (req, res) => res.render('pages/index'));
 
 app.listen(5621, () => {
-  utils.logger.server('SpotifyApps listening on port 5621!\n' + 'http://localhost:5621/');
+  utils.logger.server('SpotifyApps listening on port 5621!\nhttp://localhost:5621/');
 });
 
 // run periodically
 setInterval(() => utils.recentlyAdded.update(), 5 * ONE_HOUR);
-setTimeout(() => setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); // offset update
+setTimeout(() =>
+  setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); // offset update
 
 // run after starting
 // utils.mostPlayed.update();

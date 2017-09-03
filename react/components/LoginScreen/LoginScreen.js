@@ -6,11 +6,11 @@ import { TitleWrapper, LoginBackground, TextWrapper, WelcomeText, Description, S
 
 export default class MainPage extends Component {
   static propTypes = {
-    login: PropTypes.func,
-    status: PropTypes.string
+    login: PropTypes.func.isRequired,
+    status: PropTypes.string.isRequired
   }
   render = () =>
-    <LoginBackground status={this.props.status}>
+    (<LoginBackground status={this.props.status}>
       <TitleWrapper>
         <WelcomeText>Welcome to Autoplaylists for Spotify!</WelcomeText>
       </TitleWrapper>
@@ -18,7 +18,7 @@ export default class MainPage extends Component {
         <Description>Autoplaylists for Spotify will make and update <PlaylistTitle>Most Played</PlaylistTitle> and <PlaylistTitle>Recently Added</PlaylistTitle> playlists for you.</Description>
       </TextWrapper>
       <SpotifyButton onClick={this.props.login}>
-        <img src='/images/spotify-login.png'/>
+        <img src='/images/spotify-login.png' alt='Login With Spotify' />
       </SpotifyButton>
-    </LoginBackground>
+    </LoginBackground>)
 }

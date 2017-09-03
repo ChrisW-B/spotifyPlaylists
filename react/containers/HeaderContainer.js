@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { Header } from '../components';
 import { logout, deleteAccount } from '../actions';
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   memberId: state.member.id,
   mostPlayed: state.playlists.mostPlayed,
   recentlyAdded: state.playlists.recentlyAdded

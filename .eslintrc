@@ -1,20 +1,14 @@
 {
   "parser": "babel-eslint",
-  "plugins": ["standard"],
-  "extends": ["eslint:recommended", "standard"],
+  "extends": ["eslint:recommended", "airbnb"],
   "parserOptions": {
     "ecmaVersion": 8
   },
   "rules": {
-    "semi": [1, "always"],
+    "strict": 0,
     "quotes": [1, "single"],
-    "one-var": [0, "always"],
+    "comma-dangle": [2, "never"],
     "eol-last": [1, "never"],
-    "space-before-function-paren": [1, {
-      "anonymous": "always",
-      "named": "never",
-      "asyncArrow": "always"
-    }],
-    "indent": [1, 2, { "flatTernaryExpressions": false }]
+    "no-plusplus": [0]
   }
 }

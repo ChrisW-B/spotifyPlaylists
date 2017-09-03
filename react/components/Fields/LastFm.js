@@ -13,7 +13,7 @@ export default class LastFm extends Component {
       <p>
         LastFM Username
         <input
-          required={true}
+          required
           type='text'
           value={lastfm}
           onChange={onChange}

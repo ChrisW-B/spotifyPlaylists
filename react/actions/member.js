@@ -1,6 +1,7 @@
 // react/actions/member.js
 
 import { get, del } from './';
+
 export const getMemberInfo = () => get(
   `/member`,
   'MEMBER_INFO',
