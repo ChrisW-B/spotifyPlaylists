@@ -2,27 +2,8 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 
-const RadioLabel = styled.label`
-  background: ${props => props.checked ? 'var(--oc-violet-9)' : 'white'};
-  border: 1px solid var(--oc-violet-9);
-  border-left: 0;
-  color: ${props => props.checked ? 'white' : 'var(--oc-violet-9)'};
-  cursor: pointer;
-  padding: 5px;
-  &:first-child {
-    border: 1px solid var(--oc-violet-9);
-    border-radius: 5px 0 0 5px;
-  }
-  &:last-child {
-    border-radius: 0 5px 5px 0;
-  }
-`;
-
-const Radio = styled.input`
-  display: none;
-`;
+import { FieldWrapper, Radio, RadioLabel } from './Styles';
 
 export default class TimePeriod extends Component {
   static propTypes = {
@@ -41,22 +22,24 @@ export default class TimePeriod extends Component {
   render = () => {
     const { period, onChange } = this.props;
     return (
-      <div>
-        Time Period
-        {
-          this.options.map(o => (
-            <RadioLabel key={o.value} checked={period === o.value}>
-              <Radio
-                type='radio'
-                name='period'
-                value={o.value}
-                checked={period === o.value}
-                onChange={onChange}
-              />{o.title}
-            </RadioLabel>
-          ))
-        }
-      </div>
+      <FieldWrapper>
+        <span>Time Period</span>
+        <span>
+          {
+            this.options.map(o => (
+              <RadioLabel key={o.value} checked={period === o.value}>
+                <Radio
+                  type='radio'
+                  name='period'
+                  value={o.value}
+                  checked={period === o.value}
+                  onChange={onChange}
+                />{o.title}
+              </RadioLabel>
+            ))
+          }
+        </span>
+      </FieldWrapper>
     );
   }
 }

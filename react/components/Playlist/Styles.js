@@ -1,28 +1,19 @@
 import styled from 'styled-components';
 
-export const PlaylistWrapper = styled.div`
-  border: 1px solid black;
-  &:first-child {
-    border-radius: 5px 5px 0 0;
-    & > span {
-      border-radius: 5px 5px 0 0;
-      & > a:last-child {
-        border-radius: 0 5px 0 0;
-      }
-    }
-  }
-  &:last-child {
-    border-radius: 0 0 5px 5px;
-    border-top: 0;
-    & > span {
-      & > a:last-child {
-        border-radius: 0 0 5px;
-      }
-    }
-  }
-`;
+const ListItem = styled.li`
+  border: 1px solid var(--oc-green-8);
 
-export const PlaylistInfo = styled.span`
+  &:not(:first-child) {
+    border-top: 0;
+  }
+`
+
+export const PlaylistDetail = styled(ListItem)`
+  margin: 0;
+  padding: 10px;
+`
+
+export const PlaylistInfo = styled(ListItem)`
   background-color: ${({on}) => on ? 'var(--oc-green-2)' : 'var(--oc-red-2)'};
   display: flex;
   place-items: stretch;

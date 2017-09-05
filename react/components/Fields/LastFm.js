@@ -1,6 +1,7 @@
 // react/components/Fields/LastFm.js
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FieldWrapper, TextInput } from './Styles';
 
 export default class LastFm extends Component {
   static propTypes = {
@@ -10,15 +11,18 @@ export default class LastFm extends Component {
   render = () => {
     const { lastfm, onChange } = this.props;
     return (
-      <p>
-        LastFM Username
-        <input
-          required
-          type='text'
-          value={lastfm}
-          onChange={onChange}
-        />
-      </p>
+      <FieldWrapper>
+        <span>LastFM Username</span>
+        <span>
+          <TextInput
+            required
+            type='text'
+            value={lastfm}
+            onChange={onChange}
+            placeholder='Your Last.FM ID'
+          />
+        </span>
+      </FieldWrapper>
     );
   }
 }

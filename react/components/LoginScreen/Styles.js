@@ -27,9 +27,12 @@ const MoveInLeft = keyframes `
   }
 `;
 
+const transitionOut = `, 300ms ${MoveOutLeft} cubic-bezier(0.4, 0, 0.2, 1)`;
+const transitionIn = `, 300ms ${MoveInLeft} cubic-bezier(0.4, 0, 0.2, 1)`;
+
 export const LoginBackground = styled.div `
   align-items: left;
-  animation: 100s ${AnimateBG} linear infinite ${({status}) => status === 'exiting' ?`, 300 ms ${MoveOutLeft} cubic - bezier(0.4, 0, 0.2, 1)` : status === 'entering' ? `, 300 ms ${MoveInLeft} cubic-bezier(0.4, 0, 0.2, 1)` : ''};
+  animation: 100s ${AnimateBG} linear infinite ${({status}) => status === 'exiting' ? transitionOut : status === 'entering' ?transitionIn : ''};
   background: repeating-linear-gradient(140deg, #FA8BFF 0%, #2BFF88 35%, #2BD2FF 65%, #FA8BFF 81%);
   background-color: #00dbde;
   background-position: 50em 0;

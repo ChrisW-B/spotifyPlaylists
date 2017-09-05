@@ -42,6 +42,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 if (process.env.BUILD_MODE !== 'prebuilt') {
   /* eslint-disable import/no-extraneous-dependencies, global-require */
+  // disable because we only want this in dev mode
   const webpackConfig = require('../webpack.dev.config.js');
   const compiler = require('webpack')(webpackConfig);
   app.use(require('webpack-dev-middleware')(compiler, {

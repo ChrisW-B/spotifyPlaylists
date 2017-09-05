@@ -5,7 +5,7 @@ import IoToggle from 'react-icons/lib/io/toggle';
 import IoToggleFilled from 'react-icons/lib/io/toggle-filled';
 import IoCheckmarkCircled from 'react-icons/lib/io/checkmark-circled';
 import { LastFm, Length, TimePeriod } from '../';
-import { PlaylistWrapper, PlaylistInfo, PlaylistTitle, Button, Toggle, ButtonDescription } from './Styles';
+import { PlaylistDetail, PlaylistInfo, PlaylistTitle, Button, Toggle, ButtonDescription } from './Styles';
 
 class Playlist extends Component {
   static propTypes = {
@@ -20,8 +20,8 @@ class Playlist extends Component {
 
   static defaultProps = {
     length: '10',
-    lastfm: '',
-    period: '3month'
+    lastfm: undefined,
+    period: undefined
   }
 
   state = {
@@ -41,6 +41,11 @@ class Playlist extends Component {
       lastfm: lastfm === undefined ? undefined : lastfm || '',
       period: period === undefined ? undefined : period || '3month'
     };
+    safeVals.length = safeVals.length > 50
+      ? 50
+      : safeVals.length < 1
+      ? 1
+      : safeVals.length;
     this.setState({ ...safeVals });
   }
 
@@ -54,6 +59,7 @@ class Playlist extends Component {
     this.setState((prevState) => ({ showMore: !prevState.showMore }));
   }
 
+  // react 16 array returns are cool
   render = () => {
     const {
       props: { enabled, title, toggle },
@@ -63,31 +69,26 @@ class Playlist extends Component {
       updatePeriod,
       toggleSettings
     } = this;
-    return (
-      <PlaylistWrapper>
-        <PlaylistInfo on={enabled}>
-          <PlaylistTitle>{title}</PlaylistTitle>
-          <Button title={`Turn ${enabled ? 'Off' : 'On'}`} onClick={toggle} on={enabled}>
-            { enabled ? <Toggle><IoToggleFilled /></Toggle> : <Toggle><IoToggle /></Toggle>}
-            <ButtonDescription> {`Turn ${enabled ? 'Off' : 'On'}`} </ButtonDescription>
-          </Button>
-          <Button onClick={toggleSettings} settings >
-            { showMore ? <IoCheckmarkCircled /> : <IoGearA /> }
-            <ButtonDescription>{showMore ? 'Save' : 'Edit'}</ButtonDescription>
-          </Button>
-        </PlaylistInfo>
-        {
-          showMore
-            ? <div>
-              <Length length={length} onChange={updateLength} />
-              { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
-              { period !== undefined ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
-            </div>
-            : null
-        }
-
-      </PlaylistWrapper>
-    );
+    return [
+      <PlaylistInfo on={enabled} key={title}>
+        <PlaylistTitle>{title}</PlaylistTitle>
+        <Button title={`Turn ${enabled ? 'Off' : 'On'}`} onClick={toggle} on={enabled}>
+          { enabled ? <Toggle><IoToggleFilled /></Toggle> : <Toggle><IoToggle /></Toggle>}
+          <ButtonDescription> {`Turn ${enabled ? 'Off' : 'On'}`} </ButtonDescription>
+        </Button>
+        <Button onClick={toggleSettings} settings >
+          { showMore ? <IoCheckmarkCircled /> : <IoGearA /> }
+          <ButtonDescription>{showMore ? 'Save' : 'Edit'}</ButtonDescription>
+        </Button>
+      </PlaylistInfo>,
+      showMore
+      ? <PlaylistDetail key={`${title}-detail`}>
+        <Length length={length} onChange={updateLength} />
+        { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
+        { period !== undefined ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
+      </PlaylistDetail>
+      : null
+    ]
   }
 }
 
