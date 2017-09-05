@@ -1,7 +1,7 @@
 // react/components/Fields/LastFm.js
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FieldWrapper, TextInput } from './Styles';
+import { FieldWrapper, TextInput, FieldLabel } from './Styles';
 
 export default class LastFm extends Component {
   static propTypes = {
@@ -12,7 +12,7 @@ export default class LastFm extends Component {
     const { lastfm, onChange } = this.props;
     return (
       <FieldWrapper>
-        <span>LastFM Username</span>
+        <FieldLabel>LastFM Username</FieldLabel>
         <span>
           <TextInput
             required

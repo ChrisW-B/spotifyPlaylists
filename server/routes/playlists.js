@@ -22,12 +22,12 @@ const getCurrentSettings = async (id, isMost) =>
   (isMost
     ? ({
       enabled: String(await utils.redis.hget(id, 'most')).toLowerCase() === 'true',
-      length: await utils.redis.hget(id, 'most:length'),
+      length: +(await utils.redis.hget(id, 'most:length')),
       lastfm: await utils.redis.hget(id, 'most:lastfm'),
       period: await utils.redis.hget(id, 'most:period')
     }) : ({
       enabled: String(await utils.redis.hget(id, 'recent')).toLowerCase() === 'true',
-      length: await utils.redis.hget(id, 'recent:length')
+      length: +(await utils.redis.hget(id, 'recent:length'))
     }));
 
 app.get('', utils.ensureAuthenticated, async (req, res) => {

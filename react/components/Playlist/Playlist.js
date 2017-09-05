@@ -13,13 +13,13 @@ class Playlist extends Component {
     title: PropTypes.string.isRequired,
     toggle: PropTypes.func.isRequired,
     saveSettings: PropTypes.func.isRequired,
-    length: PropTypes.string,
+    length: PropTypes.number,
     lastfm: PropTypes.string,
     period: PropTypes.string
   }
 
   static defaultProps = {
-    length: '10',
+    length: 10,
     lastfm: undefined,
     period: undefined
   }
@@ -54,6 +54,7 @@ class Playlist extends Component {
   updatePeriod = e => this.setState({ period: e.target.value })
 
   toggleSettings = () => {
+    if (this.form && !this.form.checkValidity()) return;
     const { state: { showMore, length, lastfm, period }, props: { saveSettings } } = this;
     if (showMore) saveSettings({ length, lastfm, period });
     this.setState((prevState) => ({ showMore: !prevState.showMore }));
@@ -83,9 +84,11 @@ class Playlist extends Component {
       </PlaylistInfo>,
       showMore
       ? <PlaylistDetail key={`${title}-detail`}>
-        <Length length={length} onChange={updateLength} />
-        { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
-        { period !== undefined ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
+        <form ref={PlaylistDetail => this.form = PlaylistDetail}>
+          <Length length={length} onChange={updateLength} />
+          { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
+          { period !== undefined ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
+        </form>
       </PlaylistDetail>
       : null
     ]

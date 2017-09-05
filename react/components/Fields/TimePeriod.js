@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { FieldWrapper, Radio, RadioLabel } from './Styles';
+import { FieldWrapper, Radio, RadioLabel, FieldLabel } from './Styles';
 
 export default class TimePeriod extends Component {
   static propTypes = {
@@ -23,7 +23,7 @@ export default class TimePeriod extends Component {
     const { period, onChange } = this.props;
     return (
       <FieldWrapper>
-        <span>Time Period</span>
+        <FieldLabel>Time Period</FieldLabel>
         <span>
           {
             this.options.map(o => (

@@ -5,11 +5,11 @@ const SpotifyStrategy = require('passport-spotify').Strategy;
 const utils = require('../utils');
 
 const app = express.Router();
-const deleteMember = async(memberId) => {
+const deleteMember = async (memberId) => {
   await utils.redis.del(memberId);
   await utils.redis.srem('users', memberId);
 };
-const saveToRedis = async(data) => {
+const saveToRedis = async (data) => {
   if (!(await utils.redis.exists(data.userId))) {
     await utils.redis.sadd('users', data.userId);
     await utils.redis.hmset(data.userId,
@@ -37,7 +37,6 @@ passport.use(
     }),
     async (access, refresh, profile, done) => {
       await saveToRedis({ access, refresh, userId: profile.id });
-
       return done(null, { ...profile, access, refresh });
     }
   ));
@@ -66,7 +65,7 @@ app.get('', utils.ensureAuthenticated, (req, res) => {
   res.json({ ...req.user, isAdmin: req.user.id === process.env.ADMIN });
 });
 
-app.delete('', utils.ensureAuthenticated, async(req, res) => {
+app.delete('', utils.ensureAuthenticated, async (req, res) => {
   await deleteMember(req.user.id);
   req.logout();
   req.session.destroy(() => {});

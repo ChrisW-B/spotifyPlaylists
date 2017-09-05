@@ -14,13 +14,13 @@ export default class PlaylistList extends Component {
     toggleRecentlyAdded: PropTypes.func.isRequired,
     mostPlayed: PropTypes.shape({
       enabled: PropTypes.bool,
-      length: PropTypes.string,
+      length: PropTypes.number,
       lastfm: PropTypes.string,
       period: PropTypes.string
     }).isRequired,
     recentlyAdded: PropTypes.shape({
       enabled: PropTypes.bool,
-      length: PropTypes.string
+      length: PropTypes.number
     }).isRequired,
   }
 
@@ -30,6 +30,7 @@ export default class PlaylistList extends Component {
     const { mostPlayed, recentlyAdded, toggleMostPlayed, toggleRecentlyAdded, updateMostPlayed, updateRecentlyAdded } = this.props;
     return (
       <ListWrapper>
+        <h1> Your Playlists </h1>
         <List>
           <Playlist
             title='Most Played'
