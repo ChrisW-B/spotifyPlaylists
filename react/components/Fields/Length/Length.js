@@ -1,4 +1,4 @@
-// react/components/Fields/Length.js
+// react/components/Fields/Length/Length.js
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FieldWrapper, NumberInput, LengthContainer, SliderInput, FieldLabel, SongLabel } from './Styles';

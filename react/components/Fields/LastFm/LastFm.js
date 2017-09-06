@@ -1,4 +1,4 @@
-// react/components/Fields/LastFm.js
+// react/components/Fields/LastFm/LastFm.js
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FieldWrapper, TextInput, FieldLabel } from './Styles';

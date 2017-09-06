@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { HeaderContainer, PlaylistListContainer } from '../../containers';
+import { Route } from 'react-router';
+import { HeaderContainer, PlaylistListContainer, SettingsContainer } from '../../containers';
 import PlaylistsPageWrapper from './Styles';
 
 export default class PlaylistsPage extends Component {
@@ -10,6 +11,7 @@ export default class PlaylistsPage extends Component {
   render = () =>
     (<PlaylistsPageWrapper status={this.props.status}>
       <HeaderContainer />
-      <PlaylistListContainer />
+      <Route path={'/'} exact component={PlaylistListContainer} />
+      <Route path={'/settings'} exact component={SettingsContainer} />
     </PlaylistsPageWrapper>)
 }

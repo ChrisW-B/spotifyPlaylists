@@ -1,4 +1,4 @@
-import styled, { keyframes } from 'styled-components';
+import styled, { keyframes } from 'emotion/react';
 
 const AnimateBG = keyframes `
   0% {

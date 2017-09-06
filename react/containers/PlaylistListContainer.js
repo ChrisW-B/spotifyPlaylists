@@ -4,9 +4,9 @@ import { connect } from 'react-redux';
 import { PlaylistList } from '../components';
 import { updatePlaylistStatus, toggleMostPlayed, toggleRecentlyAdded, updateMostPlayed, updateRecentlyAdded } from '../actions';
 
-const mapStateToProps = state => ({
-  mostPlayed: state.playlists.mostPlayed,
-  recentlyAdded: state.playlists.recentlyAdded
+const mapStateToProps = ({ playlists }) => ({
+  mostPlayed: playlists.mostPlayed,
+  recentlyAdded: playlists.recentlyAdded
 });
 
 const mapDispatchToProps = dispatch => ({

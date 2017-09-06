@@ -46,11 +46,7 @@ module.exports = {
         options: {
           cacheDirectory: true,
           presets: ['es2015', 'stage-0', 'react'],
-          plugins: [
-            ['styled-components', {
-              preprocess: true
-            }]
-          ]
+          plugins: ['emotion/babel']
         }
       }]
     }, {

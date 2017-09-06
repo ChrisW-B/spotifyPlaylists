@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from 'emotion/react';
 
 const ListItem = styled.li`
   border: 1px solid var(--oc-green-8);
@@ -31,6 +31,7 @@ export const Button = styled.a`
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  font-size: 30px;
   min-width: 45px;
   padding: 0 10px;
   place-content: center;

@@ -10,6 +10,5 @@ export default class App extends Component {
     (<Switch>
       <Route path={'/loggedin'} exact component={FinishVerify} />
       <Route path={'/'} exact component={MainPageContainer} />
-      {/* <Route path={'/settings'} exact component={SettingsContainer} /> */}
     </Switch>)
 }

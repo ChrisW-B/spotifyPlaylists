@@ -7,7 +7,7 @@ import IoCheckmarkCircled from 'react-icons/lib/io/checkmark-circled';
 import { LastFm, Length, TimePeriod } from '../';
 import { PlaylistDetail, PlaylistInfo, PlaylistTitle, Button, Toggle, ButtonDescription } from './Styles';
 
-class Playlist extends Component {
+export default class Playlist extends Component {
   static propTypes = {
     enabled: PropTypes.bool.isRequired,
     title: PropTypes.string.isRequired,
@@ -94,5 +94,3 @@ class Playlist extends Component {
     ]
   }
 }
-
-export default Playlist;

@@ -2,7 +2,7 @@
 
 const path = require('path');
 const CompressionPlugin = require('compression-webpack-plugin');
-const BabiliPlugin = require('babili-webpack-plugin');
+const MinifyPlugin = require('babel-minify-webpack-plugin');
 const webpack = require('webpack');
 
 const BUILD_DIR = path.resolve(__dirname, 'public/build');
@@ -19,7 +19,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({ ENV: JSON.stringify('production') }),
-    new BabiliPlugin({
+    new MinifyPlugin({
       removeConsole: true,
       removeDebugger: true
     }, { comments: false, sourceMap: false }),
@@ -68,7 +68,7 @@ module.exports = {
             'stage-0'
           ],
           plugins: [
-            ['styled-components', { displayName: false, preprocess: true }],
+            'emotion/babel',
             'transform-decorators-legacy', ['transform-react-remove-prop-types', { mode: 'remove', removeImport: true }],
             [
               'transform-runtime', {

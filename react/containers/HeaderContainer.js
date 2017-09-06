@@ -1,18 +1,19 @@
 // react/containers/HeaderContainer.js
 
 import { connect } from 'react-redux';
+import { push } from 'react-router-redux';
 import { Header } from '../components';
-import { logout, deleteAccount } from '../actions';
+import { logout } from '../actions';
 
-const mapStateToProps = state => ({
-  memberId: state.member.id,
-  mostPlayed: state.playlists.mostPlayed,
-  recentlyAdded: state.playlists.recentlyAdded
+const mapStateToProps = ({ member, playlists }) => ({
+  member,
+  mostPlayed: playlists.mostPlayed,
+  recentlyAdded: playlists.recentlyAdded
 });
 
 const mapDispatchToProps = dispatch => ({
   logout: () => dispatch(logout()),
-  deleteAccount: () => dispatch(deleteAccount())
+  openSettings: () => dispatch(push('/settings'))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header);

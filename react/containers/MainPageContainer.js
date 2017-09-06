@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import { MainPage } from '../components';
 import { getMemberInfo } from '../actions';
 
-const mapStateToProps = state => ({
-  member: state.member,
-  mostPlayed: state.playlists.mostPlayed,
-  recentlyAdded: state.playlists.recentlyAdded
+const mapStateToProps = ({ member, playlists }) => ({
+  member,
+  mostPlayed: playlists.mostPlayed,
+  recentlyAdded: playlists.recentlyAdded
 });
 
 const mapDispatchToProps = dispatch => ({

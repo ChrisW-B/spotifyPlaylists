@@ -8,7 +8,7 @@ import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
-import { injectGlobal } from 'styled-components';
+import { injectGlobal } from 'emotion';
 
 import Reducers from './reducers';
 import { getMemberInfo } from './actions';
@@ -52,12 +52,6 @@ injectGlobal `
     margin: 0;
     overflow-x: hidden;
   }
-
-  @import url('https://fonts.googleapis.com/css?family=Lato:400,700');
-
-  @import url('/styles/opencolor.css');
-
-  @import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 `;
 
 ReactDOM.render(
