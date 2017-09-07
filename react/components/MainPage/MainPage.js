@@ -3,14 +3,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Transition from 'react-transition-group/Transition';
-import { LoginScreen, PlaylistsPage } from '../';
+import { LoginScreen, Content } from '../';
 
 export default class MainPage extends Component {
   static propTypes = {
-    member: PropTypes.shape({
-      id: PropTypes.string.isRequired
-    }).isRequired,
+    id: PropTypes.string,
     getMemberInfo: PropTypes.func.isRequired
+  }
+
+  static defaultProps = {
+    id: null
   }
 
   reloadMember = () => {
@@ -29,10 +31,10 @@ export default class MainPage extends Component {
 
   render = () =>
     (<div>
-      <Transition timeout={300} in={!!this.props.member.id} unmountOnExit mountOnEnter>
-        {status => <PlaylistsPage status={status} /> }
+      <Transition timeout={300} in={!!this.props.id} unmountOnExit mountOnEnter>
+        {status => <Content status={status} /> }
       </Transition>
-      <Transition timeout={300} in={!this.props.member.id} unmountOnExit mountOnEnter>
+      <Transition timeout={300} in={!this.props.id} unmountOnExit mountOnEnter>
         { status => <LoginScreen login={this.login} status={status} /> }
       </Transition>
     </div>)

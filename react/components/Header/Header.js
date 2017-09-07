@@ -8,21 +8,18 @@ export default class Header extends Component {
   static propTypes = {
     logout: PropTypes.func.isRequired,
     openSettings: PropTypes.func.isRequired,
-    member: PropTypes.shape({
-      country: PropTypes.string,
-      displayName: PropTypes.string,
-      followers: PropTypes.number,
-      id: PropTypes.string,
-      isAdmin: PropTypes.bool,
-      photos: PropTypes.arrayOf(PropTypes.string),
-      product: PropTypes.string,
-      profileUrl: PropTypes.string,
-      provider: PropTypes.string,
-      username: PropTypes.string
-    }).isRequired
+    photos: PropTypes.arrayOf(PropTypes.string),
+    id: PropTypes.string,
+    username: PropTypes.string
   }
+  static defaultProps = {
+    photos: [],
+    id: '',
+    username: ''
+  }
+
   render = () => {
-    const { logout, openSettings, member: { photos, id, username } } = this.props;
+    const { logout, openSettings, photos, id, username } = this.props;
     return (
       <Wrapper>
         <HeaderSpan>

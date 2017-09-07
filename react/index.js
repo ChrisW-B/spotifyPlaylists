@@ -4,7 +4,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore, applyMiddleware, compose } from 'redux';
 import { Provider } from 'react-redux';
-import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
@@ -57,7 +56,7 @@ injectGlobal `
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <Route path="*" component={AppContainer} />
+      <AppContainer />
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

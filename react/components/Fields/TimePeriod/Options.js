@@ -16,8 +16,8 @@ export default class Options extends Component {
     { value: '7day', title: '1 Week' }
   ];
   render = () => {
-    const { period, onChange } = this.props;
-    return this.options.map(({ value, title }) => (
+    const { options, props: { period, onChange } } = this;
+    return options.map(({ value, title }) => (
       <RadioLabel key={value} checked={period === value}>
         <Radio
           type='radio'

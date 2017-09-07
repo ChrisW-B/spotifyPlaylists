@@ -1,26 +1,39 @@
-import styled, { keyframes } from 'emotion/react';
+import styled from 'emotion/react';
 
-const MoveInRight = keyframes `
-  0% {
-    transform: translate3d(100%, 0, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
+export const ListWrapper = styled.div `
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 0 20px;
+  place-content: center;
+  place-items: center;
 `;
 
-const MoveOutRight = keyframes `
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(100%, 0, 0);
-  }
-`;
-
-export default styled.div `
-  animation: ${({status}) => status === 'entering' ? `300ms ${MoveInRight} cubic-bezier(0.4, 0, 0.2, 1)` : status === 'exiting' ? `300ms ${MoveOutRight} cubic-bezier(0.4, 0, 0.2, 1)` : ''};
+export const List = styled.ul `
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  max-width: 900px;
+  overflow: hidden;
+  padding: 0;
+  width: 100%;
+  & > li {
+    &:first-child {
+      border-radius: 5px 5px 0 0;
+
+      & a {
+        &:last-child {
+          border-top-right-radius: 5px;
+        }
+      }
+    }
+    &:last-child {
+      border-radius: 0 0 5px 5px;
+
+      & a {
+        &:last-child {
+          border-bottom-right-radius: 5px;
+        }
+      }
+    }
+  }
 `;
