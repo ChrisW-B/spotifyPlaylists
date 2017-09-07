@@ -44,3 +44,16 @@ export const HeaderSpan = styled.span `
 export const LogOutButton = styled(HeaderButton)`
   border-bottom: 2px solid var(--oc-red-2);
 `
+
+export const BackButton = styled.button`
+  background: transparent;
+  border: 0;
+  color: var(--oc-blue-4);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font-size: 30px;
+  padding: 0 20px 0 0;
+  place-content: center;
+  place-items: center;
+`
