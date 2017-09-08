@@ -22,7 +22,27 @@ const Contract = keyframes `
     padding: 0;
     width: 0;
   }
-`
+`;
+
+const Bounce = keyframes `
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40% {
+    transform: translate3d(0, 5px, 0);
+  }
+  60% {
+    transform: translate3d(0, 2.5px, 0);
+  }
+`;
+
+const transitionOut = `300ms ${Contract} cubic-bezier(0.4, 0, 0.2, 1)`;
+const transitionIn = `300ms ${Expand} cubic-bezier(0.4, 0, 0.2, 1)`;
+const clickedAnimation = `2s cubic-bezier(0.4, 0, 0.2, 1) ${Bounce}`
 export const Wrapper = styled.div `
   align-items: center;
   background: var(--oc-gray-0);
@@ -33,7 +53,9 @@ export const Wrapper = styled.div `
 `;
 
 export const ProfilePhoto = styled.img `
+  animation: ${({clicked}) => clicked ? clickedAnimation : ''};
   border-radius: 50px;
+  cursor: pointer;
   height: 50px;
   width: 50px;
 `;
@@ -67,8 +89,7 @@ export const HeaderSpan = styled.span `
 export const LogOutButton = styled(HeaderButton)`
   border-bottom: 2px solid var(--oc-red-2);
 `
-const transitionOut = `300ms ${Contract} cubic-bezier(0.4, 0, 0.2, 1)`;
-const transitionIn = `300ms ${Expand} cubic-bezier(0.4, 0, 0.2, 1)`;
+
 export const BackButton = styled.button `
   animation: ${({status}) => status === 'entering' ? transitionIn : status === 'exiting' ? transitionOut : ''};
   background: transparent;

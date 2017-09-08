@@ -1,6 +1,8 @@
 import styled from 'emotion/react';
 
-const ListItem = styled.li`
+const colorTransition = '.75s cubic-bezier(0.4, 0, 0.2, 1)'
+
+const ListItem = styled.li `
   border: 1px solid var(--oc-green-8);
 
   &:not(:first-child) {
@@ -17,14 +19,15 @@ export const PlaylistInfo = styled(ListItem)`
   background-color: ${({on}) => on ? 'var(--oc-green-2)' : 'var(--oc-red-2)'};
   display: flex;
   place-items: stretch;
+  transition: background-color ${colorTransition};
 `;
 
-export const PlaylistTitle = styled.p`
+export const PlaylistTitle = styled.p `
   flex: 1 1 auto;
   padding: 5px;
 `;
 
-export const Button = styled.a`
+export const Button = styled.a `
   background: ${({settings}) => settings ? 'var(--oc-blue-0)' : 'transparent'};
   border-left: ${({settings}) => settings ? '1px solid var(--oc-blue-5)' : '0'};
   color: ${({settings, on}) => settings ? 'var(--oc-blue-4)' : on ? 'var(--oc-green-7)' : 'var(--oc-red-7)'};
@@ -37,6 +40,7 @@ export const Button = styled.a`
   place-content: center;
   place-items: center;
   position: relative;
+  transition: color ${colorTransition};
   width: 50px;
 
   svg {
@@ -49,7 +53,7 @@ export const Button = styled.a`
   }
 `;
 
-export const ButtonDescription = styled.span`
+export const ButtonDescription = styled.span `
   border-radius: 4px;
   font-size: 12px;
   opacity: 0;
@@ -61,7 +65,7 @@ export const ButtonDescription = styled.span`
   width: 60px;
 `;
 
-export const Toggle = styled.span`
+export const Toggle = styled.span `
   display: flex;
   flex-direction: column;
   place-content: center;

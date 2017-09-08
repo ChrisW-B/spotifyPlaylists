@@ -17,7 +17,8 @@ const mapStateToProps = ({ member, playlists, routing }) => ({
 const mapDispatchToProps = dispatch => ({
   logout: () => dispatch(logout()),
   openSettings: () => dispatch(push('/settings')),
-  back: () => dispatch(goBack())
+  back: () => dispatch(goBack()),
+  goHome: () => dispatch(push('/'))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header);
