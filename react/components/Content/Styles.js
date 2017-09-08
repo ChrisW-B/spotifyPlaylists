@@ -18,8 +18,11 @@ const MoveOutRight = keyframes `
   }
 `;
 
+const transitionOut = `, 300ms ${MoveOutRight} cubic-bezier(0.4, 0, 0.2, 1)`;
+const transitionIn = `, 300ms ${MoveInRight} cubic-bezier(0.4, 0, 0.2, 1)`;
+
 export default styled.div `
-  animation: ${({status}) => status === 'entering' ? `300ms ${MoveInRight} cubic-bezier(0.4, 0, 0.2, 1)` : status === 'exiting' ? `300ms ${MoveOutRight} cubic-bezier(0.4, 0, 0.2, 1)` : ''};
+  animation: ${({status}) => status === 'entering' ? transitionIn : status === 'exiting' ? transitionOut : ''};
   display: flex;
   flex-direction: column;
   height: 100vh;

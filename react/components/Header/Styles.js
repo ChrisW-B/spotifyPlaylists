@@ -1,5 +1,28 @@
-import styled from 'emotion/react';
+import styled, { keyframes } from 'emotion/react';
 
+const Expand = keyframes `
+  0% {
+    font-size: 0;
+    padding: 0;
+    width: 0;
+  }
+  100% {
+    padding: 0 20px 0 0;
+    width: 50px;
+  }
+`;
+
+const Contract = keyframes `
+  0% {
+    padding: 0 20px 0 0;
+    width: 50px;
+  }
+  100% {
+    font-size: 0;
+    padding: 0;
+    width: 0;
+  }
+`
 export const Wrapper = styled.div `
   align-items: center;
   background: var(--oc-gray-0);
@@ -37,15 +60,17 @@ export const HeaderSpan = styled.span `
   width: 250px;
 
   @media (max-width: 650px) {
-    flex-direction: column;
+    flex-direction: ${({right}) => right ? 'column' : 'row'};
   }
 `
 
 export const LogOutButton = styled(HeaderButton)`
   border-bottom: 2px solid var(--oc-red-2);
 `
-
-export const BackButton = styled.button`
+const transitionOut = `300ms ${Contract} cubic-bezier(0.4, 0, 0.2, 1)`;
+const transitionIn = `300ms ${Expand} cubic-bezier(0.4, 0, 0.2, 1)`;
+export const BackButton = styled.button `
+  animation: ${({status}) => status === 'entering' ? transitionIn : status === 'exiting' ? transitionOut : ''};
   background: transparent;
   border: 0;
   color: var(--oc-blue-4);
