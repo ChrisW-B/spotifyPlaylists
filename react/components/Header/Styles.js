@@ -78,7 +78,7 @@ export const HeaderButton = styled.button `
 
 export const HeaderSpan = styled.span `
   display: flex;
-  justify-content: ${({right}) => right ? 'end' : 'start'};
+  justify-content: ${({right}) => right ? 'flex-end' : 'flex-start'};
   width: 250px;
 
   @media (max-width: 650px) {

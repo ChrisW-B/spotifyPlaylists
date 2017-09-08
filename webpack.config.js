@@ -1,8 +1,11 @@
 // ./webpack.config.js
 
+/* eslint-disable no-template-curly-in-string */
+
 const path = require('path');
 const CompressionPlugin = require('compression-webpack-plugin');
 const MinifyPlugin = require('babel-minify-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const webpack = require('webpack');
 
 const BUILD_DIR = path.resolve(__dirname, 'public/build');
@@ -24,13 +27,9 @@ module.exports = {
       removeDebugger: true
     }, { comments: false, sourceMap: false }),
     new webpack.optimize.OccurrenceOrderPlugin(),
-    new webpack.LoaderOptionsPlugin({
-      minimize: true,
-      debug: false
-    }),
+    new webpack.LoaderOptionsPlugin({ minimize: true, debug: false }),
     new webpack.optimize.ModuleConcatenationPlugin(),
     new webpack.optimize.AggressiveMergingPlugin(),
-    new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new CompressionPlugin({
       asset: '[path].gz[query]',
@@ -60,24 +59,12 @@ module.exports = {
       use: [{
         loader: 'babel-loader',
         options: {
-          cacheDirectory: './webpack-cache',
-          babelrc: false,
           presets: [
-            'es2015', ['minify', { removeConsole: true, removeDebugger: true }],
-            'react',
-            'stage-0'
+            ['es2015', { modules: false }], 'react', 'stage-0'
           ],
           plugins: [
-            'emotion/babel',
-            'transform-decorators-legacy', ['transform-react-remove-prop-types', { mode: 'remove', removeImport: true }],
-            [
-              'transform-runtime', {
-                helpers: false,
-                polyfill: false,
-                regenerator: true,
-                moduleName: 'babel-runtime'
-              }
-            ]
+            ['emotion/babel'],
+            ['transform-react-remove-prop-types', { mode: 'remove', removeImport: true }]
           ]
         }
       }]
