@@ -33,7 +33,7 @@
     "express-session": "^1.15.5",
     "express-winston": "^2.4.0",
     "history": "^4.7.2",
-    "lastfm-njs": "^0.2.4",
+    "lastfm-njs": "^1.0.0",
     "node-fetch": "^1.7.2",
     "passport": "^0.4.0",
     "passport-spotify": "^0.3.1",
