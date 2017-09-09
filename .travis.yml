@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "node"
+cache: yarn
+script:
+  - bash ./scripts/travis-ci.sh
+notifications:
+  email: false
+  slack:
+    rooms:
+      - secure: DXwgaHDoqfmDYsBmKZn8p4smnldyiXlsAKq8YO1fKiEK8uvzHlAWBrH/wWNalQbbgFQ/WPsza0orCIkjrePErzABwbxYMzf2S9G23oBXRSJKSI6ugaarMrabCFc9XuWFSbkQGdOzCzkpDvpKGblPVevSPhodk7GOXfkDhRTOnYEq3LgLsiOqHT34/vUH7Yla0y5+Wrvb1/lXLTgjD8mmK02DfFPu5c/RP3oaknpKj86+fg/06bAiZ7CQb/JjjARaBri5PXE8rwUGv+mopVQC0JLAxg74ufv40EcZF5UaptcnXM5sVyjKPyd5qkh0kT5x2G9vEb7CJeM/39pIybxLtXKWcg1NzOl2zbEUbfrUPh0a7radol1jU+t5wcBv1TD4lBsKzbBx6EGxjMgeAcyGOmOsBLTR2u1McTbP6r+F68MLvfzEhAOJo1sk22fWaIA5NTVKfEfWJVtLWDZl3lkVT7fycu3fJK6agr9xviPYnee78d/1jhPyKkWLtod8YzgdQiRsb0RkQVX4xn0D6MF57E+/F+EW2bpImdRYsOXupmuzkrNARMo1KM+9rS5PuAExcxqGYSA/sbL7wQKIuks1HZX8bLfLemEFmWEIgs2uslx76mWXLlsLx1Ph9F0awL40cDaxqtwQU44uTtFcityX/pp0bYzSrtv9Ld+ZQlRe/94=
+    on_success: always
+    on_failure: always

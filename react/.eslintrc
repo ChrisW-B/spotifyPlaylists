@@ -1,0 +1,23 @@
+{
+  "parser": "babel-eslint",
+  "plugins": ["react"],
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "env": {
+    "browser": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "classes": true,
+      "jsx": true
+    }
+  },
+  "globals": {
+    "ENV": true
+  },
+  "rules": {
+    "react/prefer-stateless-function": [0],
+    "react/jsx-filename-extension": [0]
+  }
+}
