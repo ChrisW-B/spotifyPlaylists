@@ -1,31 +1,21 @@
 // react/actions/member.js
 
-import { get, del } from './';
+import { get, del, receiveData } from './';
 
 export const getMemberInfo = () => get(
   `/member`,
   'MEMBER_INFO',
-  (type, info) => ({
-    type: `${type}_SUCCESS`,
-    info,
-    receivedAt: Date.now()
-  })
+  receiveData
 );
 
 export const logout = () => get(
   '/member/logout',
   'LOGOUT',
-  (type) => ({
-    type: `${type}_SUCCESS`,
-    receivedAt: Date.now()
-  })
+  receiveData
 );
 
 export const deleteAccount = () => del(
   '/member',
   'DELETE_ACCOUNT',
-  (type) => ({
-    type: `${type}_SUCCESS`,
-    receivedAt: Date.now()
-  })
+  receiveData
 );

@@ -1,5 +1,6 @@
 #! /bin/bash
 {
+  date
   git pull
   yarn forceDev
   yarn build

@@ -1,30 +1,25 @@
 // react/actions/playlists.js
 
-import { get, post } from './';
+import { get, post, receiveData } from './';
 
-const recieveData = (type, info) => ({
-  type: `${type}_SUCCESS`,
-  info,
-  receivedAt: Date.now()
-});
 export const updatePlaylistStatus = () => get(
   `/playlists`,
   'UPDATE_PLAYLISTS',
-  recieveData
+  receiveData
 );
 
 export const toggleMostPlayed = (enable) =>
   post(
     `/playlists/most/toggle`,
     'TOGGLE_MOST', { enable },
-    recieveData
+    receiveData
   );
 
 export const toggleRecentlyAdded = (enable) =>
   post(
     `/playlists/recent/toggle`,
     'TOGGLE_RECENT', { enable },
-    recieveData
+    receiveData
   );
 
 export const updateMostPlayed = (settings) =>
@@ -32,7 +27,7 @@ export const updateMostPlayed = (settings) =>
     `/playlists/most/save`,
     'UPDATE_MOST',
     settings,
-    recieveData
+    receiveData
   );
 
 export const updateRecentlyAdded = (settings) =>
@@ -40,5 +35,5 @@ export const updateRecentlyAdded = (settings) =>
     `/playlists/recent/save`,
     'UPDATE_RECENT',
     settings,
-    recieveData
+    receiveData
   );

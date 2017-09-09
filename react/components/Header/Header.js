@@ -4,23 +4,26 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Back from 'react-icons/lib/io/arrow-left-c';
 import { Transition } from 'react-transition-group';
-import { Wrapper, ProfilePhoto, WelcomeText, HeaderButton, LogOutButton, HeaderSpan, BackButton } from './Styles';
+import { Wrapper, ProfilePhoto, WelcomeText, HeaderButton, LogOutButton, HeaderSpan, BackButton, AdminButton } from './Styles';
 
 export default class Header extends Component {
   static propTypes = {
     logout: PropTypes.func.isRequired,
     openSettings: PropTypes.func.isRequired,
+    openAdmin: PropTypes.func.isRequired,
     goHome: PropTypes.func.isRequired,
     back: PropTypes.func.isRequired,
     photos: PropTypes.arrayOf(PropTypes.string),
     id: PropTypes.string,
-    pathname: PropTypes.string
+    pathname: PropTypes.string,
+    isAdmin: PropTypes.bool
   }
   static defaultProps = {
     photos: [],
     id: '',
     username: '',
-    pathname: '/'
+    pathname: '/',
+    isAdmin: false
   }
 
   state = {
@@ -33,7 +36,7 @@ export default class Header extends Component {
   }
 
   render = () => {
-    const { logout, openSettings, photos, id, back } = this.props;
+    const { logout, openSettings, photos, id, back, isAdmin, openAdmin } = this.props;
     return (
       <Wrapper>
         <HeaderSpan>
@@ -48,8 +51,9 @@ export default class Header extends Component {
         <HeaderSpan right>
           {
             id ? [
+              isAdmin ? <AdminButton onClick={openAdmin} key='adminbtn'>Admin</AdminButton> : null,
               <HeaderButton onClick={openSettings} key='settingsbtn'>Account Settings</HeaderButton>,
-              <LogOutButton onClick={logout} key='logoutbtn'>Log Out</LogOutButton>
+              <LogOutButton onClick={logout} key='logoutbtn'>Log Out</LogOutButton>,
             ] : null
           }
         </HeaderSpan>

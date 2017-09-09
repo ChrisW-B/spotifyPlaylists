@@ -72,6 +72,7 @@ export const HeaderButton = styled.button `
   border-radius: 0;
   cursor: pointer;
   font-size: 14px;
+  height: 30px;
   margin: 5px;
   padding: 0;
 `;
@@ -88,6 +89,10 @@ export const HeaderSpan = styled.span `
 
 export const LogOutButton = styled(HeaderButton)`
   border-bottom: 2px solid var(--oc-red-2);
+`
+
+export const AdminButton = styled(HeaderButton)`
+  border-bottom: 2px solid var(--oc-orange-2);
 `
 
 export const BackButton = styled.button `

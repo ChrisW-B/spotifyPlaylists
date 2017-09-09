@@ -4,6 +4,7 @@ const colorTransition = '.75s cubic-bezier(0.4, 0, 0.2, 1)'
 
 const ListItem = styled.li `
   border: 1px solid var(--oc-green-8);
+  min-height: 62px;
 
   &:not(:first-child) {
     border-top: 0;

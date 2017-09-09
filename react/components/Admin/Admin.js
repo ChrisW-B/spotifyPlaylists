@@ -14,7 +14,7 @@ export default class Admin extends Component {
     return (!isAdmin)
       ? <Redirect to='/' />
       : <div>
-        hi friend
+        hi special friend
         <button onClick={reloadRecent} >update most played</button>
         <button onClick={reloadMost} >update recently added</button>
       </div>
