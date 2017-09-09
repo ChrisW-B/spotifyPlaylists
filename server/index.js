@@ -77,8 +77,9 @@ app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, require('./route
 app.use('/playlists', require('./routes/playlists'));
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {
-  const update = exec(`cd ${path.join(__dirname, '..')}; git pull; yarn; yarn cleanup; yarn build`);
-  update.stdout.pipe(process.stdout);
+  const updateFile = path.join(__dirname, '..', 'scripts', 'update.sh');
+  const update = exec(updateFile);
+  update.unref();
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Thanks GitHub <3');
 });
