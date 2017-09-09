@@ -47,7 +47,7 @@ export default class Header extends Component {
             { status => <ProfilePhoto onClick={this.photoClicked} status={status} src={photos[0]} alt='profile_photo' clicked={this.state.clicked} />}
           </Transition>
         </HeaderSpan>
-        <WelcomeText>Autolaylists for Spotify</WelcomeText>
+        <WelcomeText>Autoplaylists for Spotify</WelcomeText>
         <HeaderSpan right>
           {
             id ? [

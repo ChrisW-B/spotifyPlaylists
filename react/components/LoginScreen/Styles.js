@@ -27,8 +27,9 @@ const MoveInLeft = keyframes `
   }
 `;
 
-const transitionOut = `, 300ms ${MoveOutLeft} cubic-bezier(0.4, 0, 0.2, 1)`;
-const transitionIn = `, 300ms ${MoveInLeft} cubic-bezier(0.4, 0, 0.2, 1)`;
+const materialAnimation = 'cubic-bezier(0.4, 0, 0.2, 1)';
+const transitionOut = `, 300ms ${MoveOutLeft} ${materialAnimation}`;
+const transitionIn = `, 300ms ${MoveInLeft} ${materialAnimation}`;
 
 export const LoginBackground = styled.div `
   align-items: left;

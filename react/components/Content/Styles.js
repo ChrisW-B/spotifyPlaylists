@@ -17,9 +17,9 @@ const MoveOutRight = keyframes `
     transform: translate3d(100%, 0, 0);
   }
 `;
-
-const transitionOut = `, 300ms ${MoveOutRight} cubic-bezier(0.4, 0, 0.2, 1)`;
-const transitionIn = `, 300ms ${MoveInRight} cubic-bezier(0.4, 0, 0.2, 1)`;
+const materialAnimation = 'cubic-bezier(0.4, 0, 0.2, 1)';
+const transitionOut = `, 300ms ${MoveOutRight} ${materialAnimation}`;
+const transitionIn = `, 300ms ${MoveInRight} ${materialAnimation}`;
 
 export default styled.div `
   animation: ${({status}) => status === 'entering' ? transitionIn : status === 'exiting' ? transitionOut : ''};

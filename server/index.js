@@ -73,7 +73,7 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
 }
 
 app.use('/member', require('./routes/member'));
-app.use('/admin', utils.ensureAdmin, require('./routes/admin'));
+app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, require('./routes/admin'));
 app.use('/playlists', require('./routes/playlists'));
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {

@@ -40,9 +40,10 @@ const Bounce = keyframes `
   }
 `;
 
-const transitionOut = `300ms ${Contract} cubic-bezier(0.4, 0, 0.2, 1)`;
-const transitionIn = `300ms ${Expand} cubic-bezier(0.4, 0, 0.2, 1)`;
-const clickedAnimation = `2s cubic-bezier(0.4, 0, 0.2, 1) ${Bounce}`
+const materialAnimation = 'cubic-bezier(0.4, 0, 0.2, 1)';
+const transitionOut = `300ms ${Contract} ${materialAnimation}`;
+const transitionIn = `300ms ${Expand} ${materialAnimation}`;
+const clickedAnimation = `2s ${materialAnimation} ${Bounce}`
 export const Wrapper = styled.div `
   align-items: center;
   background: var(--oc-gray-0);
