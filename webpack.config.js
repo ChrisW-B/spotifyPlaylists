@@ -5,7 +5,6 @@
 const path = require('path');
 const CompressionPlugin = require('compression-webpack-plugin');
 const MinifyPlugin = require('babel-minify-webpack-plugin');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const webpack = require('webpack');
 
 const BUILD_DIR = path.resolve(__dirname, 'public/build');

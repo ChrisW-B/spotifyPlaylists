@@ -45,7 +45,9 @@ module.exports = {
         loader: 'babel-loader',
         options: {
           cacheDirectory: true,
-          presets: ['es2015', 'stage-0', 'react'],
+          presets: [
+            ['es2015', { modules: false }], 'react', 'stage-0'
+          ],
           plugins: ['emotion/babel']
         }
       }]
