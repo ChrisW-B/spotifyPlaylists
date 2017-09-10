@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router';
 import { HeaderContainer, PlaylistsPageContainer, SettingsContainer, AdminContainer } from '../../containers';
+import { Footer } from '..';
 import ContentWrapper from './Styles';
 
 export default class Content extends Component {
@@ -16,5 +17,6 @@ export default class Content extends Component {
         <Route path={'/admin'} component={AdminContainer} />
         <Route path={'/'} component={PlaylistsPageContainer} />
       </Switch>
+      <Footer />
     </ContentWrapper>)
 }

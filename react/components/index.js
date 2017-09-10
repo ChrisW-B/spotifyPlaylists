@@ -2,6 +2,7 @@
 export App from './App';
 export Content from './Content';
 export FinishVerify from './FinishVerify';
+export Footer from './Footer';
 export Header from './Header';
 export LoginScreen from './LoginScreen';
 export MainPage from './MainPage';
