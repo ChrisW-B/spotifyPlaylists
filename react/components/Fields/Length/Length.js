@@ -1,7 +1,7 @@
 // react/components/Fields/Length/Length.js
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FieldWrapper, NumberInput, LengthContainer, SliderInput, FieldLabel, SongLabel } from './Styles';
+import { FieldWrapper, LengthContainer, SliderInput, FieldLabel, NumberInput, SongLabel } from './Styles';
 
 export default class Length extends Component {
   static propTypes = {
@@ -23,7 +23,7 @@ export default class Length extends Component {
             value={length}
             onChange={onChange}
           />
-          <span>
+          <SongLabel>
             <NumberInput
               required
               type='number'
@@ -32,8 +32,8 @@ export default class Length extends Component {
               value={length}
               onChange={onChange}
             />
-            <SongLabel>Song{length > 1 ? 's' : ''}</SongLabel>
-          </span>
+            <span>Song{length > 1 ? 's' : ''}</span>
+          </SongLabel>
         </LengthContainer>
       </FieldWrapper>
     );

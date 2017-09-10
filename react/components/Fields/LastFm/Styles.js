@@ -6,7 +6,7 @@ export const TextInput = styled.input `
   border-bottom: 2px solid var(--oc-violet-2);
   font-size: 18px;
   text-align: right;
-  width: 250px;
+  width: 150px;
 
   &:invalid {
     border: 0;

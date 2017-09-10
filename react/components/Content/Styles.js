@@ -23,7 +23,4 @@ const transitionIn = `, 300ms ${MoveInRight} ${materialAnimation}`;
 
 export default styled.div `
   animation: ${({status}) => status === 'entering' ? transitionIn : status === 'exiting' ? transitionOut : ''};
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
 `;

@@ -4,7 +4,6 @@ import { FieldLabel } from '../Styles';
 
 export const NumberInput = styled.input `
   border: none;
-  border-bottom: 2px solid var(--oc-violet-2);
   font-size: 20px;
   width: 2em;
 `;
@@ -17,7 +16,7 @@ export const LengthContainer = styled.div `
 `;
 
 export const SliderInput = styled.input `
-  width: 200px;
+  width: 150px;
 `;
 
 export const SongLabel = styled(FieldLabel)`

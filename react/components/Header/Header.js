@@ -52,7 +52,7 @@ export default class Header extends Component {
           {
             id ? [
               isAdmin ? <AdminButton onClick={openAdmin} key='adminbtn'>Admin</AdminButton> : null,
-              <HeaderButton onClick={openSettings} key='settingsbtn'>Account Settings</HeaderButton>,
+              <HeaderButton onClick={openSettings} key='settingsbtn'>Settings</HeaderButton>,
               <LogOutButton onClick={logout} key='logoutbtn'>Log Out</LogOutButton>,
             ] : null
           }

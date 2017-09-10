@@ -48,7 +48,7 @@ export const Wrapper = styled.div `
   align-items: center;
   background: var(--oc-gray-0);
   display: flex;
-  flex-direction: row;
+  flex-flow: row wrap;
   justify-content: space-between;
   padding: 10px;
 `;
@@ -64,6 +64,10 @@ export const ProfilePhoto = styled.img `
 export const WelcomeText = styled.h3 `
   margin: 0;
   text-align: center;
+
+  @media (max-width: 600px) {
+    flex: 1 1 auto;
+  }
 `;
 
 export const HeaderButton = styled.button `
@@ -73,18 +77,19 @@ export const HeaderButton = styled.button `
   border-radius: 0;
   cursor: pointer;
   font-size: 14px;
-  height: 30px;
   margin: 5px;
+  min-height: 30px;
   padding: 0;
 `;
 
 export const HeaderSpan = styled.span `
   display: flex;
   justify-content: ${({right}) => right ? 'flex-end' : 'flex-start'};
-  width: 250px;
+  width: 180px;
 
-  @media (max-width: 650px) {
-    flex-direction: ${({right}) => right ? 'column' : 'row'};
+  @media (max-width: 600px) {
+    flex: ${({right}) => right ? '1 1 100%' : '0'};
+    justify-content: ${({right}) => right ? 'space-around' : 'flex-start'};
   }
 `
 

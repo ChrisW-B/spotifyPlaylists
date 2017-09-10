@@ -8,12 +8,12 @@ export default class Options extends Component {
     onChange: PropTypes.func.isRequired
   }
   options = [
-    { value: 'overall', title: 'All Time' },
-    { value: '12month', title: '1 Year' },
-    { value: '6month', title: '6 Months' },
-    { value: '3month', title: '3 Months' },
+    { value: '7day', title: '1 Week' },
     { value: '1month', title: '1 Month' },
-    { value: '7day', title: '1 Week' }
+    { value: '3month', title: '3 Months' },
+    { value: '6month', title: '6 Months' },
+    { value: '12month', title: '1 Year' },
+    { value: 'overall', title: 'All Time' }
   ];
   render = () => {
     const { options, props: { period, onChange } } = this;
