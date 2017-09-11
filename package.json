@@ -80,6 +80,7 @@
     "eslint-plugin-node": "^5.1.1",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-react": "^7.3.0",
+    "jest": "^21.0.2",
     "nodemon": "^1.12.0",
     "stylelint": "^8.1.1",
     "stylelint-config-standard": "^17.0.0",
@@ -92,13 +93,14 @@
     "webpack-hot-middleware": "^2.19.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "env BUILD_MODE=prebuilt node ./server",
     "backend": "yarn build & nodemon --config ./nodemon-backend.json ./server",
     "frontend": "nodemon ./server --config ./nodemon-frontend.json",
     "lint:js": "eslint ./ --ignore-pattern 'public/**/*.js'",
     "lint:js:fix": "eslint --fix ./ --ignore-pattern 'public/**/*.js'",
     "lint:css": "stylelint './react/components/**/*.js'",
+    "test": "jest --coverage",
+    "test:watch": "npm test -- --watch",
     "forceDev": "yarn install --production=false",
     "build": "webpack -p --progress",
     "clean": "rm -r public/build"
