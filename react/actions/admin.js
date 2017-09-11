@@ -1,14 +1,15 @@
 // react/actions/admin.js
 import { post, receiveData } from './';
+import { ADMIN_MOST, ADMIN_RECENT } from '../constants';
 
 export const reloadMost = () => post(
   `/admin/forceMost`,
-  'ADMIN_MOST',
+  ADMIN_MOST,
   receiveData
 );
 
 export const reloadRecent = () => post(
   `/admin/forceRecent`,
-  'ADMIN_RECENT',
+  ADMIN_RECENT,
   receiveData
 );

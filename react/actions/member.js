@@ -1,21 +1,22 @@
 // react/actions/member.js
 
 import { get, del, receiveData } from './';
+import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT } from '../constants';
 
 export const getMemberInfo = () => get(
   `/member`,
-  'MEMBER_INFO',
+  MEMBER_INFO,
   receiveData
 );
 
 export const logout = () => get(
   '/member/logout',
-  'LOGOUT',
+  LOGOUT,
   receiveData
 );
 
 export const deleteAccount = () => del(
   '/member',
-  'DELETE_ACCOUNT',
+  DELETE_ACCOUNT,
   receiveData
 );
