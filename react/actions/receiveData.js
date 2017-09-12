@@ -1,2 +1,0 @@
-// react/actions/receiveData.js
-

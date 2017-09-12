@@ -1,5 +1,5 @@
 import member from '../member';
-import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT, TOGGLE_RECENT } from '../../constants';
+import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT, TOGGLE_RECENT } from '../../actionTypes';
 
 const initialState = {
   id: '',

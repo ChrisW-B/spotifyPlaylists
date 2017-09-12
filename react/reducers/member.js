@@ -1,5 +1,5 @@
 // react/reducers/member.js
-import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT } from '../constants';
+import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT } from '../actionTypes';
 
 const initialState = {
   id: '',

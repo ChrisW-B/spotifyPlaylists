@@ -1,13 +1,14 @@
 // react/actions/playlists.js
 
 import { get, post, receiveData } from './';
-import { UPDATE_PLAYLISTS, TOGGLE_MOST, TOGGLE_RECENT, UPDATE_MOST, UPDATE_RECENT } from '../constants';
+import { UPDATE_PLAYLISTS, TOGGLE_MOST, TOGGLE_RECENT, UPDATE_MOST, UPDATE_RECENT } from '../actionTypes';
 
-export const updatePlaylistStatus = () => get(
-  `/playlists`,
-  UPDATE_PLAYLISTS,
-  receiveData
-);
+export const updatePlaylistStatus = () =>
+  get(
+    `/playlists`,
+    UPDATE_PLAYLISTS,
+    receiveData
+  );
 
 export const toggleMostPlayed = (enable) =>
   post(

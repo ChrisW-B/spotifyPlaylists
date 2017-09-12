@@ -1,6 +1,6 @@
 import playlists from '../playlists';
 
-import { UPDATE_PLAYLISTS, UPDATE_MOST, TOGGLE_MOST, TOGGLE_RECENT, UPDATE_RECENT, LOGOUT, DELETE_ACCOUNT } from '../../constants';
+import { UPDATE_PLAYLISTS, UPDATE_MOST, TOGGLE_MOST, TOGGLE_RECENT, UPDATE_RECENT, LOGOUT, DELETE_ACCOUNT } from '../../actionTypes';
 
 const initialState = {
   mostPlayed: { enabled: false },
