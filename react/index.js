@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
-import { injectGlobal } from 'emotion';
+import { injectGlobal } from 'emotion/react';
 
 import Reducers from './reducers';
 import { getMemberInfo } from './actions';
