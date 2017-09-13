@@ -7,9 +7,8 @@ export const get = (url, type, cb) =>
     try {
       dispatch(loading(type));
       const response = await fetch(url, { credentials: 'same-origin' });
-      return response.status === 200
-        ? dispatch(cb(type, await response.json()))
-        : dispatch(cb(type));
+      if (response.status !== 200) throw new Error(`${response.status} Error`);
+      return dispatch(cb(type, await response.json()))
     } catch (error) {
       return dispatch({ type: `${type}_FAIL`, error });
     }
@@ -25,9 +24,8 @@ export const post = (url, type, item, cb) =>
         credentials: 'same-origin',
         'body': JSON.stringify(item)
       });
-      return response.status === 200
-        ? dispatch(cb(type, await response.json()))
-        : dispatch(cb(type));
+      if (response.status !== 200) throw new Error(`${response.status} Error`);
+      return dispatch(cb(type, await response.json()))
     } catch (error) {
       return dispatch({ type: `${type}_FAIL`, error });
     }
@@ -37,7 +35,8 @@ export const del = (url, type, cb) =>
   async dispatch => {
     dispatch(loading(type));
     try {
-      await fetch(url, { method: 'DELETE', credentials: 'same-origin' });
+      const response = await fetch(url, { method: 'DELETE', credentials: 'same-origin' });
+      if (response.status !== 200) throw new Error(`${response.status} Error`);
       return dispatch(cb(type));
     } catch (error) {
       return dispatch({ type: `${type}_FAIL`, error });

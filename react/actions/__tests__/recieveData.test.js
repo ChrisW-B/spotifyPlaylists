@@ -1,6 +1,6 @@
 import { receiveData } from '..';
 
-Date.now = jest.fn(() => 1487076708000)
+Date.now = jest.fn(() => 1234567890)
 
 const info = {
   bob: 'uncle'
