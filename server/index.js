@@ -10,7 +10,7 @@ const expressWinston = require('express-winston');
 const path = require('path');
 const passport = require('passport');
 const RedisStore = require('connect-redis')(session);
-const exec = require('child_process').exec;
+const { spawn } = require('child_process');
 const utils = require('./utils');
 
 const app = express();
@@ -77,12 +77,13 @@ app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, require('./route
 app.use('/playlists', require('./routes/playlists'));
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {
-  const updateFile = path.join(__dirname, '..', 'scripts', 'update.sh');
+  const cwd = path.join(__dirname, '..');
+  const updateFile = path.join(cwd, 'scripts', 'update.sh');
   utils.logger.server(`running ${updateFile}`);
-  const update = exec(`sh ${updateFile}`);
-  update.stdout.on('data', data => utils.logger.server(data));
-  update.stderr.on('data', data => utils.logger.server(`ERR! ${data}`));
-  update.unref();
+  spawn('sh', [updateFile], {
+    cwd,
+    env: Object.assign({}, process.env, { PATH: `${process.env.PATH} :/usr/local/bin` })
+  });
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Thanks GitHub <3');
 });
