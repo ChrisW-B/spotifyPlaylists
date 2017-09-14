@@ -47,7 +47,7 @@ module.exports = {
   ensureAdmin: (req, res, next) =>
     (req.user && req.user.id === process.env.ADMIN ? next() : res.sendStatus(403)),
   ensureGithub: (req, res, next) => {
-    if (!req.headers['user-agent'].includes('GitHub-Hookshot')) res.redirect(301, '/');
+    if (!req.headers['user-agent'].includes('GitHub-Hookshot')) return res.redirect(301, '/');
     const hmac = crypto.createHmac('sha1', process.env.GITHUB_SECRET);
     if (crypto.timingSafeEqual(Buffer.from(`sha1=${hmac.update(JSON.stringify(req.body)).digest('hex')}`, 'utf8'), Buffer.from(req.get('X-Hub-Signature'), 'utf8'))) return next();
     return res.redirect(301, '/');
