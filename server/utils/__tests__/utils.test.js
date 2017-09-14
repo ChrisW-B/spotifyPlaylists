@@ -78,5 +78,4 @@ describe('server utils', () => {
   it('should be an instance of winston logger', () =>
     expect(utils.logger).toBeInstanceOf(winston.Logger)
   );
-
 });
