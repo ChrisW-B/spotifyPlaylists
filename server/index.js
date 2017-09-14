@@ -79,7 +79,9 @@ app.use('/playlists', require('./routes/playlists'));
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {
   const updateFile = path.join(__dirname, '..', 'scripts', 'update.sh');
   utils.logger.server(`running ${updateFile}`);
-  const update = exec(updateFile);
+  const update = exec(`sh ${updateFile}`);
+  update.stdout.on('data', data => utils.logger.server(data));
+  update.stderr.on('data', data => utils.logger.server(`ERR! ${data}`));
   update.unref();
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Thanks GitHub <3');
