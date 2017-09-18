@@ -5,19 +5,28 @@ const SpotifyStrategy = require('passport-spotify').Strategy;
 const utils = require('../utils');
 
 const app = express.Router();
-const deleteMember = async (memberId) => {
-  await utils.redis.del(memberId);
-  await utils.redis.srem('users', memberId);
-};
-const saveToRedis = async (data) => {
-  if (!(await utils.redis.exists(data.userId))) {
-    await utils.redis.sadd('users', data.userId);
-    await utils.redis.hmset(data.userId,
-      'access', data.access,
-      'refresh', data.refresh,
-      'most', 'false',
-      'recent', 'false');
-  } else utils.logger.server(`${data.userId} already added!`);
+
+const deleteMember = memberId =>
+  utils.db.remove({ spotifyId: memberId });
+
+const save = async ({ access, refresh, userId }) => {
+  const member = await utils.db.findOne({ spotifyId: userId });
+  if (!member) {
+    await utils.db.insert({
+      spotifyId: userId,
+      visits: 1,
+      refreshToken: refresh,
+      accessToken: access,
+      mostPlayed: { period: undefined, id: undefined, lastfm: undefined, length: undefined, enabled: false },
+      recentlyAdded: { id: undefined, length: undefined, enabled: false }
+    });
+  } else {
+    await utils.db.findAndModify({
+      query: member,
+      update: { $set: { accessToken: access, refreshToken: refresh }, $inc: { visits: 1 } }
+    });
+    utils.logger.server(`${userId} already added!`);
+  }
 };
 
 passport.serializeUser((user, done) => {
@@ -36,7 +45,7 @@ passport.use(
       callbackURL: process.env.SPOTIFY_REDIRECT
     }),
     async (access, refresh, profile, done) => {
-      await saveToRedis({ access, refresh, userId: profile.id });
+      await save({ access, refresh, userId: profile.id });
       return done(null, { ...profile, access, refresh });
     }
   ));

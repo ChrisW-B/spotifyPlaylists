@@ -86,8 +86,8 @@ export default class Playlist extends Component {
       ? <PlaylistDetail key={`${title}-detail`}>
         <form ref={PlaylistDetail => this.form = PlaylistDetail}>
           <Length length={length} onChange={updateLength} />
-          { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
-          { period !== undefined ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
+          { title === 'Most Played' ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
+          { title === 'Most Played' ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
         </form>
       </PlaylistDetail>
       : null

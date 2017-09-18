@@ -88,6 +88,7 @@ module.exports = class MostPlayed extends Playlist {
       lastFmId: await this.redis.hget(userId, `${this.type}:lastfm`),
       timespan: await this.redis.hget(userId, `${this.type}:period`)
     };
+    if (!memberInfo.numTracks || !memberInfo.lastfmId) return;
     const token = (await this.refreshToken(memberInfo.token, memberInfo.refresh));
     const newTokens = {
       token: token.access_token,

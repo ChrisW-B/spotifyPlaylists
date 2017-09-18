@@ -9,9 +9,11 @@ const winston = require('winston');
 const expressWinston = require('express-winston');
 const path = require('path');
 const passport = require('passport');
-const RedisStore = require('connect-redis')(session);
+const MongoStore = require('connect-mongo')(session);
 const { spawn } = require('child_process');
 const utils = require('./utils');
+const schema = require('../schema');
+const graphqlHTTP = require('express-graphql');
 
 const app = express();
 const ONE_SEC = 1000;
@@ -22,7 +24,7 @@ app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
-  store: new RedisStore({ host: 'localhost', port: 6379, client: utils.redis }),
+  store: new MongoStore(utils.connection),
   secret: process.env.SECRET,
   resave: false,
   saveUninitialized: true,
@@ -75,6 +77,16 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
 app.use('/member', require('./routes/member'));
 app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, require('./routes/admin'));
 app.use('/playlists', require('./routes/playlists'));
+
+app.get('/mongotest', async (_, res) => res.json(await utils.db.usercollection.find()));
+
+app.use('/graphql', graphqlHTTP({
+  schema,
+  rootValue: {
+    hello: () => 'Hello world!'
+  },
+  graphiql: true
+}));
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {
   const cwd = path.join(__dirname, '..');

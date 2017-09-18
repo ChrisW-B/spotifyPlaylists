@@ -1,12 +1,13 @@
 // server/utils/index.js
 require('dotenv').config();
-const Redis = require('promise-redis')();
 const winston = require('winston');
 const crypto = require('crypto');
 const RecentlyAdded = require('../Playlists').recentlyAdded;
 const MostPlayed = require('../Playlists').mostPlayed;
+const mogodb = require('promised-mongo');
 
-const redis = Redis.createClient();
+const connection = mogodb('mongodb://localhost:27017/spotifyPlaylists', ['spotifyPlaylists']);
+const db = connection.spotifyPlaylists;
 const logger = new (winston.Logger)({
   level: 'recentlyAdded',
   levels: { server: 0, playlist: 0, mostPlayed: 0, recentlyAdded: 0 },
@@ -18,7 +19,7 @@ const logger = new (winston.Logger)({
 });
 
 const mostPlayed = new MostPlayed(logger,
-  redis, {
+  db, {
     clientId: process.env.SPOTIFY_ID,
     clientSecret: process.env.SPOTIFY_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT
@@ -30,7 +31,7 @@ const mostPlayed = new MostPlayed(logger,
   });
 const recentlyAdded = new RecentlyAdded(
   logger,
-  redis, {
+  db, {
     clientId: process.env.SPOTIFY_ID,
     clientSecret: process.env.SPOTIFY_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT
@@ -38,7 +39,8 @@ const recentlyAdded = new RecentlyAdded(
 
 module.exports = {
   logger,
-  redis,
+  connection,
+  db,
   recentlyAdded,
   mostPlayed,
 
