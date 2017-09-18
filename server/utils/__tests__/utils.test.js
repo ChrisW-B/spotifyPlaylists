@@ -4,20 +4,21 @@ const MostPlayed = require('../../Playlists/mostPlayed');
 const RecentlyAdded = require('../../Playlists/recentlyAdded');
 const winston = require('winston');
 
+process.env.SPOTIFY_SCOPES = 'user-read-private,playlist-read-private,playlist-modify-private,playlist-modify-public,user-library-read';
+process.env.SPOTIFY_ID = 'AAAAAAAAAAAAAAA';
+process.env.SPOTIFY_SECRET = 'BBBBBBBBBBBBBBB';
+process.env.SPOTIFY_REDIRECT = '//localhost:5621/member/setup/';
+process.env.LASTFM_TOKEN = 'CCCCCCCCCCCCCCC';
+process.env.LASTFM_SECRET = 'DDDDDDDDDDDDDDD';
+process.env.LASTFM_USERNAME = 'A_USER';
+process.env.LASTFM_PASS = 'A_PASSWORD';
+process.env.SECRET = 'A_SECRET';
+process.env.ADMIN = 'anAdmin';
+process.env.GITHUB_SECRET = 'GITHUB_SECRET';
+
 describe('server utils', () => {
-  beforeEach(() => {
-    process.env.SPOTIFY_SCOPES = 'user-read-private,playlist-read-private,playlist-modify-private,playlist-modify-public,user-library-read';
-    process.env.SPOTIFY_ID = 'AAAAAAAAAAAAAAA';
-    process.env.SPOTIFY_SECRET = 'BBBBBBBBBBBBBBB';
-    process.env.SPOTIFY_REDIRECT = '//localhost:5621/member/setup/';
-    process.env.LASTFM_TOKEN = 'CCCCCCCCCCCCCCC';
-    process.env.LASTFM_SECRET = 'DDDDDDDDDDDDDDD';
-    process.env.LASTFM_USERNAME = 'A_USER';
-    process.env.LASTFM_PASS = 'A_PASSWORD';
-    process.env.SECRET = 'A_SECRET';
-    process.env.ADMIN = 'anAdmin';
-    process.env.GITHUB_SECRET = 'GITHUB_SECRET';
-  });
+  // I'd love to test more of the github auth stuff but I'm not sure how
+  // TODO: I guess?
 
   it('should call next() once if the user is isAuthenticated', () => {
     const nextSpy = sinon.spy();
@@ -28,7 +29,7 @@ describe('server utils', () => {
       sendStatus: (info) => { status = info; }
     }, nextSpy);
     expect(nextSpy.calledOnce).toEqual(true);
-    expect(status).toBe(null);
+    return expect(status).toBe(null);
   });
 
   it('should send a 401 error if user is not authenticated', () => {
@@ -40,7 +41,7 @@ describe('server utils', () => {
       sendStatus: (info) => { status = info; }
     }, nextSpy);
     expect(status).toEqual(401);
-    expect(nextSpy.calledOnce).toEqual(false);
+    return expect(nextSpy.calledOnce).toEqual(false);
   });
 
   it('should call next() once if the user is isAuthenticated', () => {
@@ -48,7 +49,7 @@ describe('server utils', () => {
     let status = null;
     utils.ensureAdmin({ user: { id: 'anAdmin' } }, { sendStatus: (info) => { status = info; } }, nextSpy);
     expect(nextSpy.calledOnce).toEqual(true);
-    expect(status).toBe(null);
+    return expect(status).toBe(null);
   });
 
   it('should send a 401 error if user is not authenticated', () => {
@@ -56,7 +57,7 @@ describe('server utils', () => {
     let status = null;
     utils.ensureAdmin({ user: { id: 'abcd' } }, { sendStatus: (info) => { status = info; } }, nextSpy);
     expect(status).toEqual(403);
-    expect(nextSpy.calledOnce).toEqual(false);
+    return expect(nextSpy.calledOnce).toEqual(false);
   });
 
   it('should send a 301 redirect if user is not github', () => {
@@ -64,7 +65,7 @@ describe('server utils', () => {
     let status = null;
     utils.ensureGithub({ get: () => 'hello', headers: { 'user-agent': 'Moz' }, body: { hi: 'hello' } }, { redirect: (info) => { status = info; } }, nextSpy);
     expect(status).toEqual(301);
-    expect(nextSpy.calledOnce).toEqual(false);
+    return expect(nextSpy.calledOnce).toEqual(false);
   });
 
   it('should be an instance of most played', () =>

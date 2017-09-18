@@ -9,6 +9,7 @@ app.post('/forceRecent', (req, res) => {
   utils.recentlyAdded.update();
   res.json({ success: true });
 });
+
 app.post('/forceMost', (req, res) => {
   utils.mostPlayed.update();
   res.json({ success: true });
