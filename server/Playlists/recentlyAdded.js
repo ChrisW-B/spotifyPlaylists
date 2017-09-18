@@ -24,6 +24,8 @@ module.exports = class RecentlyAdded extends Playlist {
       oldPlaylist: await this.redis.hget(userId, `${this.type}:playlist`)
     };
 
+    if (!memberInfo.numTracks) return;
+
     this.logger.recentlyAdded('Logging in to spotify');
     const token = (await this.refreshToken(memberInfo.token, memberInfo.refresh));
     const newTokens = {
