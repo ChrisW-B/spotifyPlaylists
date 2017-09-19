@@ -61,8 +61,8 @@ export default class Playlist extends Component {
   }
 
   toggle = () => {
-    const { state: { length }, props: { toggle } } = this;
-    if (!length) this.setState((prevState) => ({ showMore: !prevState.showMore }))
+    const { state: { lastfm }, props: { toggle, title } } = this;
+    if (title === 'Most Played' && !lastfm) this.setState((prevState) => ({ showMore: !prevState.showMore }))
     else toggle();
   }
 
