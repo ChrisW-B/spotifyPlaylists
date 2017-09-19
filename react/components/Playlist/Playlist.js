@@ -49,7 +49,7 @@ export default class Playlist extends Component {
     this.setState({ ...safeVals });
   }
 
-  updateLength = e => this.setState({ length: e.target.value > 50 ? 50 : e.target.value < 1 ? 1 : e.target.value })
+  updateLength = e => this.setState({ length: +e.target.value > 50 ? 50 : +e.target.value < 1 ? 1 : +e.target.value })
   updateLastfm = e => this.setState({ lastfm: e.target.value })
   updatePeriod = e => this.setState({ period: e.target.value })
 
@@ -61,9 +61,7 @@ export default class Playlist extends Component {
   }
 
   toggle = () => {
-    const { length, toggle } = this.props;
-
-
+    const { state: { length }, props: { toggle } } = this;
     if (!length) this.setState((prevState) => ({ showMore: !prevState.showMore }))
     else toggle();
   }

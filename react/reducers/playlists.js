@@ -21,7 +21,6 @@ export default (state = initialState, action = {}) => {
   case `${LOGOUT}_SUCCESS`:
   case `${DELETE_ACCOUNT}_SUCCESS`:
     return { ...initialState };
-
   default:
     return { ...state };
   }

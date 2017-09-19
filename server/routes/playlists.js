@@ -56,7 +56,9 @@ app.post('/:type/toggle/', utils.ensureAuthenticated, async(req, res) => {
   const { user: { id }, params: { type }, body: { enable } } = req;
   if (type !== 'most' && type !== 'recent') { res.sendStatus(401); }
   const { value } = await togglePlaylist(id, type, enable);
-  res.json(type === 'most' ? value.mostPlayed : value.recentlyAdded);
+  const response = type === 'most' ? value.mostPlayed : value.recentlyAdded;
+  delete response.id;
+  res.json(response);
 });
 
 app.post('/:type/save', utils.ensureAuthenticated, async(req, res) => {
@@ -66,8 +68,10 @@ app.post('/:type/save', utils.ensureAuthenticated, async(req, res) => {
     body: { length, lastfm, period }
   } = req;
   if (type !== 'most' && type !== 'recent') { res.sendStatus(401); return; }
-  const { value } = await saveSettings(id, length, lastfm, period, type === 'most');
-  res.json(type === 'most' ? value.mostPlayed : value.recentlyAdded);
+  const { value } = await saveSettings(id, +length, lastfm, period, type === 'most');
+  const response = type === 'most' ? value.mostPlayed : value.recentlyAdded;
+  delete response.id;
+  res.json(response);
 });
 
 module.exports = app;
