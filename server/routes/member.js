@@ -4,37 +4,22 @@ const passport = require('passport');
 const SpotifyStrategy = require('passport-spotify').Strategy;
 const utils = require('../utils');
 
+const { Member } = utils;
 const app = express.Router();
 
 const deleteMember = memberId =>
-  utils.db.remove({ spotifyId: memberId });
+  Member.remove({ spotifyId: memberId }).exec();
 
 const save = async ({ access, refresh, userId }) => {
-  const member = await utils.db.findOne({ spotifyId: userId });
+  const member = await Member.findOne({ spotifyId: userId }).exec();
   if (!member) {
-    await utils.db.insert({
-      spotifyId: userId,
-      visits: 1,
-      refreshToken: refresh,
-      accessToken: access,
-      mostPlayed: {
-        period: undefined,
-        id: undefined,
-        lastfm: undefined,
-        length: undefined,
-        enabled: false
-      },
-      recentlyAdded: {
-        id: undefined,
-        length: undefined,
-        enabled: false
-      }
-    });
+    const newMember = new Member({ spotifyId: userId, refreshToken: refresh, accessToken: access });
+    await newMember.save();
   } else {
-    await utils.db.findAndModify({
-      query: member,
-      update: { $set: { accessToken: access, refreshToken: refresh }, $inc: { visits: 1 } }
-    });
+    member.accessToken = access;
+    member.refreshToken = refresh;
+    member.visits += 1;
+    await member.save();
     utils.logger.server(`${userId} already added!`);
   }
 };

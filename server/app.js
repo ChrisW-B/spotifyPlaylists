@@ -12,8 +12,7 @@ const passport = require('passport');
 const MongoStore = require('connect-mongo')(session);
 const { spawn } = require('child_process');
 const utils = require('./utils');
-const schema = require('../schema');
-const graphqlHTTP = require('express-graphql');
+const { Mongoose } = require('../db');
 
 const app = express();
 const ONE_SEC = 1000;
@@ -24,7 +23,7 @@ app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
-  store: new MongoStore(utils.connection),
+  store: new MongoStore({ mongooseConnection: Mongoose.connection }),
   secret: process.env.SECRET,
   resave: false,
   saveUninitialized: true,
@@ -77,16 +76,6 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
 app.use('/member', require('./routes/member'));
 app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, require('./routes/admin'));
 app.use('/playlists', require('./routes/playlists'));
-
-app.get('/mongotest', async (_, res) => res.json(await utils.db.usercollection.find()));
-
-app.use('/graphql', graphqlHTTP({
-  schema,
-  rootValue: {
-    hello: () => 'Hello world!'
-  },
-  graphiql: true
-}));
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {
   const cwd = path.join(__dirname, '..');

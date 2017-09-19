@@ -4,10 +4,8 @@ const winston = require('winston');
 const crypto = require('crypto');
 const RecentlyAdded = require('../Playlists').recentlyAdded;
 const MostPlayed = require('../Playlists').mostPlayed;
-const mogodb = require('promised-mongo');
+const Schema = require('../../db/schema');
 
-const connection = mogodb('mongodb://localhost:27017/spotifyPlaylists', ['spotifyPlaylists']);
-const db = connection.spotifyPlaylists;
 const logger = new (winston.Logger)({
   level: 'recentlyAdded',
   levels: { server: 0, playlist: 0, mostPlayed: 0, recentlyAdded: 0 },
@@ -19,7 +17,7 @@ const logger = new (winston.Logger)({
 });
 
 const mostPlayed = new MostPlayed(logger,
-  db, {
+  Schema.Member, {
     clientId: process.env.SPOTIFY_ID,
     clientSecret: process.env.SPOTIFY_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT
@@ -31,7 +29,7 @@ const mostPlayed = new MostPlayed(logger,
   });
 const recentlyAdded = new RecentlyAdded(
   logger,
-  db, {
+  Schema.Member, {
     clientId: process.env.SPOTIFY_ID,
     clientSecret: process.env.SPOTIFY_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT
@@ -39,8 +37,7 @@ const recentlyAdded = new RecentlyAdded(
 
 module.exports = {
   logger,
-  connection,
-  db,
+  Member: Schema.Member,
   recentlyAdded,
   mostPlayed,
 

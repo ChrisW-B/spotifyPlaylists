@@ -4,8 +4,8 @@ const sleep = require('sleep-promise');
 const Playlist = require('./Playlist');
 
 module.exports = class RecentlyAdded extends Playlist {
-  constructor(logger, db, spotifyData) {
-    super(logger, db, spotifyData, 'recent');
+  constructor(logger, Member, spotifyData) {
+    super(logger, Member, spotifyData, 'recent');
   }
 
   createTrackListArray(tracks) {
@@ -14,35 +14,27 @@ module.exports = class RecentlyAdded extends Playlist {
   }
 
   async updatePlaylist(member, delayInc = 0) {
+    const newMember = member;
     await sleep(delayInc * this.ONE_MIN * 5);
     const { id, length } = member.recentlyAdded;
 
     this.logger.recentlyAdded('Logging in to spotify');
-    const {
-      access_token,
-      refresh_token = member.refreshToken // eslint-disable-line camelcase
-    } = await this.refreshToken(member.accessToken, member.refreshToken);
-    this.spotifyApi.setAccessToken(access_token);
-    this.spotifyApi.setRefreshToken(refresh_token);
+    const { accessToken, refreshToken } = await this.signInToSpotify(member);
+    newMember.accessToken = accessToken;
+    newMember.refreshToken = refreshToken;
 
     this.logger.recentlyAdded('Getting user info');
-    const userInfo = await this.spotifyApi.getMe();
+    const { body: { id: spotifyId } } = await this.spotifyApi.getMe();
 
     this.logger.recentlyAdded('preparing playlist and getting saved tracks');
-    const newPlaylistId = await this.preparePlaylist(userInfo.body.id, id);
-    const savedTracks = (await this.spotifyApi.getMySavedTracks({
-      limit: length
-    })).body;
-    const spotifyId = userInfo.body.id;
+    newMember.recentlyAdded.id = await this.preparePlaylist(spotifyId, id);
+    const savedTracks = (await this.spotifyApi.getMySavedTracks({ limit: length })).body;
 
     this.logger.recentlyAdded('filling playlist');
     const spotifyUris = this.createTrackListArray(savedTracks.items);
-    await this.spotifyApi.addTracksToPlaylist(spotifyId, newPlaylistId, spotifyUris);
+    await this.spotifyApi.addTracksToPlaylist(spotifyId, newMember.recentlyAdded.id, spotifyUris);
 
     this.logger.recentlyAdded('Updating database');
-    await this.db.findAndModify({
-      query: { _id: member._id }, // eslint-disable-line no-underscore-dangle
-      update: { $set: { accessToken: access_token, refreshToken: refresh_token, 'mostPlayed.id': newPlaylistId } }
-    });
+    await newMember.save();
   }
 };

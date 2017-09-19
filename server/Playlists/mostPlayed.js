@@ -4,8 +4,8 @@ const sleep = require('sleep-promise');
 const Playlist = require('./Playlist');
 
 module.exports = class MostPlayed extends Playlist {
-  constructor(logger, db, spotifyData, lastFmData) {
-    super(logger, db, spotifyData, 'most');
+  constructor(logger, Member, spotifyData, lastFmData) {
+    super(logger, Member, spotifyData, 'most');
     this.lastfm = new Lastfm(lastFmData);
   }
 
@@ -72,17 +72,15 @@ module.exports = class MostPlayed extends Playlist {
   }
 
   async updatePlaylist(member, delayInc = 0) {
+    const newMember = member;
     await sleep(delayInc * this.ONE_MIN * 5);
     const { length, lastfm, period, id } = member.mostPlayed;
     if (!length || !lastfm || !period) return;
 
     this.logger.recentlyAdded('Logging in to spotify');
-    const {
-      access_token,
-      refresh_token = member.refreshToken // eslint-disable-line camelcase
-    } = await this.refreshToken(member.accessToken, member.refreshToken);
-    this.spotifyApi.setAccessToken(access_token);
-    this.spotifyApi.setRefreshToken(refresh_token);
+    const { accessToken, refreshToken } = await this.signInToSpotify(member);
+    newMember.accessToken = accessToken;
+    newMember.refreshToken = refreshToken;
 
     this.logger.mostPlayed('logging in to lastfm');
     await this.lastfm.auth_getMobileSession();
@@ -93,18 +91,16 @@ module.exports = class MostPlayed extends Playlist {
 
     this.logger.mostPlayed('converting to spotify and getting userinfo');
     const spotifyList = await this.convertToSpotify(lastFmTrackList.track, length);
-    const spotifyId = (await this.spotifyApi.getMe()).body.id;
+    const { body: { id: spotifyId } } = await this.spotifyApi.getMe();
     const trackList = await this.insertMissingTracks(spotifyList, lastfm, period);
 
     this.logger.mostPlayed('sorting tracks, getting user, and preparing playlist');
-    const newPlaylistId = await this.preparePlaylist(spotifyId, id);
+    newMember.mostPlayed.id = await this.preparePlaylist(spotifyId, id);
     const sortedTracks = trackList.sort((a, b) => a.rank - b.rank);
 
     this.logger.mostPlayed('filling playlist');
-    await this.fillPlaylist(spotifyId, newPlaylistId, sortedTracks);
-    await this.db.findAndModify({
-      query: { _id: member._id }, // eslint-disable-line no-underscore-dangle
-      update: { $set: { accessToken: access_token, refreshToken: refresh_token, 'mostPlayed.id': newPlaylistId } }
-    });
+    await this.fillPlaylist(spotifyId, newMember.mostPlayed.id, sortedTracks);
+
+    await newMember.save();
   }
 };
