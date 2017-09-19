@@ -61,11 +61,8 @@ app.get('/setup', passport.authenticate('spotify', {
 app.get('', utils.ensureAuthenticated, (req, res) => {
   delete req.user.access;
   delete req.user.refresh;
-  /* eslint-disable no-underscore-dangle */
-  // beacuse spotify is bad
-  delete req.user._json;
-  delete req.user._raw;
-  /* eslint-enable no-underscore-dangle */
+  delete req.user._json; // eslint-disable-line no-underscore-dangle
+  delete req.user._raw; // eslint-disable-line no-underscore-dangle
   res.json({ ...req.user, isAdmin: req.user.id === process.env.ADMIN });
 });
 
@@ -73,12 +70,12 @@ app.delete('', utils.ensureAuthenticated, async (req, res) => {
   await deleteMember(req.user.id);
   req.logout();
   req.session.destroy(() => {});
-  res.sendStatus(401);
+  res.json({ success: true });
 });
-app.get('/logout', utils.ensureAuthenticated, (req, res) => {
+app.post('/logout', utils.ensureAuthenticated, (req, res) => {
   req.logout();
   req.session.destroy(() => {});
-  res.sendStatus(401);
+  res.json({ success: true });
 });
 
 module.exports = app;

@@ -1,7 +1,4 @@
 // ./webpack.config.js
-
-/* eslint-disable no-template-curly-in-string */
-
 const path = require('path');
 const CompressionPlugin = require('compression-webpack-plugin');
 const MinifyPlugin = require('babel-minify-webpack-plugin');

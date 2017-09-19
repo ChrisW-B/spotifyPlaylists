@@ -10,7 +10,7 @@ const mapStateToProps = ({ member }) => ({
 
 const mapDispatchToProps = dispatch => ({
   logout: () => dispatch(logout()),
-  deleteAccount: () => dispatch(deleteAccount)
+  deleteAccount: () => dispatch(deleteAccount())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);
