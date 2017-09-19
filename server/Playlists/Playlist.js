@@ -6,8 +6,8 @@ const ONE_MIN = 60 * 1000;
 const ONE_SEC = 1000;
 
 module.exports = class Playlist {
-  constructor(logger, redis, spotifyData, type) {
-    this.redis = redis;
+  constructor(logger, db, spotifyData, type) {
+    this.db = db;
     this.type = type;
     this.playListName = type === 'most' ? 'Most Played' : 'Recently Added';
     this.spotifyApi = new SpotifyWebApi(spotifyData);
@@ -64,10 +64,10 @@ module.exports = class Playlist {
 
   async update() {
     this.logger.playlist('Starting');
-    const members = await this.redis.smembers('users');
-    await Promise.all(members.map(async (member) => {
-      const enabled = String(await this.redis.hget(member, this.type)).toLowerCase() === 'true';
+    const members = await this.db.find();
+    await Promise.all(members.map(async(member) => {
       let delayInc = 0;
+      const enabled = this.type === 'most' ? member.mostPlayed.enabled : member.recentlyAdded.enabled;
       try {
         return enabled ? this.updatePlaylist(member, delayInc++) : null;
       } catch (e) {

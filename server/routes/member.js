@@ -9,7 +9,7 @@ const app = express.Router();
 const deleteMember = memberId =>
   utils.db.remove({ spotifyId: memberId });
 
-const save = async({ access, refresh, userId }) => {
+const save = async ({ access, refresh, userId }) => {
   const member = await utils.db.findOne({ spotifyId: userId });
   if (!member) {
     await utils.db.insert({
@@ -54,7 +54,7 @@ passport.use(
       clientSecret: process.env.SPOTIFY_SECRET,
       callbackURL: process.env.SPOTIFY_REDIRECT
     }),
-    async(access, refresh, profile, done) => {
+    async (access, refresh, profile, done) => {
       await save({ access, refresh, userId: profile.id });
       return done(null, { ...profile, access, refresh });
     }
@@ -84,7 +84,7 @@ app.get('', utils.ensureAuthenticated, (req, res) => {
   res.json({ ...req.user, isAdmin: req.user.id === process.env.ADMIN });
 });
 
-app.delete('', utils.ensureAuthenticated, async(req, res) => {
+app.delete('', utils.ensureAuthenticated, async (req, res) => {
   await deleteMember(req.user.id);
   req.logout();
   req.session.destroy(() => {});

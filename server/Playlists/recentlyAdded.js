@@ -3,9 +3,8 @@ const sleep = require('sleep-promise');
 const Playlist = require('./Playlist');
 
 module.exports = class RecentlyAdded extends Playlist {
-  constructor(logger, redis, spotifyData) {
-    super(logger, redis, spotifyData, 'recent');
-    this.redis = redis;
+  constructor(logger, db, spotifyData) {
+    super(logger, db, spotifyData, 'recent');
   }
 
   createTrackListArray(tracks) {
@@ -13,33 +12,25 @@ module.exports = class RecentlyAdded extends Playlist {
     return tracks.map(t => t.track.uri);
   }
 
-  async updatePlaylist(userId, delayInc = 0) {
+  async updatePlaylist(member, delayInc = 0) {
     await sleep(delayInc * this.ONE_MIN * 5);
-
-    this.logger.recentlyAdded('Getting database items');
-    const memberInfo = {
-      numTracks: await this.redis.hget(userId, `${this.type}:length`),
-      refresh: await this.redis.hget(userId, 'refresh'),
-      token: await this.redis.hget(userId, 'token'),
-      oldPlaylist: await this.redis.hget(userId, `${this.type}:playlist`)
-    };
+    const { id, length } = member.recentlyAdded;
 
     this.logger.recentlyAdded('Logging in to spotify');
-    const token = (await this.refreshToken(memberInfo.token, memberInfo.refresh));
-    const newTokens = {
-      token: token.access_token,
-      refresh: token.refresh_token ? token.refresh_token : memberInfo.refresh
-    };
-    this.spotifyApi.setAccessToken(newTokens.token);
-    this.spotifyApi.setRefreshToken(newTokens.refresh);
+    const {
+      access_token,
+      refresh_token = member.refreshToken
+    } = await this.refreshToken(member.accessToken, member.refreshToken);
+    this.spotifyApi.setAccessToken(access_token);
+    this.spotifyApi.setRefreshToken(refresh_token);
 
     this.logger.recentlyAdded('Getting user info');
     const userInfo = await this.spotifyApi.getMe();
 
     this.logger.recentlyAdded('preparing playlist and getting saved tracks');
-    const newPlaylistId = await this.preparePlaylist(userInfo.body.id, memberInfo.oldPlaylist);
+    const newPlaylistId = await this.preparePlaylist(userInfo.body.id, id);
     const savedTracks = (await this.spotifyApi.getMySavedTracks({
-      limit: memberInfo.numTracks
+      limit: length
     })).body;
     const spotifyId = userInfo.body.id;
 
@@ -48,10 +39,9 @@ module.exports = class RecentlyAdded extends Playlist {
     await this.spotifyApi.addTracksToPlaylist(spotifyId, newPlaylistId, spotifyUris);
 
     this.logger.recentlyAdded('Updating database');
-    await Promise.all([
-      this.redis.hset(userId, 'access', newTokens.token),
-      this.redis.hset(userId, 'refresh', newTokens.refresh),
-      this.redis.hset(userId, `${this.type}:playlist`, newPlaylistId)
-    ]);
+    await this.db.findAndModify({
+      query: { _id: member._id },
+      update: { $set: { accessToken: access_token, refreshToken: refresh_token, 'mostPlayed.id': newPlaylistId } }
+    });
   }
 };
