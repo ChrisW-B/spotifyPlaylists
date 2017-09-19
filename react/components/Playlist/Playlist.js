@@ -60,15 +60,24 @@ export default class Playlist extends Component {
     this.setState((prevState) => ({ showMore: !prevState.showMore }));
   }
 
+  toggle = () => {
+    const { length, toggle } = this.props;
+
+
+    if (!length) this.setState((prevState) => ({ showMore: !prevState.showMore }))
+    else toggle();
+  }
+
   // react 16 array returns are cool
   render = () => {
     const {
-      props: { enabled, title, toggle },
+      props: { enabled, title },
       state: { showMore, length, lastfm, period },
       updateLength,
       updateLastfm,
       updatePeriod,
-      toggleSettings
+      toggleSettings,
+      toggle
     } = this;
     return [
       <PlaylistInfo on={enabled} key={title}>
