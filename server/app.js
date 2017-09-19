@@ -9,9 +9,10 @@ const winston = require('winston');
 const expressWinston = require('express-winston');
 const path = require('path');
 const passport = require('passport');
-const RedisStore = require('connect-redis')(session);
+const MongoStore = require('connect-mongo')(session);
 const { spawn } = require('child_process');
 const utils = require('./utils');
+const { Mongoose } = require('../db');
 
 const app = express();
 const ONE_SEC = 1000;
@@ -22,7 +23,7 @@ app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
-  store: new RedisStore({ host: 'localhost', port: 6379, client: utils.redis }),
+  store: new MongoStore({ mongooseConnection: Mongoose.connection }),
   secret: process.env.SECRET,
   resave: false,
   saveUninitialized: true,

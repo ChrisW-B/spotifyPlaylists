@@ -6,7 +6,7 @@ A nodejs/express based web app that contains a website and 2 backend services
 
 Available [here](http://spotifyapps.chriswbarry.com/ "SpotifyApps")
 
-To use this, you need to have [redis](http://redis.io/topics/quickstart) installed
+This project uses mongodb
 
 ## ./server
 

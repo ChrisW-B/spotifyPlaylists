@@ -4,20 +4,24 @@ const passport = require('passport');
 const SpotifyStrategy = require('passport-spotify').Strategy;
 const utils = require('../utils');
 
+const { Member } = utils;
 const app = express.Router();
-const deleteMember = async (memberId) => {
-  await utils.redis.del(memberId);
-  await utils.redis.srem('users', memberId);
-};
-const saveToRedis = async (data) => {
-  if (!(await utils.redis.exists(data.userId))) {
-    await utils.redis.sadd('users', data.userId);
-    await utils.redis.hmset(data.userId,
-      'access', data.access,
-      'refresh', data.refresh,
-      'most', 'false',
-      'recent', 'false');
-  } else utils.logger.server(`${data.userId} already added!`);
+
+const deleteMember = memberId =>
+  Member.remove({ spotifyId: memberId }).exec();
+
+const save = async ({ access, refresh, userId }) => {
+  const member = await Member.findOne({ spotifyId: userId }).exec();
+  if (!member) {
+    const newMember = new Member({ spotifyId: userId, refreshToken: refresh, accessToken: access });
+    await newMember.save();
+  } else {
+    member.accessToken = access;
+    member.refreshToken = refresh;
+    member.visits += 1;
+    await member.save();
+    utils.logger.server(`${userId} already added!`);
+  }
 };
 
 passport.serializeUser((user, done) => {
@@ -36,7 +40,7 @@ passport.use(
       callbackURL: process.env.SPOTIFY_REDIRECT
     }),
     async (access, refresh, profile, done) => {
-      await saveToRedis({ access, refresh, userId: profile.id });
+      await save({ access, refresh, userId: profile.id });
       return done(null, { ...profile, access, refresh });
     }
   ));

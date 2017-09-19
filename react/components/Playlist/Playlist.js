@@ -49,7 +49,7 @@ export default class Playlist extends Component {
     this.setState({ ...safeVals });
   }
 
-  updateLength = e => this.setState({ length: e.target.value > 50 ? 50 : e.target.value < 1 ? 1 : e.target.value })
+  updateLength = e => this.setState({ length: +e.target.value > 50 ? 50 : +e.target.value < 1 ? 1 : +e.target.value })
   updateLastfm = e => this.setState({ lastfm: e.target.value })
   updatePeriod = e => this.setState({ period: e.target.value })
 
@@ -60,15 +60,22 @@ export default class Playlist extends Component {
     this.setState((prevState) => ({ showMore: !prevState.showMore }));
   }
 
+  toggle = () => {
+    const { state: { length }, props: { toggle } } = this;
+    if (!length) this.setState((prevState) => ({ showMore: !prevState.showMore }))
+    else toggle();
+  }
+
   // react 16 array returns are cool
   render = () => {
     const {
-      props: { enabled, title, toggle },
+      props: { enabled, title },
       state: { showMore, length, lastfm, period },
       updateLength,
       updateLastfm,
       updatePeriod,
-      toggleSettings
+      toggleSettings,
+      toggle
     } = this;
     return [
       <PlaylistInfo on={enabled} key={title}>
@@ -86,8 +93,8 @@ export default class Playlist extends Component {
       ? <PlaylistDetail key={`${title}-detail`}>
         <form ref={PlaylistDetail => this.form = PlaylistDetail}>
           <Length length={length} onChange={updateLength} />
-          { lastfm !== undefined ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
-          { period !== undefined ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
+          { title === 'Most Played' ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
+          { title === 'Most Played' ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
         </form>
       </PlaylistDetail>
       : null
