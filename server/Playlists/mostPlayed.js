@@ -1,7 +1,4 @@
 // server/Playlists/mostPlayed.js
-
-'use strict';
-
 const Lastfm = require('lastfm-njs');
 const sleep = require('sleep-promise');
 const Playlist = require('./Playlist');
@@ -9,14 +6,13 @@ const Playlist = require('./Playlist');
 module.exports = class MostPlayed extends Playlist {
   constructor(logger, db, spotifyData, lastFmData) {
     super(logger, db, spotifyData, 'most');
-    // this.db = db;
     this.lastfm = new Lastfm(lastFmData);
   }
 
   // takes list of last.fm tracks and tries to find them in spotify
   convertToSpotify(topTracks) {
     return Promise.all(topTracks.map((ele, i) =>
-      new Promise(async(resolve) => {
+      new Promise(async (resolve) => {
         await sleep((this.ONE_SEC / 2) * i);
         this.logger.mostPlayed(`Searching for \n${ele.name} by ${ele.artist.name}`);
         const results = (await this.spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`))
@@ -36,7 +32,7 @@ module.exports = class MostPlayed extends Playlist {
 
   insertMissingTracks(trackList, lastFmId, period) {
     let nextTrackSet;
-    return Promise.all(trackList.map(async(ele) => {
+    return Promise.all(trackList.map(async (ele) => {
       if (ele !== undefined) {
         return new Promise((resolve) => {
           resolve(ele);
@@ -83,7 +79,7 @@ module.exports = class MostPlayed extends Playlist {
     this.logger.recentlyAdded('Logging in to spotify');
     const {
       access_token,
-      refresh_token = member.refreshToken
+      refresh_token = member.refreshToken // eslint-disable-line camelcase
     } = await this.refreshToken(member.accessToken, member.refreshToken);
     this.spotifyApi.setAccessToken(access_token);
     this.spotifyApi.setRefreshToken(refresh_token);
@@ -107,7 +103,7 @@ module.exports = class MostPlayed extends Playlist {
     this.logger.mostPlayed('filling playlist');
     await this.fillPlaylist(spotifyId, newPlaylistId, sortedTracks);
     await this.db.findAndModify({
-      query: { _id: member._id },
+      query: { _id: member._id }, // eslint-disable-line no-underscore-dangle
       update: { $set: { accessToken: access_token, refreshToken: refresh_token, 'mostPlayed.id': newPlaylistId } }
     });
   }

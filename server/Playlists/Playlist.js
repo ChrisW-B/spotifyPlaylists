@@ -65,7 +65,7 @@ module.exports = class Playlist {
   async update() {
     this.logger.playlist('Starting');
     const members = await this.db.find();
-    await Promise.all(members.map(async(member) => {
+    await Promise.all(members.map(async (member) => {
       let delayInc = 0;
       const enabled = this.type === 'most' ? member.mostPlayed.enabled : member.recentlyAdded.enabled;
       try {

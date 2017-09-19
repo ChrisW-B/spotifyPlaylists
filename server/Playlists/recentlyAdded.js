@@ -1,4 +1,5 @@
 // server/Playlists/recentlyAdded.js
+
 const sleep = require('sleep-promise');
 const Playlist = require('./Playlist');
 
@@ -19,7 +20,7 @@ module.exports = class RecentlyAdded extends Playlist {
     this.logger.recentlyAdded('Logging in to spotify');
     const {
       access_token,
-      refresh_token = member.refreshToken
+      refresh_token = member.refreshToken // eslint-disable-line camelcase
     } = await this.refreshToken(member.accessToken, member.refreshToken);
     this.spotifyApi.setAccessToken(access_token);
     this.spotifyApi.setRefreshToken(refresh_token);
@@ -40,7 +41,7 @@ module.exports = class RecentlyAdded extends Playlist {
 
     this.logger.recentlyAdded('Updating database');
     await this.db.findAndModify({
-      query: { _id: member._id },
+      query: { _id: member._id }, // eslint-disable-line no-underscore-dangle
       update: { $set: { accessToken: access_token, refreshToken: refresh_token, 'mostPlayed.id': newPlaylistId } }
     });
   }
