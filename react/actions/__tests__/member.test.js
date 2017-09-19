@@ -11,7 +11,7 @@ const mockStore = configureMockStore(middlewares);
 
 describe('member methods', () => {
   fetchMock.getOnce('/member', { success: true })
-    .getOnce('/member/logout', { success: true })
+    .postOnce('/member/logout', { success: true })
     .deleteOnce('/member', { success: true })
     .mock('*', 404)
 
@@ -24,7 +24,7 @@ describe('member methods', () => {
     ])
   })
 
-  it('should use get to log out', async() => {
+  it('should use post to log out', async() => {
     const store = mockStore({});
     await store.dispatch(logout())
     return expect(store.getActions()).toEqual([
