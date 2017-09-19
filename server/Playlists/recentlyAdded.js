@@ -18,6 +18,8 @@ module.exports = class RecentlyAdded extends Playlist {
     await sleep(delayInc * this.ONE_MIN * 5);
     const { id, length } = member.recentlyAdded;
 
+    if (!memberInfo.numTracks) return;
+
     this.logger.recentlyAdded('Logging in to spotify');
     const { accessToken, refreshToken } = await this.signInToSpotify(member);
     newMember.accessToken = accessToken;

@@ -12,7 +12,7 @@ module.exports = class MostPlayed extends Playlist {
   // takes list of last.fm tracks and tries to find them in spotify
   convertToSpotify(topTracks) {
     return Promise.all(topTracks.map((ele, i) =>
-      new Promise(async (resolve) => {
+      new Promise(async(resolve) => {
         await sleep((this.ONE_SEC / 2) * i);
         this.logger.mostPlayed(`Searching for \n${ele.name} by ${ele.artist.name}`);
         const results = (await this.spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`))
@@ -32,7 +32,7 @@ module.exports = class MostPlayed extends Playlist {
 
   insertMissingTracks(trackList, lastFmId, period) {
     let nextTrackSet;
-    return Promise.all(trackList.map(async (ele) => {
+    return Promise.all(trackList.map(async(ele) => {
       if (ele !== undefined) {
         return new Promise((resolve) => {
           resolve(ele);
