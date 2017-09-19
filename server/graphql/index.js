@@ -2,9 +2,6 @@ const {
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
-  GraphQLInt,
-  GraphQLBoolean,
-  GraphQLList,
   GraphQLNonNull
 } = require('graphql/type');
 
@@ -30,8 +27,7 @@ const schema = new GraphQLSchema({
             type: new GraphQLNonNull(GraphQLString)
           }
         },
-        resolve: async(root, { spotifyId }, source, fieldASTs) => {
-          console.log(source.user.id);
+        resolve: async (root, { spotifyId }, source, fieldASTs) => {
           if (source.user.id !== spotifyId && source.user.id !== process.env.ADMIN) return {};
           const projections = getProjection(fieldASTs);
           const foundItems = await Member.findOne({ spotifyId }, projections).exec();
