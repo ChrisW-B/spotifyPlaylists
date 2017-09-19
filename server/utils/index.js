@@ -6,13 +6,13 @@ const RecentlyAdded = require('../Playlists').recentlyAdded;
 const MostPlayed = require('../Playlists').mostPlayed;
 const Schema = require('../mongoose/schema');
 
-const logger = new (winston.Logger)({
+const logger = new(winston.Logger)({
   level: 'recentlyAdded',
   levels: { server: 0, playlist: 0, mostPlayed: 0, recentlyAdded: 0 },
   colors: { server: 'green', playlist: 'blue', mostPlayed: 'magenta', recentlyAdded: 'yellow' },
   colorize: true,
   transports: [
-    new (winston.transports.Console)({ timestamp: true, prettyPrint: true, colorize: true })
+    new(winston.transports.Console)({ timestamp: true, prettyPrint: true, colorize: true })
   ]
 });
 
