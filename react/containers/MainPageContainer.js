@@ -5,7 +5,7 @@ import { MainPage } from '../components';
 import { getMemberInfo } from '../actions';
 
 const mapStateToProps = ({ member, playlists }) => ({
-  id: member.id,
+  spotifyId: member.spotifyId,
   mostPlayed: playlists.mostPlayed,
   recentlyAdded: playlists.recentlyAdded
 });

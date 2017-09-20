@@ -2,9 +2,7 @@
 import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT } from '../actionTypes';
 
 const initialState = {
-  id: '',
-  username: '',
-  displayName: '',
+  spotifyId: '',
   isAdmin: false
 };
 

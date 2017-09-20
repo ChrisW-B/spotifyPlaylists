@@ -7,12 +7,12 @@ import { LoginScreen, Content } from '../';
 
 export default class MainPage extends Component {
   static propTypes = {
-    id: PropTypes.string,
+    spotifyId: PropTypes.string,
     getMemberInfo: PropTypes.func.isRequired
   }
 
   static defaultProps = {
-    id: null
+    spotifyId: ''
   }
 
   reloadMember = () => {
@@ -31,10 +31,10 @@ export default class MainPage extends Component {
 
   render = () =>
     (<div>
-      <Transition timeout={300} in={!!this.props.id} unmountOnExit mountOnEnter>
+      <Transition timeout={300} in={!!this.props.spotifyId} unmountOnExit mountOnEnter>
         {status => <Content status={status} /> }
       </Transition>
-      <Transition timeout={300} in={!this.props.id} unmountOnExit mountOnEnter>
+      <Transition timeout={300} in={!this.props.spotifyId} unmountOnExit mountOnEnter>
         { status => <LoginScreen login={this.login} status={status} /> }
       </Transition>
     </div>)

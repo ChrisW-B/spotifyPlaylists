@@ -80,6 +80,10 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
 app.use('/member', memberRoute);
 app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, adminRoute);
 app.use('/playlists', playlistRoute);
+
+if (process.env.NODE_ENV !== 'production') app.use('/graphql', graphqlHTTP({ schema: graphqlSchema, graphiql: true }));
+else app.use('/graphql', utils.ensureAuthenticated, graphqlHTTP({ schema: graphqlSchema, graphiql: false }));
+
 app.use('/graphql', utils.ensureAuthenticated, graphqlHTTP({ schema: graphqlSchema, graphiql: process.env.NODE_ENV !== 'production' }));
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {

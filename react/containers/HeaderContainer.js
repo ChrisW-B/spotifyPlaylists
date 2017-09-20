@@ -6,10 +6,9 @@ import { Header } from '../components';
 import { logout } from '../actions';
 
 const mapStateToProps = ({ member, playlists, routing }) => ({
-  photos: member.photos,
-  id: member.id,
+  photo: member.photo,
   isAdmin: member.isAdmin,
-  username: member.username,
+  spotifyId: member.spotifyId,
   mostPlayed: playlists.mostPlayed,
   recentlyAdded: playlists.recentlyAdded,
   pathname: routing.location.pathname //so the thing actually updates on route changes

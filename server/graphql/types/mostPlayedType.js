@@ -6,7 +6,6 @@ const mostPlayedType = new GraphQLObjectType({
   fields: () => ({
     period: { type: (GraphQLString), description: 'the time period to play songs from' },
     lastfm: { type: (GraphQLString), description: 'the last fm id to pick most played songs from' },
-    // id: { type: (GraphQLString), description: 'the playlist\'s id' },
     length: { type: (GraphQLInt), description: 'the playlist length' },
     enabled: { type: (GraphQLBoolean), description: 'whether the playlist is enabled' }
   })

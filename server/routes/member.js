@@ -10,14 +10,22 @@ const app = express.Router();
 const deleteMember = memberId =>
   Member.remove({ spotifyId: memberId }).exec();
 
-const save = async ({ access, refresh, userId }) => {
+const save = async ({ access, refresh, userId, photos }) => {
   const member = await Member.findOne({ spotifyId: userId }).exec();
+  const photo = photos.length ? photos[0] : '';
   if (!member) {
-    const newMember = new Member({ spotifyId: userId, refreshToken: refresh, accessToken: access });
+    const newMember = new Member({
+      spotifyId: userId,
+      refreshToken: refresh,
+      accessToken: access,
+      isAdmin: userId === process.env.ADMIN,
+      photo
+    });
     await newMember.save();
   } else {
     member.accessToken = access;
     member.refreshToken = refresh;
+    member.photo = photo;
     member.visits += 1;
     await member.save();
     utils.logger.server(`${userId} already added!`);
@@ -40,7 +48,7 @@ passport.use(
       callbackURL: process.env.SPOTIFY_REDIRECT
     }),
     async (access, refresh, profile, done) => {
-      await save({ access, refresh, userId: profile.id });
+      await save({ access, refresh, userId: profile.id, photos: profile.photos });
       return done(null, { ...profile, access, refresh });
     }
   ));

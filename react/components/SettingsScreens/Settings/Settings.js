@@ -7,9 +7,6 @@ export default class Settings extends Component {
     logout: PropTypes.func.isRequired,
     deleteAccount: PropTypes.func.isRequired
   }
-  static defaultProps = {
-    id: null
-  }
 
   render() {
     const { logout, deleteAccount } = this.props;

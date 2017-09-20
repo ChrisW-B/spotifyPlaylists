@@ -1,4 +1,4 @@
-const { GraphQLString, GraphQLInt, GraphQLObjectType } = require('graphql/type');
+const { GraphQLString, GraphQLInt, GraphQLObjectType, GraphQLBoolean } = require('graphql/type');
 const mostPlayedType = require('./mostPlayedType');
 const recentlyAddedType = require('./recentlyAddedType');
 
@@ -7,9 +7,9 @@ const memberType = new GraphQLObjectType({
   description: 'a member',
   fields: () => ({
     spotifyId: { type: (GraphQLString), description: 'The spotify id of the member' },
+    photo: { type: (GraphQLString), description: 'a photo of the member' },
+    isAdmin: { type: (GraphQLBoolean), description: 'whether the member is an admin' },
     visits: { type: (GraphQLInt), description: 'The number of times a person has visited' },
-    // refreshToken: { type: (GraphQLString), description: 'The spotify refresh token' },
-    // accessToken: { type: (GraphQLString), description: 'The spotify access token' },
     mostPlayed: { type: (mostPlayedType), description: 'The member\'s most played playlist info' },
     recentlyAdded: { type: (recentlyAddedType), description: 'The member\'s recently added playlist info' }
   })

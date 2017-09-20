@@ -1,10 +1,23 @@
 // react/actions/member.js
 
-import { get, del, post, receiveData } from './';
+import { graphQL, del, post, receiveData } from './';
 import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT } from '../actionTypes';
 
+const query = `
+{
+  member {
+    spotifyId
+    isAdmin
+    photo
+  }
+}
+`;
 export const getMemberInfo = () =>
-  get('/member', MEMBER_INFO, receiveData);
+  graphQL(
+    MEMBER_INFO,
+    query,
+    receiveData
+  );
 
 export const logout = () =>
   post('/member/logout', LOGOUT, {}, receiveData);
