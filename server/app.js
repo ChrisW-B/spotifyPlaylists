@@ -96,8 +96,10 @@ setInterval(() => utils.recentlyAdded.update(), 5 * ONE_HOUR);
 setTimeout(() =>
   setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); // offset update
 
-// run after starting
-// utils.mostPlayed.update();
-// setTimeout(() => utils.recentlyAdded.update(), ONE_MIN * 2);
+// run after starting in production
+if (process.env.NODE_ENV === 'production') {
+  utils.mostPlayed.update();
+  setTimeout(() => utils.recentlyAdded.update(), ONE_MIN * 2);
+}
 
 module.exports = app;
