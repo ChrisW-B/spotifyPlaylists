@@ -1,5 +1,4 @@
 // server/index.js
-
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -12,12 +11,7 @@ const passport = require('passport');
 const MongoStore = require('connect-mongo')(session);
 const { spawn } = require('child_process');
 const utils = require('./utils');
-const { Mongoose } = require('./mongoose');
-const graphqlHTTP = require('express-graphql');
-const memberRoute = require('./routes/member');
-const adminRoute = require('./routes/admin');
-const playlistRoute = require('./routes/playlists');
-const graphqlSchema = require('./graphql');
+const { Mongoose } = require('../db');
 
 const app = express();
 const ONE_SEC = 1000;
@@ -78,10 +72,9 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
   });
 }
 
-app.use('/member', memberRoute);
-app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, adminRoute);
-app.use('/playlists', playlistRoute);
-app.use('/graphql', utils.ensureAuthenticated, graphqlHTTP({ schema: graphqlSchema, graphiql: process.env.NODE_ENV !== 'production' }));
+app.use('/member', require('./routes/member'));
+app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, require('./routes/admin'));
+app.use('/playlists', require('./routes/playlists'));
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {
   const cwd = path.join(__dirname, '..');
