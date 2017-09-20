@@ -96,7 +96,6 @@ setTimeout(() =>
   setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); // offset update
 
 // run after starting in production
-console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'production') {
   utils.mostPlayed.update();
   setTimeout(() => utils.recentlyAdded.update(), ONE_MIN * 2);
