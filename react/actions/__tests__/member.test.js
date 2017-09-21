@@ -10,9 +10,8 @@ const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares);
 
 describe('member methods', () => {
-  fetchMock.getOnce('/member', { success: true })
-    .postOnce('/member/logout', { success: true })
-    .deleteOnce('/member', { success: true })
+  fetchMock
+    .post({ matcher: '/graphql', times: 3, response: {success: true} })
     .mock('*', 404)
 
   it('should get info about the current member', async() => {
@@ -20,7 +19,7 @@ describe('member methods', () => {
     await store.dispatch(getMemberInfo())
     return expect(store.getActions()).toEqual([
       { type: `${MEMBER_INFO}_LOADING` },
-      { type: `${MEMBER_INFO}_SUCCESS`, info: { success: true }, receivedAt: Date.now() }
+      { type: `${MEMBER_INFO}_SUCCESS`, receivedAt: Date.now() }
     ])
   })
 
@@ -29,7 +28,7 @@ describe('member methods', () => {
     await store.dispatch(logout())
     return expect(store.getActions()).toEqual([
       { type: `${LOGOUT}_LOADING` },
-      { type: `${LOGOUT}_SUCCESS`, info: { success: true }, receivedAt: Date.now() }
+      { type: `${LOGOUT}_SUCCESS`, receivedAt: Date.now() }
     ])
   })
 
@@ -38,7 +37,7 @@ describe('member methods', () => {
     await store.dispatch(deleteAccount())
     return expect(store.getActions()).toEqual([
       { type: `${DELETE_ACCOUNT}_LOADING` },
-      { type: `${DELETE_ACCOUNT}_SUCCESS`, info: {}, receivedAt: Date.now() }
+      { type: `${DELETE_ACCOUNT}_SUCCESS`, receivedAt: Date.now() }
     ])
   })
 

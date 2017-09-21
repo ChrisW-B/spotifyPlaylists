@@ -7,9 +7,6 @@ const utils = require('../utils');
 const { Member } = utils;
 const app = express.Router();
 
-const deleteMember = memberId =>
-  Member.remove({ spotifyId: memberId }).exec();
-
 const save = async ({ access, refresh, userId, photos }) => {
   const member = await Member.findOne({ spotifyId: userId }).exec();
   const photo = photos.length ? photos[0] : '';
@@ -65,25 +62,5 @@ app.get('/setup', passport.authenticate('spotify', {
   successRedirect: '/loggedin',
   failureRedirect: '/'
 }));
-
-app.get('', utils.ensureAuthenticated, (req, res) => {
-  delete req.user.access;
-  delete req.user.refresh;
-  delete req.user._json; // eslint-disable-line no-underscore-dangle
-  delete req.user._raw; // eslint-disable-line no-underscore-dangle
-  res.json({ ...req.user, isAdmin: req.user.id === process.env.ADMIN });
-});
-
-app.delete('', utils.ensureAuthenticated, async (req, res) => {
-  await deleteMember(req.user.id);
-  req.logout();
-  req.session.destroy(() => {});
-  res.json({ success: true });
-});
-app.post('/logout', utils.ensureAuthenticated, (req, res) => {
-  req.logout();
-  req.session.destroy(() => {});
-  res.json({ success: true });
-});
 
 module.exports = app;

@@ -15,16 +15,25 @@ describe('admin methods', () => {
     .postOnce('/admin/forceRecent', { success: true })
     .mock('*', 404)
 
-  it('should use get request', async() => {
+  it('should use post request when force reloading most played', async() => {
     const store = mockStore({});
     await store.dispatch(reloadMost())
     return expect(store.getActions()).toEqual([
       { type: `${ADMIN_MOST}_LOADING` },
-      { type: `${ADMIN_MOST}_SUCCESS`, info: { success: true }, receivedAt: Date.now() }
+      { type: `${ADMIN_MOST}_SUCCESS`, success: true, receivedAt: Date.now() }
     ])
   })
 
-  it('should fail gracefully', async() => {
+  it('should use post request when force reloading recently added', async() => {
+    const store = mockStore({});
+    await store.dispatch(reloadRecent())
+    return expect(store.getActions()).toEqual([
+      { type: `${ADMIN_RECENT}_LOADING` },
+      { type: `${ADMIN_RECENT}_SUCCESS`, success: true, receivedAt: Date.now() }
+    ])
+  })
+
+  it('should fail gracefully when force reloading most played', async() => {
     const store = mockStore({});
     await store.dispatch(reloadMost())
     return expect(store.getActions()).toEqual([
@@ -33,16 +42,7 @@ describe('admin methods', () => {
     ])
   })
 
-  it('should use get request', async() => {
-    const store = mockStore({});
-    await store.dispatch(reloadRecent())
-    return expect(store.getActions()).toEqual([
-      { type: `${ADMIN_RECENT}_LOADING` },
-      { type: `${ADMIN_RECENT}_SUCCESS`, info: { success: true }, receivedAt: Date.now() }
-    ])
-  })
-
-  it('should use get request', async() => {
+  it('should fail gracefully when force reloading most played', async() => {
     const store = mockStore({});
     await store.dispatch(reloadRecent())
     return expect(store.getActions()).toEqual([

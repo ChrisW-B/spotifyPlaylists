@@ -6,18 +6,16 @@ const initialState = {
   recentlyAdded: { enabled: false }
 };
 
-export default (state = initialState, action = { info: {} }) => {
-  if (!action.info) return { ...state };
-  const { info: { member, updatePlaylist }, type } = action;
-  switch (type) {
+export default (state = initialState, action = {}) => {
+  switch (action.type) {
   case `${UPDATE_PLAYLISTS}_SUCCESS`:
-    return { ...state, ...member };
+    return { ...state, ...action.member };
   case `${UPDATE_MOST}_SUCCESS`:
   case `${TOGGLE_MOST}_SUCCESS`:
-    return { ...state, mostPlayed: { ...state.mostPlayed, ...updatePlaylist.mostPlayed } };
+    return { ...state, mostPlayed: { ...state.mostPlayed, ...action.updatePlaylist.mostPlayed } };
   case `${UPDATE_RECENT}_SUCCESS`:
   case `${TOGGLE_RECENT}_SUCCESS`:
-    return { ...state, recentlyAdded: { ...state.mostPlayed, ...updatePlaylist.recentlyAdded } };
+    return { ...state, recentlyAdded: { ...state.mostPlayed, ...action.updatePlaylist.recentlyAdded } };
   case `${LOGOUT}_SUCCESS`:
   case `${DELETE_ACCOUNT}_SUCCESS`:
     return { ...initialState };

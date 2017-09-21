@@ -6,7 +6,7 @@ const initialState = {
   failed: false
 };
 
-export default (state = initialState, action) => {
+export default (state = initialState, action = {}) => {
   if (!action.type) return state;
   const loadingState = { ...state.loadingState };
   let failed = state.failed || false;
