@@ -4,7 +4,7 @@ const winston = require('winston');
 const crypto = require('crypto');
 const RecentlyAdded = require('../Playlists').recentlyAdded;
 const MostPlayed = require('../Playlists').mostPlayed;
-const Schema = require('../mongoose/schema');
+const { Member } = require('../../db/mongoose/schema');
 
 const logger = new (winston.Logger)({
   level: 'recentlyAdded',
@@ -17,7 +17,7 @@ const logger = new (winston.Logger)({
 });
 
 const mostPlayed = new MostPlayed(logger,
-  Schema.Member, {
+  Member, {
     clientId: process.env.SPOTIFY_ID,
     clientSecret: process.env.SPOTIFY_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT
@@ -29,7 +29,7 @@ const mostPlayed = new MostPlayed(logger,
   });
 const recentlyAdded = new RecentlyAdded(
   logger,
-  Schema.Member, {
+  Member, {
     clientId: process.env.SPOTIFY_ID,
     clientSecret: process.env.SPOTIFY_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT
@@ -37,7 +37,7 @@ const recentlyAdded = new RecentlyAdded(
 
 module.exports = {
   logger,
-  Member: Schema.Member,
+  Member,
   recentlyAdded,
   mostPlayed,
 

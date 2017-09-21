@@ -11,12 +11,12 @@ const passport = require('passport');
 const MongoStore = require('connect-mongo')(session);
 const { spawn } = require('child_process');
 const utils = require('./utils');
-const { Mongoose } = require('./mongoose');
+const { Mongoose } = require('../db/mongoose');
 const graphqlHTTP = require('express-graphql');
 const memberRoute = require('./routes/member');
 const adminRoute = require('./routes/admin');
 const playlistRoute = require('./routes/playlists');
-const graphqlSchema = require('./graphql');
+const graphqlSchema = require('../db/graphql');
 
 const app = express();
 const ONE_SEC = 1000;

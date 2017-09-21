@@ -3,7 +3,7 @@ const {
   GraphQLString,
   GraphQLList
 } = require('graphql/type');
-const { getProjection } = require('./utils');
+const { getProjection, validMember } = require('./utils');
 const { Member } = require('../mongoose/schema');
 const memberType = require('./types/memberType');
 
@@ -19,19 +19,20 @@ const queries = new GraphQLObjectType({
           type: GraphQLString
         }
       },
-      resolve: async (root, { spotifyId }, source, fieldASTs) => {
+      resolve: async (_, { spotifyId }, { user }, fieldASTs) => {
         // allow admin and dev environments to view specific members
-        const id = (spotifyId && (process.env.NODE_ENV !== 'production' || source.user.id === process.env.ADMIN))
+        if (!validMember(user, spotifyId)) return {};
+        const id = (spotifyId && (process.env.NODE_ENV !== 'production' || user.id === process.env.ADMIN))
           ? spotifyId
-          : source.user.id;
+          : user.id;
         return Member.findOne({ spotifyId: id }, getProjection(fieldASTs)).exec();
       }
     },
     members: {
       type: new GraphQLList(memberType),
-      resolve: async (root, _, source, fieldASTs) => {
+      resolve: async (_, __, { user }, fieldASTs) => {
         // don't allow non admins to view full member list
-        if (process.env.NODE_ENV === 'production' && source.user.id !== process.env.ADMIN) return {};
+        if (process.env.NODE_ENV === 'production' && user.id !== process.env.ADMIN) return {};
         return Member.find({}, getProjection(fieldASTs)).exec();
       }
     }

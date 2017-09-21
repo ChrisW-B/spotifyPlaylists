@@ -2,7 +2,7 @@
 
 import { loading } from './';
 
-export const graphQL = (type, query, cb) =>
+export const graphQL = (type, cb, query, variables = {}) =>
   async dispatch => {
     try {
       dispatch(loading(type));
@@ -10,12 +10,11 @@ export const graphQL = (type, query, cb) =>
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ query })
+        body: JSON.stringify({ query, variables })
       });
       if (response.status !== 200) throw new Error(`${response.status} Error`);
       const json = await response.json();
-      console.log(json.data) // eslint-disable-line no-console
-      return dispatch(cb(type, json.data.member));
+      return dispatch(cb(type, json.data));
     } catch (error) {
       return dispatch({ type: `${type}_FAIL`, error })
     }
