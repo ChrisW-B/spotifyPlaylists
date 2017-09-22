@@ -19,7 +19,7 @@ const queries = new GraphQLObjectType({
           type: GraphQLString
         }
       },
-      resolve: async (_, { spotifyId }, { user }, fieldASTs) => {
+      resolve: async(_, { spotifyId }, { user }, fieldASTs) => {
         // allow admin and dev environments to view specific members
         if (!validMember(user, spotifyId)) return {};
         const id = (spotifyId && (process.env.NODE_ENV !== 'production' || user.id === process.env.ADMIN))
@@ -30,7 +30,7 @@ const queries = new GraphQLObjectType({
     },
     members: {
       type: new GraphQLList(memberType),
-      resolve: async (_, __, { user }, fieldASTs) => {
+      resolve: async(_, __, { user }, fieldASTs) => {
         // don't allow non admins to view full member list
         if (process.env.NODE_ENV === 'production' && user.id !== process.env.ADMIN) return {};
         return Member.find({}, getProjection(fieldASTs)).exec();

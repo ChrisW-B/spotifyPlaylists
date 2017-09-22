@@ -20,14 +20,14 @@
   "homepage": "https://spotifyapps.chriswbarry.com",
   "dependencies": {
     "babel-minify-webpack-plugin": "^0.2.0",
-    "babel-plugin-emotion": "^7.3.1",
+    "babel-plugin-emotion": "^7.3.2",
     "body-parser": "^1.17.2",
     "compression": "^1.7.0",
     "connect-mongo": "^1.3.2",
     "cookie-parser": "^1.4.3",
     "dotenv": "^4.0.0",
     "ejs": "^2.5.7",
-    "emotion": "^7.3.1",
+    "emotion": "^7.3.2",
     "express": "^4.15.4",
     "express-graphql": "^0.6.11",
     "express-session": "^1.15.5",
@@ -42,7 +42,7 @@
     "prop-types": "^15.5.10",
     "react": "^16.0.0-rc.2",
     "react-dom": "^16.0.0-rc.2",
-    "react-emotion": "^7.3.1",
+    "react-emotion": "^7.3.2",
     "react-icons": "^2.2.5",
     "react-redux": "^5.0.6",
     "react-router": "^4.2.0",
@@ -82,6 +82,7 @@
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-react": "^7.3.0",
     "fetch-mock": "^5.12.2",
+    "husky": "^0.14.3",
     "isomorphic-fetch": "^2.2.1",
     "jest": "^21.0.2",
     "nodemon": "^1.12.0",
@@ -109,6 +110,7 @@
     "test:watch": "npm test -- --watch",
     "forceDev": "yarn install --production=false",
     "build": "webpack -p --progress",
-    "clean": "rm -r public/build"
+    "clean": "rm -r public/build",
+    "precommit": "yarn lint:js:fix"
   }
 }
