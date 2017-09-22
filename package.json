@@ -111,6 +111,6 @@
     "forceDev": "yarn install --production=false",
     "build": "webpack -p --progress",
     "clean": "rm -r public/build",
-    "precommit": "yarn lint:js:fix"
+    "precommit": "yarn lint:js"
   }
 }
