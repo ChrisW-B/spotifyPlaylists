@@ -13,7 +13,6 @@ const fieldASTs = {
 };
 
 describe('Backend Action Type', () => {
-
   process.env.NODE_ENV = 'development';
   it('should register as valid member if in dev mode', () =>
     expect(validMember({ id: 'bob' }, 'rob')).toBe(true)
