@@ -11,6 +11,10 @@ describe('loading reducer', () => {
     expect(loading(undefined, {})).toEqual(initialState)
   )
 
+  it('should return the initial state', () =>
+    expect(loading()).toEqual(initialState)
+  )
+
   it('should a loading state', () =>
     expect(loading(undefined, { type: 'ABC_LOADING' })).toEqual({
       ...initialState,

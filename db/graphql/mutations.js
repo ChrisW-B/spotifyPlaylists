@@ -41,13 +41,16 @@ const mutations = new GraphQLObjectType({
           type: new GraphQLNonNull(updatePlaylistType)
         }
       },
-      resolve: async (_, { spotifyId, playlistKind, patch }, { user }, fieldASTs) => {
+      resolve: async(_, { spotifyId, playlistKind, patch }, { user }, fieldASTs) => {
         if (!validMember(user, spotifyId)) return {};
         const id = (spotifyId && (process.env.NODE_ENV !== 'production' || user.id === process.env.ADMIN))
           ? spotifyId
           : user.id;
         const safePatch = { ...patch };
-        const foundItem = await Member.findOne({ spotifyId: id }, getProjection(fieldASTs)).exec();
+        console.log(fieldASTs.fieldNodes[0].selectionSet.selections); // eslint-disable-line no-console
+        const projection = getProjection(fieldASTs)
+        const foundItem = await Member.findOne({ spotifyId: id }, projection).exec();
+        console.log({ projection }) // eslint-disable-line no-console
         if (playlistKind === 'most') foundItem.mostPlayed = { ...foundItem.mostPlayed, ...safePatch };
         else if (playlistKind === 'recent') {
           delete safePatch.period;
@@ -62,7 +65,7 @@ const mutations = new GraphQLObjectType({
       type: backendActionType,
       name: 'deleteAccount',
       description: 'removes a member and logs them out',
-      resolve: async (_, __, source) => {
+      resolve: async(_, __, source) => {
         if (!source.user || !source.user.id) return { success: false };
         await Member.remove({ spotifyId: source.user.id }).exec();
         source.logout();
@@ -74,7 +77,7 @@ const mutations = new GraphQLObjectType({
       type: backendActionType,
       name: 'logout',
       description: 'logs a person out',
-      resolve: async (_, __, source) => {
+      resolve: async(_, __, source) => {
         if (!source.user || !source.user.id) return { success: false };
         source.logout();
         source.session.destroy(() => {});
