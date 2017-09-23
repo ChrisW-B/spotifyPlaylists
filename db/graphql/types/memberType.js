@@ -1,3 +1,5 @@
+// db/graphql/types/memberType.js
+
 const { GraphQLString, GraphQLInt, GraphQLObjectType, GraphQLBoolean } = require('graphql/type');
 const mostPlayedType = require('./mostPlayedType');
 const recentlyAddedType = require('./recentlyAddedType');

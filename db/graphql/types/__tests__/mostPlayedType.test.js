@@ -1,3 +1,5 @@
+// db/graphql/types/__tests__/mostPlayedType.test.js
+
 const mostPlayedType = require('../mostPlayedType');
 const { GraphQLString, GraphQLBoolean, GraphQLInt } = require('graphql/type');
 

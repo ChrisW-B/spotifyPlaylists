@@ -1,3 +1,5 @@
+// db/graphql/types/__tests__/memberType.test.js
+
 const memberType = require('../memberType');
 const { GraphQLString, GraphQLInt, GraphQLBoolean } = require('graphql/type');
 

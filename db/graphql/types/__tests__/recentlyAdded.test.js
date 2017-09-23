@@ -1,3 +1,5 @@
+// db/graphql/types/__tests__/recentlyAdded.test.js
+
 const recentlyAddedType = require('../recentlyAddedType');
 const { GraphQLBoolean, GraphQLInt } = require('graphql/type');
 

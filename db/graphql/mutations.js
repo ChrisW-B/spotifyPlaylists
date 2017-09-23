@@ -1,9 +1,6 @@
-const {
-  GraphQLObjectType,
-  GraphQLString,
-  GraphQLNonNull,
-  GraphQLEnumType
-} = require('graphql/type');
+// db/graphql/mutations.js
+
+const { GraphQLObjectType, GraphQLString, GraphQLNonNull, GraphQLEnumType } = require('graphql/type');
 const { getProjection, validMember } = require('./utils');
 const { Member } = require('../mongoose/schema');
 const memberType = require('./types/memberType');

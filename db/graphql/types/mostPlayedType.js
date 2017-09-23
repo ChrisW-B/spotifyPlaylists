@@ -1,3 +1,5 @@
+// db/graphql/types/mostPlayedType.js
+
 const { GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLObjectType } = require('graphql/type');
 
 const mostPlayedType = new GraphQLObjectType({

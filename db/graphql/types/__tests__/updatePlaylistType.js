@@ -1,3 +1,5 @@
+// db/graphql/types/__tests__/updatePlaylistType.js
+
 const updatePlaylist = require('../updatePlaylistType');
 const { GraphQLString, GraphQLBoolean, GraphQLInt } = require('graphql/type');
 

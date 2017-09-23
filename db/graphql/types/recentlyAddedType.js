@@ -1,3 +1,5 @@
+// db/graphql/types/recentlyAddedType.js
+
 const { GraphQLBoolean, GraphQLInt, GraphQLObjectType } = require('graphql/type');
 
 const recentlyAddedType = new GraphQLObjectType({

@@ -1,3 +1,5 @@
+// react/reducers/__tests__/loading.test.js
+
 import loading from '../loading';
 
 const initialState = {

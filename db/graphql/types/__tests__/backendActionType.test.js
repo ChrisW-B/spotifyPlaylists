@@ -1,3 +1,4 @@
+// db/graphql/types/__tests__/backendActionType.test.js
 const backendActionType = require('../backendActionType');
 const { GraphQLBoolean } = require('graphql/type');
 

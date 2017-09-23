@@ -1,3 +1,5 @@
+// db/graphql/utils.js
+
 const getProjection = fieldASTs =>
   fieldASTs.fieldNodes[0].selectionSet.selections.reduce((projections, selection) => {
     const newProjections = projections;

@@ -1,3 +1,5 @@
+// db/graphql/types/backendActionType.js
+
 const { GraphQLObjectType, GraphQLBoolean } = require('graphql/type');
 
 const backendActionType = new GraphQLObjectType({

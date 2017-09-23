@@ -1,3 +1,5 @@
+// db/mongoose/schema/Member.js
+
 const db = require('../');
 
 const { Mongoose } = db;

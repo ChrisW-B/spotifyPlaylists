@@ -1,3 +1,5 @@
+// db/graphql/types/updatePlaylistType.js
+
 const { GraphQLInputObjectType, GraphQLString, GraphQLBoolean, GraphQLInt } = require('graphql/type');
 
 const updatePlaylistType = new GraphQLInputObjectType({
