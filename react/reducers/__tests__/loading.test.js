@@ -1,3 +1,5 @@
+// react/reducers/__tests__/loading.test.js
+
 import loading from '../loading';
 
 const initialState = {
@@ -9,6 +11,10 @@ const initialState = {
 describe('loading reducer', () => {
   it('should return the initial state', () =>
     expect(loading(undefined, {})).toEqual(initialState)
+  )
+
+  it('should return the initial state', () =>
+    expect(loading()).toEqual(initialState)
   )
 
   it('should a loading state', () =>

@@ -11,7 +11,11 @@ const passport = require('passport');
 const MongoStore = require('connect-mongo')(session);
 const { spawn } = require('child_process');
 const utils = require('./utils');
-const { Mongoose } = require('../db');
+const { Mongoose } = require('../db/mongoose');
+const graphqlHTTP = require('express-graphql');
+const memberRoute = require('./routes/member');
+const adminRoute = require('./routes/admin');
+const graphqlSchema = require('../db/graphql');
 
 const app = express();
 const ONE_SEC = 1000;
@@ -72,9 +76,13 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
   });
 }
 
-app.use('/member', require('./routes/member'));
-app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, require('./routes/admin'));
-app.use('/playlists', require('./routes/playlists'));
+app.use('/member', memberRoute);
+app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, adminRoute);
+
+if (process.env.NODE_ENV !== 'production') app.use('/graphql', graphqlHTTP({ schema: graphqlSchema, graphiql: true }));
+else app.use('/graphql', utils.ensureAuthenticated, graphqlHTTP({ schema: graphqlSchema, graphiql: false }));
+
+app.use('/graphql', utils.ensureAuthenticated, graphqlHTTP({ schema: graphqlSchema, graphiql: process.env.NODE_ENV !== 'production' }));
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {
   const cwd = path.join(__dirname, '..');

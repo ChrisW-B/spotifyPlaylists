@@ -1,13 +1,13 @@
 // react/actions/member.js
 
-import { get, del, post, receiveData } from './';
+import { graphQL, receiveData } from './';
 import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT } from '../actionTypes';
 
 export const getMemberInfo = () =>
-  get('/member', MEMBER_INFO, receiveData);
+  graphQL(MEMBER_INFO, receiveData, '{member{spotifyId isAdmin photo}}');
 
 export const logout = () =>
-  post('/member/logout', LOGOUT, {}, receiveData);
+  graphQL(LOGOUT, receiveData, 'mutation{logout{success}}');
 
 export const deleteAccount = () =>
-  del('/member', DELETE_ACCOUNT, receiveData);
+  graphQL(DELETE_ACCOUNT, receiveData, 'mutation{deleteAccount{success}}');

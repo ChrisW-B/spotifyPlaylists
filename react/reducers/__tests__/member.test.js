@@ -1,33 +1,32 @@
+// react/reducers/__tests__/member.test.js
+
 import member from '../member';
 import { MEMBER_INFO, LOGOUT, DELETE_ACCOUNT, TOGGLE_RECENT } from '../../actionTypes';
 
 const initialState = {
-  id: '',
-  username: '',
-  displayName: '',
+  spotifyId: '',
+  photo: '',
   isAdmin: false
-}
+};
 
 describe('member reducer', () => {
   it('should return the initial state', () =>
-    expect(member(undefined, {})).toEqual(initialState)
+    expect(member(undefined, {type: 'ABC_GARBAGE'})).toEqual(initialState)
   )
 
   it('should populate the member\'s info', () =>
     expect(member(initialState, {
       type: `${MEMBER_INFO}_SUCCESS`,
-      info: {
+      member: {
         ...initialState,
-        id: 'abc123',
-        username: 'aperson',
-        displayName: 'A Person',
+        spotifyId: 'aperson',
+        photo: 'https://photo.url',
         isAdmin: false
       }
     })).toEqual({
       ...initialState,
-      id: 'abc123',
-      username: 'aperson',
-      displayName: 'A Person',
+      spotifyId: 'aperson',
+      photo: 'https://photo.url',
       isAdmin: false
     })
   )
@@ -35,9 +34,8 @@ describe('member reducer', () => {
   it('should reset to initial state on delete account', () =>
     expect(member({
       ...initialState,
-      id: 'abc123',
-      username: 'aperson',
-      displayName: 'A Person',
+      spotifyId: 'aperson',
+      photo: 'https://photo.url',
       isAdmin: false
     }, { type: `${DELETE_ACCOUNT}_SUCCESS` })).toEqual(initialState)
   )
@@ -45,9 +43,8 @@ describe('member reducer', () => {
   it('should reset to initial state on logout', () =>
     expect(member({
       ...initialState,
-      id: 'abc123',
-      username: 'aperson',
-      displayName: 'A Person',
+      spotifyId: 'aperson',
+      photo: 'https://photo.url',
       isAdmin: false
     }, { type: `${LOGOUT}_SUCCESS` })).toEqual(initialState)
   )
@@ -55,18 +52,16 @@ describe('member reducer', () => {
   it('should not affect the member state', () =>
     expect(member({
       ...initialState,
-      id: 'abc123',
-      username: 'aperson',
-      displayName: 'A Person',
+      spotifyId: 'aperson',
+      photo: 'https://photo.url',
       isAdmin: false
     }, {
       type: `${TOGGLE_RECENT}_SUCCESS`,
       info: { garbage: 'hi' }
     })).toEqual({
       ...initialState,
-      id: 'abc123',
-      username: 'aperson',
-      displayName: 'A Person',
+      spotifyId: 'aperson',
+      photo: 'https://photo.url',
       isAdmin: false
     })
   )

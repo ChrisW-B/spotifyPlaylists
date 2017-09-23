@@ -1,3 +1,5 @@
+// react/reducers/__tests__/playlists.test.js
+
 import playlists from '../playlists';
 
 import { UPDATE_PLAYLISTS, UPDATE_MOST, TOGGLE_MOST, TOGGLE_RECENT, UPDATE_RECENT, LOGOUT, DELETE_ACCOUNT } from '../../actionTypes';
@@ -36,7 +38,7 @@ describe('playlists reducer', () => {
   it('should populate the playlists state', () =>
     expect(playlists(initialState, {
       type: `${UPDATE_PLAYLISTS}_SUCCESS`,
-      info: {
+      member: {
         mostPlayed: mostPlayedSample,
         recentlyAdded: recentlyAddedSample
       }
@@ -49,8 +51,9 @@ describe('playlists reducer', () => {
   it('should update only the most played enabled status', () =>
     expect(playlists(initialState, {
       type: `${TOGGLE_MOST}_SUCCESS`,
-      info: mostPlayedSample
-
+      updatePlaylist: {
+        mostPlayed: { enabled: mostPlayedSample.enabled }
+      }
     })).toEqual({
       ...initialState,
       mostPlayed: { enabled: true },
@@ -60,7 +63,9 @@ describe('playlists reducer', () => {
   it('should modify the most played state', () =>
     expect(playlists(initialState, {
       type: `${UPDATE_MOST}_SUCCESS`,
-      info: mostPlayedSample
+      updatePlaylist: {
+        mostPlayed: mostPlayedSample
+      }
     })).toEqual({
       ...initialState,
       mostPlayed: mostPlayedSample,
@@ -70,8 +75,9 @@ describe('playlists reducer', () => {
   it('should update only the recently added enabled status', () =>
     expect(playlists(initialState, {
       type: `${TOGGLE_RECENT}_SUCCESS`,
-      info: recentlyAddedSample
-
+      updatePlaylist: {
+        recentlyAdded: { enabled: recentlyAddedSample.enabled }
+      }
     })).toEqual({
       ...initialState,
       recentlyAdded: { enabled: true },
@@ -81,7 +87,9 @@ describe('playlists reducer', () => {
   it('should modify the recently added state', () =>
     expect(playlists(initialState, {
       type: `${UPDATE_RECENT}_SUCCESS`,
-      info: recentlyAddedSample
+      updatePlaylist: {
+        recentlyAdded: recentlyAddedSample
+      }
     })).toEqual({
       ...initialState,
       recentlyAdded: recentlyAddedSample,

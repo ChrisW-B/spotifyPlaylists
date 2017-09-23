@@ -10,12 +10,9 @@ const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares);
 
 describe('playlist methods', () => {
+
   fetchMock
-    .getOnce('/playlists', { success: true })
-    .postOnce('/playlists/most/toggle', (_, { body }) => ({ body }))
-    .postOnce('/playlists/recent/toggle', (_, { body }) => ({ body }))
-    .postOnce('/playlists/most/save', (_, { body }) => ({ body }))
-    .postOnce('/playlists/recent/save', (_, { body }) => ({ body }))
+    .post({ matcher: '/graphql', times: 5, response: { success: true } })
     .mock('*', 404)
 
   it('should get status of playlists', async() => {
@@ -23,7 +20,7 @@ describe('playlist methods', () => {
     await store.dispatch(updatePlaylistStatus())
     return expect(store.getActions()).toEqual([
       { type: `${UPDATE_PLAYLISTS}_LOADING` },
-      { type: `${UPDATE_PLAYLISTS}_SUCCESS`, info: { success: true }, receivedAt: Date.now() }
+      { type: `${UPDATE_PLAYLISTS}_SUCCESS`, receivedAt: Date.now() }
     ])
   })
 
@@ -31,8 +28,8 @@ describe('playlist methods', () => {
     const store = mockStore({});
     await store.dispatch(toggleMostPlayed(false))
     return expect(store.getActions()).toEqual([
-      { type: `${TOGGLE_MOST}_LOADING`, enable: false },
-      { type: `${TOGGLE_MOST}_SUCCESS`, info: { enable: false }, receivedAt: Date.now() }
+      { type: `${TOGGLE_MOST}_LOADING` },
+      { type: `${TOGGLE_MOST}_SUCCESS`, receivedAt: Date.now() }
     ])
   })
 
@@ -40,8 +37,8 @@ describe('playlist methods', () => {
     const store = mockStore({});
     await store.dispatch(toggleRecentlyAdded(true))
     return expect(store.getActions()).toEqual([
-      { type: `${TOGGLE_RECENT}_LOADING`, enable: true },
-      { type: `${TOGGLE_RECENT}_SUCCESS`, info: { enable: true }, receivedAt: Date.now() }
+      { type: `${TOGGLE_RECENT}_LOADING` },
+      { type: `${TOGGLE_RECENT}_SUCCESS`, receivedAt: Date.now() }
     ])
   })
 
@@ -49,8 +46,8 @@ describe('playlist methods', () => {
     const store = mockStore({});
     await store.dispatch(updateMostPlayed({ enable: true, length: 10, lastfm: 'christo27' }))
     return expect(store.getActions()).toEqual([
-      { type: `${UPDATE_MOST}_LOADING`, enable: true, length: 10, lastfm: 'christo27' },
-      { type: `${UPDATE_MOST}_SUCCESS`, info: { enable: true, length: 10, lastfm: 'christo27' }, receivedAt: Date.now() }
+      { type: `${UPDATE_MOST}_LOADING` },
+      { type: `${UPDATE_MOST}_SUCCESS`, receivedAt: Date.now() }
     ])
   })
 
@@ -58,8 +55,8 @@ describe('playlist methods', () => {
     const store = mockStore({});
     await store.dispatch(updateRecentlyAdded({ enable: true, length: 10 }))
     return expect(store.getActions()).toEqual([
-      { type: `${UPDATE_RECENT}_LOADING`, enable: true, length: 10 },
-      { type: `${UPDATE_RECENT}_SUCCESS`, info: { enable: true, length: 10 }, receivedAt: Date.now() }
+      { type: `${UPDATE_RECENT}_LOADING` },
+      { type: `${UPDATE_RECENT}_SUCCESS`, receivedAt: Date.now() }
     ])
   })
 
@@ -76,7 +73,7 @@ describe('playlist methods', () => {
     const store = mockStore({});
     await store.dispatch(toggleMostPlayed(true))
     return expect(store.getActions()).toEqual([
-      { type: `${TOGGLE_MOST}_LOADING`, enable: true },
+      { type: `${TOGGLE_MOST}_LOADING` },
       { type: `${TOGGLE_MOST}_FAIL`, error: expect.any(Error) }
     ])
   })
@@ -85,7 +82,7 @@ describe('playlist methods', () => {
     const store = mockStore({});
     await store.dispatch(toggleRecentlyAdded(false))
     return expect(store.getActions()).toEqual([
-      { type: `${TOGGLE_RECENT}_LOADING`, enable: false },
+      { type: `${TOGGLE_RECENT}_LOADING` },
       { type: `${TOGGLE_RECENT}_FAIL`, error: expect.any(Error) }
     ])
   })
@@ -94,7 +91,7 @@ describe('playlist methods', () => {
     const store = mockStore({});
     await store.dispatch(updateMostPlayed({ enable: true, length: 10, lastfm: 'christo27' }))
     return expect(store.getActions()).toEqual([
-      { type: `${UPDATE_MOST}_LOADING`, enable: true, length: 10, lastfm: 'christo27' },
+      { type: `${UPDATE_MOST}_LOADING` },
       { type: `${UPDATE_MOST}_FAIL`, error: expect.any(Error) }
     ])
   })
@@ -103,7 +100,7 @@ describe('playlist methods', () => {
     const store = mockStore({});
     await store.dispatch(updateRecentlyAdded({ enable: true, length: 10 }))
     return expect(store.getActions()).toEqual([
-      { type: `${UPDATE_RECENT}_LOADING`, enable: true, length: 10 },
+      { type: `${UPDATE_RECENT}_LOADING` },
       { type: `${UPDATE_RECENT}_FAIL`, error: expect.any(Error) }
     ])
   })

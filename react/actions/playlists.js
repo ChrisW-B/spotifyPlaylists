@@ -1,19 +1,19 @@
 // react/actions/playlists.js
 
-import { get, post, receiveData } from './';
+import { graphQL, receiveData } from './';
 import { UPDATE_PLAYLISTS, TOGGLE_MOST, TOGGLE_RECENT, UPDATE_MOST, UPDATE_RECENT } from '../actionTypes';
 
 export const updatePlaylistStatus = () =>
-  get('/playlists', UPDATE_PLAYLISTS, receiveData);
+  graphQL(UPDATE_PLAYLISTS, receiveData, '{member{mostPlayed{lastfm enabled period length}recentlyAdded{enabled length}}}', );
 
 export const toggleMostPlayed = (enable) =>
-  post('/playlists/most/toggle', TOGGLE_MOST, { enable }, receiveData);
+  graphQL(TOGGLE_MOST, receiveData, `mutation{updatePlaylist(playlistKind:mostPlayed patch:{enabled:${enable}}){mostPlayed{enabled}}}`);
 
 export const toggleRecentlyAdded = (enable) =>
-  post('/playlists/recent/toggle', TOGGLE_RECENT, { enable }, receiveData);
+  graphQL(TOGGLE_RECENT, receiveData, `mutation{updatePlaylist(playlistKind:recentlyAdded patch:{enabled:${enable}}){recentlyAdded{enabled}}}`);
 
 export const updateMostPlayed = (settings) =>
-  post('/playlists/most/save', UPDATE_MOST, settings, receiveData);
+  graphQL(UPDATE_MOST, receiveData, `mutation updateMostPlayed($settings: updatePlaylistType!){updatePlaylist(playlistKind:mostPlayed patch:$settings){mostPlayed{lastfm enabled period length}}}`, { settings });
 
 export const updateRecentlyAdded = (settings) =>
-  post('/playlists/recent/save', UPDATE_RECENT, settings, receiveData);
+  graphQL(UPDATE_RECENT, receiveData, `mutation updateRecentlyAdded($settings: updatePlaylistType!){updatePlaylist(playlistKind:recentlyAdded patch:$settings){recentlyAdded{enabled length}}}`, { settings });

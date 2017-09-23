@@ -13,15 +13,14 @@ export default class Header extends Component {
     openAdmin: PropTypes.func.isRequired,
     goHome: PropTypes.func.isRequired,
     back: PropTypes.func.isRequired,
-    photos: PropTypes.arrayOf(PropTypes.string),
-    id: PropTypes.string,
+    photo: PropTypes.string,
+    spotifyId: PropTypes.string,
     pathname: PropTypes.string,
     isAdmin: PropTypes.bool
   }
   static defaultProps = {
-    photos: [],
-    id: '',
-    username: '',
+    photo: '',
+    spotifyId: '',
     pathname: '/',
     isAdmin: false
   }
@@ -36,21 +35,21 @@ export default class Header extends Component {
   }
 
   render = () => {
-    const { logout, openSettings, photos, id, back, isAdmin, openAdmin } = this.props;
+    const { logout, openSettings, photo, spotifyId, back, isAdmin, openAdmin } = this.props;
     return (
       <Wrapper>
         <HeaderSpan>
           <Transition timeout={300} in={!(this.props.pathname === '/' || this.props.pathname === '')} unmountOnExit mountOnEnter appear>
             { status => <BackButton status={status} onClick={back}><Back /></BackButton>}
           </Transition>
-          <Transition timeout={300} in={!!(photos && photos.length)} unmountOnExit mountOnEnter>
-            { status => <ProfilePhoto onClick={this.photoClicked} status={status} src={photos[0]} alt='profile_photo' clicked={this.state.clicked} />}
+          <Transition timeout={300} in={!!(photo)} unmountOnExit mountOnEnter>
+            { status => <ProfilePhoto onClick={this.photoClicked} status={status} src={photo} alt='profile_photo' clicked={this.state.clicked} />}
           </Transition>
         </HeaderSpan>
         <WelcomeText>Autoplaylists for Spotify</WelcomeText>
         <HeaderSpan right>
           {
-            id ? [
+            spotifyId ? [
               isAdmin ? <AdminButton onClick={openAdmin} key='adminbtn'>Admin</AdminButton> : null,
               <HeaderButton onClick={openSettings} key='settingsbtn'>Settings</HeaderButton>,
               <LogOutButton onClick={logout} key='logoutbtn'>Log Out</LogOutButton>,
