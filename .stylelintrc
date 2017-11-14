@@ -15,7 +15,7 @@
     "value-no-vendor-prefix": true,
     "declaration-no-important": true,
     "font-weight-notation": "numeric",
-    "plugin/no-unsupported-browser-features": [true, { "browsers": ['> 5%'], "severity": "warning" }],
+    "plugin/no-unsupported-browser-features": [true, { "browsers": ["> 5%"], "severity": "warning" }],
     "order/order": [
       "declarations",
       "rules",

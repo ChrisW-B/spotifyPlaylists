@@ -1,8 +1,6 @@
 // ./webpack.dev.config.js
-/* eslint import/no-extraneous-dependencies: 0 */
 const path = require('path');
 const webpack = require('webpack');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 
 const BUILD_DIR = path.resolve(__dirname, 'public/build');
 const APP_DIR = path.resolve(__dirname, 'react');
@@ -22,7 +20,6 @@ module.exports = {
   devtool: 'cheap-module-source-map',
   plugins: [
     new webpack.DefinePlugin({ ENV: JSON.stringify('development') }),
-    new CaseSensitivePathsPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.ProgressPlugin()

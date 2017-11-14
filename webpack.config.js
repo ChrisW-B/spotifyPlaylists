@@ -40,16 +40,6 @@ module.exports = {
   },
   module: {
     rules: [{
-      enforce: 'pre',
-      test: /\.js$/,
-      exclude: /node_modules/,
-      loader: 'eslint-loader'
-    }, {
-      enforce: 'pre',
-      test: /\.js$/,
-      exclude: /node_modules/,
-      loader: 'stylelint-custom-processor-loader'
-    }, {
       test: /\.jsx?$|\.js?$/,
       exclude: /node_modules/,
       use: [{
