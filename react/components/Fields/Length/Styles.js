@@ -1,5 +1,5 @@
 // react/components/Fields/Length/Styles.js
-import styled from 'emotion/react';
+import styled from 'react-emotion';
 import { FieldLabel } from '../Styles';
 
 export const NumberInput = styled.input `

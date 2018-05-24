@@ -30,7 +30,7 @@ app.use(session({
   secret: process.env.SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: 'auto' }
+  cookie: { secure: 'auto' },
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -40,7 +40,7 @@ app.use(expressWinston.logger({
   transports: [new winston.transports.Console({ colorize: true })],
   expressFormat: true,
   meta: false,
-  colorize: true
+  colorize: true,
 }));
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -53,14 +53,14 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
     hot: true,
     publicPath: webpackConfig.output.publicPath,
     stats: {
-      colors: true
+      colors: true,
     },
-    historyApiFallback: true
+    historyApiFallback: true,
   }));
   app.use(require('webpack-hot-middleware')(compiler, {
     reload: true,
     path: '/__webpack_hmr',
-    heartbeat: 10 * ONE_SEC
+    heartbeat: 10 * ONE_SEC,
   }));
   /* eslint-enable import/no-extraneous-dependencies, global-require */
 } else {
@@ -79,10 +79,19 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
 app.use('/member', memberRoute);
 app.use('/admin', utils.ensureAuthenticated, utils.ensureAdmin, adminRoute);
 
-if (process.env.NODE_ENV !== 'production') app.use('/graphql', graphqlHTTP({ schema: graphqlSchema, graphiql: true }));
-else app.use('/graphql', utils.ensureAuthenticated, graphqlHTTP({ schema: graphqlSchema, graphiql: false }));
+if (process.env.NODE_ENV !== 'production') { app.use('/graphql', graphqlHTTP({ schema: graphqlSchema, graphiql: true })); } else {
+  app.use(
+    '/graphql',
+    utils.ensureAuthenticated,
+    graphqlHTTP({ schema: graphqlSchema, graphiql: false }),
+  );
+}
 
-app.use('/graphql', utils.ensureAuthenticated, graphqlHTTP({ schema: graphqlSchema, graphiql: process.env.NODE_ENV !== 'production' }));
+app.use(
+  '/graphql',
+  utils.ensureAuthenticated,
+  graphqlHTTP({ schema: graphqlSchema, graphiql: process.env.NODE_ENV !== 'production' }),
+);
 
 app.post('/postrecieve', utils.ensureGithub, (req, res) => {
   const cwd = path.join(__dirname, '..');
@@ -90,7 +99,7 @@ app.post('/postrecieve', utils.ensureGithub, (req, res) => {
   utils.logger.server(`running ${updateFile}`);
   spawn('sh', [updateFile], {
     cwd,
-    env: Object.assign({}, process.env, { PATH: `${process.env.PATH} :/usr/local/bin` })
+    env: Object.assign({}, process.env, { PATH: `${process.env.PATH} :/usr/local/bin` }),
   });
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Thanks GitHub <3');
@@ -98,10 +107,11 @@ app.post('/postrecieve', utils.ensureGithub, (req, res) => {
 
 app.get('*', (req, res) => res.render('pages/index'));
 
+const mostPlayedInterval = () => setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR);
+
 // run periodically
 setInterval(() => utils.recentlyAdded.update(), 5 * ONE_HOUR);
-setTimeout(() =>
-  setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR), 2 * ONE_HOUR); // offset update
+setTimeout(() => mostPlayedInterval, 2 * ONE_HOUR); // offset update
 
 // run after starting in production
 if (process.env.NODE_ENV === 'production') {

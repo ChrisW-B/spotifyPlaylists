@@ -3,7 +3,4 @@
 const mostPlayed = require('./mostPlayed');
 const recentlyAdded = require('./recentlyAdded');
 
-module.exports = {
-  mostPlayed,
-  recentlyAdded
-};
+module.exports = { mostPlayed, recentlyAdded };

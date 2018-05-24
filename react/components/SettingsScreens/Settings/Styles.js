@@ -1,4 +1,4 @@
-import styled from 'emotion/react';
+import styled from 'react-emotion';
 
 export { Button, Title, Container, ButtonGroup, Description } from '../Styles';
 export const Warning = styled.span `

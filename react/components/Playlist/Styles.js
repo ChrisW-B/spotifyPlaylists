@@ -1,4 +1,4 @@
-import styled from 'emotion/react';
+import styled from 'react-emotion';
 
 const colorTransition = '.75s cubic-bezier(0.4, 0, 0.2, 1)'
 

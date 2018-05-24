@@ -1,5 +1,5 @@
 // react/components/Fields/LastFm/Styles.js
-import styled from 'emotion/react';
+import styled from 'react-emotion';
 
 export const TextInput = styled.input `
   border: 0;

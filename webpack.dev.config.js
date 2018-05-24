@@ -6,8 +6,9 @@ const BUILD_DIR = path.resolve(__dirname, 'public/build');
 const APP_DIR = path.resolve(__dirname, 'react');
 
 module.exports = {
+  mode: 'development',
   entry: {
-    app: ['babel-polyfill', 'webpack-hot-middleware/client?name=app', APP_DIR]
+    app: ['babel-polyfill', 'webpack-hot-middleware/client?name=app', APP_DIR],
   },
   output: {
     path: BUILD_DIR,
@@ -15,26 +16,26 @@ module.exports = {
     publicPath: '/build/',
     hotUpdateChunkFilename: 'hot/[hash].hot-update.js',
     hotUpdateMainFilename: 'hot/[hash].hot-update.json',
-    devtoolModuleFilenameTemplate: 'webpack:///[absolute-resource-path]'
+    devtoolModuleFilenameTemplate: 'webpack:///[absolute-resource-path]',
   },
   devtool: 'cheap-module-source-map',
   plugins: [
     new webpack.DefinePlugin({ ENV: JSON.stringify('development') }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.ProgressPlugin()
+    new webpack.ProgressPlugin(),
   ],
   module: {
     rules: [{
       enforce: 'pre',
       test: /\.js$/,
       exclude: /node_modules/,
-      loader: 'eslint-loader'
+      loader: 'eslint-loader',
     }, {
       enforce: 'pre',
       test: /\.js$/,
       exclude: /node_modules/,
-      loader: 'stylelint-custom-processor-loader'
+      loader: 'stylelint-custom-processor-loader',
     }, {
       test: /\.jsx?$|\.js?$/,
       exclude: /node_modules/,
@@ -43,23 +44,23 @@ module.exports = {
         options: {
           cacheDirectory: true,
           presets: [
-            ['es2015', { modules: false }], 'react', 'stage-0'
+            ['es2015', { modules: false }], 'react', 'stage-0',
           ],
-          plugins: ['emotion/babel']
-        }
-      }]
+          plugins: ['emotion'],
+        },
+      }],
     }, {
       test: /\.json?$/,
-      loader: 'json-loader'
+      loader: 'json-loader',
     }, {
       test: /\.svg$/,
-      loader: 'url-loader?limit=10000&mimetype=image/svg+xml'
+      loader: 'url-loader?limit=10000&mimetype=image/svg+xml',
     }, {
       test: /\.(woff2?|svg)$/,
-      loader: 'url-loader?limit=10000'
+      loader: 'url-loader?limit=10000',
     }, {
       test: /\.(ttf|eot)$/,
-      loader: 'file-loader'
-    }]
-  }
+      loader: 'file-loader',
+    }],
+  },
 };

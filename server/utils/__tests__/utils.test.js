@@ -24,9 +24,9 @@ describe('server utils', () => {
     const nextSpy = sinon.spy();
     let status = null;
     utils.ensureAuthenticated({
-      isAuthenticated: () => true
+      isAuthenticated: () => true,
     }, {
-      sendStatus: (info) => { status = info; }
+      sendStatus: (info) => { status = info; },
     }, nextSpy);
     expect(nextSpy.calledOnce).toEqual(true);
     return expect(status).toBe(null);
@@ -36,9 +36,9 @@ describe('server utils', () => {
     const nextSpy = sinon.spy();
     let status = null;
     utils.ensureAuthenticated({
-      isAuthenticated: () => false
+      isAuthenticated: () => false,
     }, {
-      sendStatus: (info) => { status = info; }
+      sendStatus: (info) => { status = info; },
     }, nextSpy);
     expect(status).toEqual(401);
     return expect(nextSpy.calledOnce).toEqual(false);
@@ -69,14 +69,11 @@ describe('server utils', () => {
   });
 
   it('should be an instance of most played', () =>
-    expect(utils.mostPlayed).toBeInstanceOf(MostPlayed)
-  );
+    expect(utils.mostPlayed).toBeInstanceOf(MostPlayed));
 
   it('should be an instance of recently added', () =>
-    expect(utils.recentlyAdded).toBeInstanceOf(RecentlyAdded)
-  );
+    expect(utils.recentlyAdded).toBeInstanceOf(RecentlyAdded));
 
   it('should be an instance of winston logger', () =>
-    expect(utils.logger).toBeInstanceOf(winston.Logger)
-  );
+    expect(utils.logger).toBeInstanceOf(winston.Logger));
 });

@@ -7,19 +7,19 @@ import { Provider } from 'react-redux';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
-import { injectGlobal } from 'emotion/react';
+import { injectGlobal } from 'react-emotion';
 
 import Reducers from './reducers';
 import { getMemberInfo } from './actions';
 import { AppContainer } from './containers';
 
-if (module.hot && ENV !== 'production') {
+if (module.hot && process.env.NODE_ENV !== 'production') {
   module.hot.accept();
 }
 const history = createHistory();
 let middleware = [thunkMiddleware, routerMiddleware(history)];
 
-if (ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production') {
   const { createLogger } = require('redux-logger');
   const loggerMiddleware = createLogger({
     timestamp: false,

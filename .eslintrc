@@ -7,7 +7,6 @@
   "rules": {
     "strict": 0,
     "quotes": [1, "single"],
-    "comma-dangle": [2, "never"],
     "eol-last": [1, "never"],
     "no-plusplus": [0],
     "no-console": ["warn"]

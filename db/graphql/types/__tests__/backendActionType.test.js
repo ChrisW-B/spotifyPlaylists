@@ -4,10 +4,8 @@ const { GraphQLBoolean } = require('graphql/type');
 
 describe('Backend Action Type', () => {
   it('should have a success field', () =>
-    expect(backendActionType.getFields()).toHaveProperty('success')
-  );
+    expect(backendActionType.getFields()).toHaveProperty('success'));
 
   it('success field should be of type boolean', () =>
-    expect(backendActionType.getFields().success.type).toEqual(GraphQLBoolean)
-  );
+    expect(backendActionType.getFields().success.type).toEqual(GraphQLBoolean));
 });
