@@ -1,4 +1,4 @@
-import styled, { keyframes } from 'emotion/react';
+import styled, { keyframes } from 'react-emotion';
 
 const MoveInRight = keyframes `
   0% {

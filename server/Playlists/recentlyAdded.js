@@ -9,7 +9,9 @@ module.exports = class RecentlyAdded extends Playlist {
     this.playListName = 'Recently Added';
   }
 
-  log(s) { this.logger.recentlyAdded(s); }
+  log(s) {
+    this.logger.recentlyAdded(s);
+  }
 
   isEnabled(member) {
     this.log(`${member.spotifyId} Most Played is ${member.recentlyAdded.enabled ? 'en' : 'dis'}abled`);
@@ -34,7 +36,9 @@ module.exports = class RecentlyAdded extends Playlist {
     newMember.refreshToken = refreshToken;
 
     this.log('Getting user info');
-    const { body: { id: spotifyId } } = await this.spotifyApi.getMe();
+    const {
+      body: { id: spotifyId },
+    } = await this.spotifyApi.getMe();
 
     this.log('preparing playlist and getting saved tracks');
     newMember.recentlyAdded.id = await this.preparePlaylist(spotifyId, id, this.playListName);

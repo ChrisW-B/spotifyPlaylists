@@ -1,4 +1,4 @@
-import styled from 'emotion/react';
+import styled from 'react-emotion';
 
 const FieldWrapper = styled.li `
   display: flex;

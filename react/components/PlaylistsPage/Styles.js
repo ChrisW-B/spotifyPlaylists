@@ -1,4 +1,4 @@
-import styled from 'emotion/react';
+import styled from 'react-emotion';
 
 export const ListWrapper = styled.div `
   display: flex;
@@ -22,19 +22,16 @@ export const List = styled.ul `
     &:first-child {
       border-radius: 5px 5px 0 0;
 
-      & a {
-        &:last-child {
-          border-top-right-radius: 5px;
-        }
+      & a:last-child {
+        border-top-right-radius: 5px;
       }
     }
+
     &:last-child {
       border-radius: 0 0 5px 5px;
 
-      & a {
-        &:last-child {
-          border-bottom-right-radius: 5px;
-        }
+      & a:last-child {
+        border-bottom-right-radius: 5px;
       }
     }
   }

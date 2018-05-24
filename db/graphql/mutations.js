@@ -1,6 +1,8 @@
 // db/graphql/mutations.js
 
-const { GraphQLObjectType, GraphQLString, GraphQLNonNull, GraphQLEnumType } = require('graphql/type');
+const {
+  GraphQLObjectType, GraphQLString, GraphQLNonNull, GraphQLEnumType,
+} = require('graphql/type');
 const { getProjection, validMember } = require('./utils');
 const { Member } = require('../mongoose/schema');
 const memberType = require('./types/memberType');
@@ -19,7 +21,7 @@ const mutations = new GraphQLObjectType({
         spotifyId: {
           name: 'spotifyId',
           description: 'The current member\'s id',
-          type: GraphQLString
+          type: GraphQLString,
         },
         playlistKind: {
           name: 'playlistKind',
@@ -28,15 +30,15 @@ const mutations = new GraphQLObjectType({
             name: 'playlistType',
             values: {
               mostPlayed: { value: 'most' },
-              recentlyAdded: { value: 'recent' }
-            }
-          })
+              recentlyAdded: { value: 'recent' },
+            },
+          }),
         },
         patch: {
           name: 'playlistInfo',
           description: 'Everything we want to change',
-          type: new GraphQLNonNull(updatePlaylistType)
-        }
+          type: new GraphQLNonNull(updatePlaylistType),
+        },
       },
       resolve: async (_, { spotifyId, playlistKind, patch }, { user }, fieldASTs) => {
         if (!validMember(user, spotifyId)) return {};
@@ -54,7 +56,7 @@ const mutations = new GraphQLObjectType({
         }
         await foundItem.save();
         return foundItem;
-      }
+      },
     },
     deleteAccount: {
       type: backendActionType,
@@ -66,7 +68,7 @@ const mutations = new GraphQLObjectType({
         source.logout();
         source.session.destroy(() => {});
         return { success: true };
-      }
+      },
     },
     logout: {
       type: backendActionType,
@@ -77,9 +79,9 @@ const mutations = new GraphQLObjectType({
         source.logout();
         source.session.destroy(() => {});
         return { success: true };
-      }
-    }
-  }
+      },
+    },
+  },
 });
 
 module.exports = mutations;

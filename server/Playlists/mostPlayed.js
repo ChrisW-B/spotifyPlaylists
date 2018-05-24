@@ -15,7 +15,9 @@ module.exports = class MostPlayed extends Playlist {
     return member.mostPlayed.enabled;
   }
 
-  log(s) { this.logger.mostPlayed(s); }
+  log(s) {
+    this.logger.mostPlayed(s);
+  }
 
   // takes list of last.fm tracks and tries to find them in spotify
   convertToSpotify(topTracks) {
@@ -23,19 +25,17 @@ module.exports = class MostPlayed extends Playlist {
       new Promise(async (resolve) => {
         await sleep((this.ONE_SEC / 2) * i);
         this.log(`Searching for \n${ele.name} by ${ele.artist.name}`);
-        const results = (await this.spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`))
-          .body.tracks.items;
+        const results = (await this.spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`)).body.tracks.items;
         if (results.length > 0 && results[0].uri) {
           resolve({
             id: results[0].uri,
-            rank: ele['@attr'].rank
+            rank: ele['@attr'].rank,
           });
         } else {
           this.log(`couldn't find ${ele.name} by ${ele.artist.name}`);
           resolve(undefined);
         }
-      }),
-    ));
+      })));
   }
 
   insertMissingTracks(trackList, lastFmId, period) {
@@ -47,12 +47,12 @@ module.exports = class MostPlayed extends Playlist {
         });
       }
       if (nextTrackSet === undefined) {
-        const topTracks = (await this.lastfm.user_getTopTracks({
+        const topTracks = await this.lastfm.user_getTopTracks({
           user: lastFmId,
           limit: trackList.length,
           period,
-          page: 2
-        }));
+          page: 2,
+        });
         const converted = this.convertToSpotify(topTracks);
         nextTrackSet = converted;
         for (let i = 0; i < nextTrackSet.length; i++) {
@@ -81,8 +81,10 @@ module.exports = class MostPlayed extends Playlist {
 
   async updatePlaylist(member, delayInc = 0) {
     const newMember = member;
-    await sleep(delayInc * this.ONE_MIN * 5);
-    const { length, lastfm, period, id } = member.mostPlayed;
+    await sleep((delayInc * this.ONE_MIN) * 5);
+    const {
+      length, lastfm, period, id,
+    } = member.mostPlayed;
     if (!length || !lastfm || !period) return;
 
     this.log('Logging in to spotify');
@@ -99,7 +101,9 @@ module.exports = class MostPlayed extends Playlist {
 
     this.log('converting to spotify and getting userinfo');
     const spotifyList = await this.convertToSpotify(lastFmTrackList.track, length);
-    const { body: { id: spotifyId } } = await this.spotifyApi.getMe();
+    const {
+      body: { id: spotifyId },
+    } = await this.spotifyApi.getMe();
     const trackList = await this.insertMissingTracks(spotifyList, lastfm, period);
 
     this.log('sorting tracks, getting user, and preparing playlist');
@@ -109,6 +113,7 @@ module.exports = class MostPlayed extends Playlist {
     this.log('filling playlist');
     await this.fillPlaylist(spotifyId, newMember.mostPlayed.id, sortedTracks);
 
+    this.log('saving member');
     await newMember.save();
   }
 };

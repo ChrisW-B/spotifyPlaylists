@@ -7,7 +7,9 @@ const utils = require('../utils');
 const { Member } = utils;
 const app = express.Router();
 
-const save = async ({ access, refresh, userId, photos }) => {
+const save = async ({
+  access, refresh, userId, photos,
+}) => {
   const member = await Member.findOne({ spotifyId: userId }).exec();
   const photo = photos.length ? photos[0] : '';
   if (!member) {
@@ -16,7 +18,7 @@ const save = async ({ access, refresh, userId, photos }) => {
       refreshToken: refresh,
       accessToken: access,
       isAdmin: userId === process.env.ADMIN,
-      photo
+      photo,
     });
     await newMember.save();
   } else {
@@ -37,30 +39,40 @@ passport.deserializeUser((obj, done) => {
   done(null, obj);
 });
 
-passport.use(
-  new SpotifyStrategy(
-    ({
-      clientID: process.env.SPOTIFY_ID,
-      clientSecret: process.env.SPOTIFY_SECRET,
-      callbackURL: process.env.SPOTIFY_REDIRECT
-    }),
-    async (access, refresh, profile, done) => {
-      await save({ access, refresh, userId: profile.id, photos: profile.photos });
-      return done(null, { ...profile, access, refresh });
-    }
-  ));
+passport.use(new SpotifyStrategy(
+  {
+    clientID: process.env.SPOTIFY_ID,
+    clientSecret: process.env.SPOTIFY_SECRET,
+    callbackURL: process.env.SPOTIFY_REDIRECT,
+  },
+  async (access, refresh, profile, done) => {
+    await save({
+      access,
+      refresh,
+      userId: profile.id,
+      photos: profile.photos,
+    });
+    return done(null, { ...profile, access, refresh });
+  },
+));
 
-app.get('/login', passport.authenticate('spotify', {
-  scope: process.env.SPOTIFY_SCOPES.split(','),
-  showDialog: true,
-  successRedirect: '/',
-  failureRedirect: '/'
-}));
-app.get('/setup', passport.authenticate('spotify', {
-  scope: process.env.SPOTIFY_SCOPES.split(','),
-  showDialog: true,
-  successRedirect: '/loggedin',
-  failureRedirect: '/'
-}));
+app.get(
+  '/login',
+  passport.authenticate('spotify', {
+    scope: process.env.SPOTIFY_SCOPES.split(','),
+    showDialog: true,
+    successRedirect: '/',
+    failureRedirect: '/',
+  }),
+);
+app.get(
+  '/setup',
+  passport.authenticate('spotify', {
+    scope: process.env.SPOTIFY_SCOPES.split(','),
+    showDialog: true,
+    successRedirect: '/loggedin',
+    failureRedirect: '/',
+  }),
+);
 
 module.exports = app;

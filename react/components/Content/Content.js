@@ -7,16 +7,17 @@ import ContentWrapper from './Styles';
 
 export default class Content extends Component {
   static propTypes = {
-    status: PropTypes.string.isRequired
-  }
-  render = () =>
-    (<ContentWrapper status={this.props.status}>
+    status: PropTypes.string.isRequired,
+  };
+  render = () => (
+    <ContentWrapper status={this.props.status}>
       <HeaderContainer />
       <Switch>
-        <Route path={'/settings'} component={SettingsContainer} />
-        <Route path={'/admin'} component={AdminContainer} />
-        <Route path={'/'} component={PlaylistsPageContainer} />
+        <Route path="/settings" component={SettingsContainer} />
+        <Route path="/admin" component={AdminContainer} />
+        <Route path="/" component={PlaylistsPageContainer} />
       </Switch>
       <Footer />
-    </ContentWrapper>)
+    </ContentWrapper>
+  );
 }

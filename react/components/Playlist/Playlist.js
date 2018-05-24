@@ -15,56 +15,63 @@ export default class Playlist extends Component {
     saveSettings: PropTypes.func.isRequired,
     length: PropTypes.number,
     lastfm: PropTypes.string,
-    period: PropTypes.string
-  }
+    period: PropTypes.string,
+  };
 
   static defaultProps = {
     length: 10,
     lastfm: undefined,
-    period: undefined
-  }
+    period: undefined,
+  };
 
   state = {
     showMore: false,
     length: null,
     lastfm: null,
-    period: null
-  }
+    period: null,
+  };
 
-  componentDidMount = () => this.updateState(this.props)
-  componentWillReceiveProps = (nextProps) => this.updateState(nextProps)
-
-  updateState = (nextProps) => {
+  componentDidMount = () => {
+    const { length, lastfm, period } = this.props;
+    this.updateState({ length, lastfm, period });
+  };
+  componentWillReceiveProps = (nextProps) => {
     const { length, lastfm, period } = nextProps;
+    this.updateState({ length, lastfm, period });
+  };
+
+  updateState = ({ length, lastfm, period }) => {
     const safeVals = {
       length: length || 10,
       lastfm: lastfm === undefined ? undefined : lastfm || '',
-      period: period === undefined ? undefined : period || '3month'
+      period: period === undefined ? undefined : period || '3month',
     };
-    safeVals.length = safeVals.length > 50
-      ? 50
-      : safeVals.length < 1
-      ? 1
-      : safeVals.length;
+    safeVals.length = safeVals.length > 50 ? 50 : safeVals.length < 1 ? 1 : safeVals.length;
     this.setState({ ...safeVals });
-  }
+  };
 
-  updateLength = e => this.setState({ length: +e.target.value > 50 ? 50 : +e.target.value < 1 ? 1 : +e.target.value })
-  updateLastfm = e => this.setState({ lastfm: e.target.value })
-  updatePeriod = e => this.setState({ period: e.target.value })
+  updateLength = (e) => this.setState({ length: +e.target.value > 50 ? 50 : +e.target.value < 1 ? 1 : +e.target.value });
+  updateLastfm = (e) => this.setState({ lastfm: e.target.value });
+  updatePeriod = (e) => this.setState({ period: e.target.value });
 
   toggleSettings = () => {
     if (this.form && !this.form.checkValidity()) return;
-    const { state: { showMore, length, lastfm, period }, props: { saveSettings } } = this;
+    const {
+      state: { showMore, length, lastfm, period },
+      props: { saveSettings },
+    } = this;
     if (showMore) saveSettings({ length, lastfm, period });
     this.setState((prevState) => ({ showMore: !prevState.showMore }));
-  }
+  };
 
   toggle = () => {
-    const { state: { lastfm }, props: { toggle, title } } = this;
-    if (title === 'Most Played' && !lastfm) this.setState((prevState) => ({ showMore: !prevState.showMore }))
+    const {
+      state: { lastfm },
+      props: { toggle, title },
+    } = this;
+    if (title === 'Most Played' && !lastfm) this.setState((prevState) => ({ showMore: !prevState.showMore }));
     else toggle();
-  }
+  };
 
   // react 16 array returns are cool
   render = () => {
@@ -75,29 +82,37 @@ export default class Playlist extends Component {
       updateLastfm,
       updatePeriod,
       toggleSettings,
-      toggle
+      toggle,
     } = this;
     return [
       <PlaylistInfo on={enabled} key={title}>
         <PlaylistTitle>{title}</PlaylistTitle>
         <Button title={`Turn ${enabled ? 'Off' : 'On'}`} onClick={toggle} on={enabled}>
-          { enabled ? <Toggle><IoToggleFilled /></Toggle> : <Toggle><IoToggle /></Toggle>}
+          {enabled ? (
+            <Toggle>
+              <IoToggleFilled />
+            </Toggle>
+          ) : (
+            <Toggle>
+              <IoToggle />
+            </Toggle>
+          )}
           <ButtonDescription> {`Turn ${enabled ? 'Off' : 'On'}`} </ButtonDescription>
         </Button>
-        <Button onClick={toggleSettings} settings >
-          { showMore ? <IoCheckmarkCircled /> : <IoGearA /> }
+        <Button onClick={toggleSettings} settings>
+          {showMore ? <IoCheckmarkCircled /> : <IoGearA />}
           <ButtonDescription>{showMore ? 'Save' : 'Edit'}</ButtonDescription>
         </Button>
       </PlaylistInfo>,
-      showMore
-      ? <PlaylistDetail key={`${title}-detail`}>
-        <form ref={PlaylistDetail => this.form = PlaylistDetail}>
-          <Length length={length} onChange={updateLength} />
-          { title === 'Most Played' ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
-          { title === 'Most Played' ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
-        </form>
-      </PlaylistDetail>
-      : null
-    ]
-  }
+      showMore ? (
+        <PlaylistDetail key={`${title}-detail`}>
+          <form ref={(PlaylistDetail) => (this.form = PlaylistDetail)}>
+            <Length length={length} onChange={updateLength} />
+            {title === 'Most Played' ? <LastFm lastfm={lastfm || ''} onChange={updateLastfm} /> : null}
+            {title === 'Most Played' ? <TimePeriod period={period || '3month'} onChange={updatePeriod} /> : null}
+          </form>
+        </PlaylistDetail>
+      ) : null,
+    ];
+  };
 }

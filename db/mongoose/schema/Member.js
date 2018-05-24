@@ -15,14 +15,18 @@ const member = new Mongoose.Schema({
     period: { type: String, default: '3month', enum: ['7day', '1month', '3month', '6month', '12month', 'overall'] },
     lastfm: { type: String, default: '' },
     id: { type: String, default: '' },
-    length: { type: Number, default: 10, max: 50, min: 1 },
-    enabled: { type: Boolean, default: false, required: true }
+    length: {
+      type: Number, default: 10, max: 50, min: 1,
+    },
+    enabled: { type: Boolean, default: false, required: true },
   },
   recentlyAdded: {
     id: { type: String, default: '' },
-    length: { type: Number, default: 10, max: 50, min: 1 },
-    enabled: { type: Boolean, default: false, required: true }
-  }
+    length: {
+      type: Number, default: 10, max: 50, min: 1,
+    },
+    enabled: { type: Boolean, default: false, required: true },
+  },
 });
 
 const Member = Mongoose.model('Member', member);

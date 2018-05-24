@@ -1,6 +1,8 @@
 // db/graphql/types/mostPlayedType.js
 
-const { GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLObjectType } = require('graphql/type');
+const {
+  GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLObjectType,
+} = require('graphql/type');
 
 const mostPlayedType = new GraphQLObjectType({
   name: 'mostplayed',
@@ -9,8 +11,8 @@ const mostPlayedType = new GraphQLObjectType({
     period: { type: (GraphQLString), description: 'the time period to play songs from' },
     lastfm: { type: (GraphQLString), description: 'the last fm id to pick most played songs from' },
     length: { type: (GraphQLInt), description: 'the playlist length' },
-    enabled: { type: (GraphQLBoolean), description: 'whether the playlist is enabled' }
-  })
+    enabled: { type: (GraphQLBoolean), description: 'whether the playlist is enabled' },
+  }),
 });
 
 module.exports = mostPlayedType;

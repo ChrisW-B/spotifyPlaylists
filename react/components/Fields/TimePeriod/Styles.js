@@ -1,6 +1,6 @@
 // import { FieldWrapper, Radio, RadioLabel, FieldLabel } from './Styles';
 // react/components/Fields/TimePeriod/Styles.js
-import styled from 'emotion/react';
+import styled from 'react-emotion';
 
 export const RadioLabel = styled.label `
   background: ${({checked}) => checked ? 'var(--oc-violet-9)' : 'white'};

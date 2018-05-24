@@ -23,7 +23,10 @@ module.exports = class Playlist {
     // create an empty playlist
     if (playlist.tracks.total) {
       await this.spotifyApi.removeTracksFromPlaylistByPosition(
-        userId, playlist.id, [...Array(playlist.tracks.total).keys()], playlist.snapshot_id
+        userId,
+        playlist.id,
+        [...Array(playlist.tracks.total).keys()],
+        playlist.snapshot_id,
       );
     }
     return playlist.id;
@@ -36,14 +39,14 @@ module.exports = class Playlist {
 
   async createNewPlaylist(userId, name) {
     return (await this.spotifyApi.createPlaylist(userId, name, {
-      public: false
+      public: false,
     })).body.id;
   }
 
   async preparePlaylist(userId, oldPlaylistId, name, offset = 0) {
     const userPlaylists = (await this.spotifyApi.getUserPlaylists(userId, {
       limit: 20,
-      offset
+      offset,
     })).body;
     const playlistLoc = this.foundOldPlaylist(userPlaylists.items, oldPlaylistId);
     if (playlistLoc > -1) {
@@ -64,7 +67,7 @@ module.exports = class Playlist {
   async signInToSpotify({ accessToken, refreshToken }) {
     const {
       access_token, // eslint-disable-line camelcase
-      refresh_token = refreshToken // eslint-disable-line camelcase
+      refresh_token = refreshToken, // eslint-disable-line camelcase
     } = await this.refreshToken(accessToken, refreshToken);
     this.spotifyApi.setAccessToken(access_token);
     this.spotifyApi.setRefreshToken(refresh_token);
