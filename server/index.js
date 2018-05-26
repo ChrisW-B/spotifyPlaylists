@@ -1,15 +1,17 @@
 // server/index.js
 require('dotenv').config();
-const express = require('express');
-const session = require('express-session');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const winston = require('winston');
+const express = require('express');
 const expressWinston = require('express-winston');
-const path = require('path');
 const passport = require('passport');
-const MongoStore = require('connect-mongo')(session);
+const path = require('path');
+const session = require('express-session');
+const winston = require('winston');
 const { spawn } = require('child_process');
+
+const MongoStore = require('connect-mongo')(session);
+
 const utils = require('./utils');
 const { Mongoose } = require('../db/mongoose');
 const graphqlHTTP = require('express-graphql');
@@ -71,8 +73,14 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
     next();
   });
 
-  app.get('/build/app.js', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/build', 'app.js'));
+  app.get('/build/app.bundle.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/build', 'app.bundle.js'));
+  });
+  app.get('/build/vendor.bundle.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/build', 'vendor.bundle.js'));
+  });
+  app.get('/build/runtime.bundle.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/build', 'runtime.bundle.js'));
   });
 }
 

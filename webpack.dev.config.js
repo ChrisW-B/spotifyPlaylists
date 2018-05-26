@@ -12,7 +12,7 @@ module.exports = {
   },
   output: {
     path: BUILD_DIR,
-    filename: '[name].js',
+    filename: '[name].bundle.js',
     publicPath: '/build/',
     hotUpdateChunkFilename: 'hot/[hash].hot-update.js',
     hotUpdateMainFilename: 'hot/[hash].hot-update.json',
