@@ -115,7 +115,7 @@ app.post('/postrecieve', utils.ensureGithub, (req, res) => {
 
 app.get('*', (req, res) => res.render('pages/index'));
 
-const mostPlayedInterval = () => setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR);
+const mostPlayedInterval = setInterval(() => utils.mostPlayed.update(), 5 * ONE_HOUR);
 
 // run periodically
 setInterval(() => utils.recentlyAdded.update(), 5 * ONE_HOUR);
