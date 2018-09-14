@@ -24,15 +24,17 @@ module.exports = class MostPlayed extends Playlist {
     return Promise.all(topTracks.map((ele, i) =>
       new Promise(async (resolve) => {
         await sleep((this.ONE_SEC / 2) * i);
-        this.log(`Searching for \n${ele.name} by ${ele.artist.name}`);
-        const results = (await this.spotifyApi.searchTracks(`track:${ele.name} artist:${ele.artist.name}`)).body.tracks.items;
+        const cleanArtist = ele.artist.name.replace(/['()]/g, '');
+        const cleanTrack = ele.name.replace(/['()]/g, '');
+        this.log(`Searching for \n${cleanTrack} by ${cleanArtist}`);
+        const results = (await this.spotifyApi.searchTracks(`track:${cleanTrack} artist:${cleanArtist}`)).body.tracks.items;
         if (results.length > 0 && results[0].uri) {
           resolve({
             id: results[0].uri,
             rank: ele['@attr'].rank,
           });
         } else {
-          this.log(`couldn't find ${ele.name} by ${ele.artist.name}`);
+          this.log(`couldn't find ${cleanTrack} by ${cleanArtist}`);
           resolve(undefined);
         }
       })));
@@ -53,7 +55,7 @@ module.exports = class MostPlayed extends Playlist {
           period,
           page: 2,
         });
-        const converted = this.convertToSpotify(topTracks);
+        const converted = this.convertToSpotify(topTracks.track);
         nextTrackSet = converted;
         for (let i = 0; i < nextTrackSet.length; i++) {
           const temp = nextTrackSet[i];
@@ -83,7 +85,10 @@ module.exports = class MostPlayed extends Playlist {
     const newMember = member;
     await sleep((delayInc * this.ONE_MIN) * 5);
     const {
-      length, lastfm, period, id,
+      length,
+      lastfm,
+      period,
+      id,
     } = member.mostPlayed;
     if (!length || !lastfm || !period) return;
 
@@ -108,8 +113,9 @@ module.exports = class MostPlayed extends Playlist {
 
     this.log('sorting tracks, getting user, and preparing playlist');
     newMember.mostPlayed.id = await this.preparePlaylist(spotifyId, id, this.playListName);
-    const sortedTracks = trackList.sort((a, b) => a.rank - b.rank);
-
+    const sortedTracks = trackList
+      .filter(a => !!a && a.rank)
+      .sort((a, b) => a.rank - b.rank);
     this.log('filling playlist');
     await this.fillPlaylist(spotifyId, newMember.mostPlayed.id, sortedTracks);
 

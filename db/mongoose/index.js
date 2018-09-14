@@ -3,7 +3,7 @@
 const Mongoose = require('mongoose');
 
 Mongoose.connect('mongodb://localhost:27017/spotifyPlaylists', {
-  // useMongoClient: true,
+  useNewUrlParser: true,
   socketTimeoutMS: 0,
   keepAlive: true,
   reconnectTries: 30,
