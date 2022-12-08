@@ -28,7 +28,7 @@
     "dotenv": "^6.0.0",
     "ejs": "^2.5.7",
     "emotion": "^9.2.3",
-    "express": "^4.15.4",
+    "express": "^4.17.3",
     "express-graphql": "^0.6.11",
     "express-session": "^1.15.5",
     "express-winston": "^2.4.0",
