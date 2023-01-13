@@ -55,7 +55,7 @@
     "sleep-promise": "^8.0.1",
     "spotify-web-api-node": "^3.1.1",
     "webpack": "^4.12.0",
-    "webpack-cli": "^3.0.3",
+    "webpack-cli": "^3.3.12",
     "winston": "^2.3.1"
   },
   "devDependencies": {
